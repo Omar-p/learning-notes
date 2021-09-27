@@ -1,3 +1,8 @@
 Go Use 2 words structure for string:
     one word contains a pointer to the start of the string.
     another contains the length of it.
+-----------------------------------------------------------------
+For consistency 
+    - when declaring a variable use [var x type] when you don't initalize it,
+      and use := if you will initialize with the declaration. 
+-----------------------------------------------------------------
