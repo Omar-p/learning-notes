@@ -1,0 +1,3 @@
+Go Use 2 words structure for string:
+    one word contains a pointer to the start of the string.
+    another contains the length of it.
