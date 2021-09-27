@@ -1,0 +1,5 @@
+Semaphore (permits)
+    after declaring it we cannot increase the number of permits but we can decrease it.
+    has the methods in the Lock interface and additional ones:
+        can get the #of waiting threads and reference to them: 	getQueuedThreads() ...
+--------------------------------------------------------------------------------
