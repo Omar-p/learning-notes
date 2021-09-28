@@ -6,3 +6,9 @@ For consistency
     - when declaring a variable use [var x type] when you don't initalize it,
       and use := if you will initialize with the declaration. 
 -----------------------------------------------------------------
+==> go build -gcflags -m=2
+    - it shows us the escape analysis of our code
+      which value moved to the heap to be accessible
+      from upper stack frame after the current stack frame
+      removed.
+==> write code for readability, don't hide the cost of ur code.
