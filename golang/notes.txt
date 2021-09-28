@@ -12,3 +12,11 @@ For consistency
       from upper stack frame after the current stack frame
       removed.
 ==> write code for readability, don't hide the cost of ur code.
+______________________________________________________________________
+each goroutine created initially with 2kb stack size, and when the stack 
+need to grows more than 2kb go allocate another stack with double size
+and move all frame to the new one. because of that go doesn't allow 
+sharing data in the stack between different goroutines so any shared data
+moved to the heap memory 
+[go compiler use escape analysis will figure out which data need to allocated in the heap]
+_______________________________________________________________________________-
