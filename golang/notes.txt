@@ -18,5 +18,5 @@ need to grows more than 2kb go allocate another stack with double size
 and move all frame to the new one. because of that go doesn't allow 
 sharing data in the stack between different goroutines so any shared data
 moved to the heap memory 
-[go compiler use escape analysis will figure out which data need to allocated in the heap]
+[go compiler use escape analysis to figure out which data need to be sotred in the heap]
 _______________________________________________________________________________-
