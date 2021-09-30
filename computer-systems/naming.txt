@@ -1,0 +1,11 @@
+In DNS 
+    -hostname can map to multiple Ip Addresses. 
+        one reason for it is to balance the load
+    -a single value (Ip Address) can be mapped to multiple hostname, 
+        we can host multiple website on the same machine [It is called a Shared Web Hosting].
+    - the value can change overtime.
+    -no single table store all name to ip mapping, 
+      instead these binding are distributed across many different name server => 
+            introduce new problem: what server has a particular binding ? : solved by structured the names themself
+                      each name correspond to a zone and a name servers associated with that zone keep track of the names in the zone.
+                                    
