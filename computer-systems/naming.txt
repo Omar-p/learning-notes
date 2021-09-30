@@ -7,5 +7,5 @@ In DNS
     -no single table store all name to ip mapping, 
       instead these binding are distributed across many different name server => 
             introduce new problem: what server has a particular binding ? : solved by structured the names themself
-                      each name correspond to a zone and a name servers associated with that zone keep track of the names in the zone.
+                      each server correspond to a zone and a name servers associated with that zone keep track of the names in the zone.
                                     
