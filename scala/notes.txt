@@ -9,3 +9,5 @@ object keyword in scala instantiate a singleton object.
 COMPANION OBJECTS: in the same file write a definition for object and class for the same name.
     put the class level functionality under object definition and instance definition under class object.
         common pattern to write apply method as a Factory under object to make instantiation from the class. 
+
+we can override fields in sub-classes directrly in the constructor class Dog(override val fly: Boolean, food: String) extend Animal(food)
