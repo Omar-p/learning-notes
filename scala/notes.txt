@@ -11,3 +11,5 @@ COMPANION OBJECTS: in the same file write a definition for object and class for 
         common pattern to write apply method as a Factory under object to make instantiation from the class. 
 
 we can override fields in sub-classes directrly in the constructor class Dog(override val fly: Boolean, food: String) extend Animal(food)
+
+to prevent the class to be extended outside the file it is in, write [sealed] before its definition.
