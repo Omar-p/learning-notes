@@ -3,3 +3,9 @@ calss parameters are not a fields in the class,
         class Person(age: Int) to class Person(val age: Int).
 
 Any auxilary constructor must call the main class or another auxilary.
+
+object keyword in scala instantiate a singleton object.
+
+COMPANION OBJECTS: in the same file write a definition for object and class for the same name.
+    put the class level functionality under object definition and instance definition under class object.
+        common pattern to write apply method as a Factory under object to make instantiation from the class. 
