@@ -13,3 +13,10 @@ COMPANION OBJECTS: in the same file write a definition for object and class for 
 we can override fields in sub-classes directrly in the constructor class Dog(override val fly: Boolean, food: String) extend Animal(food)
 
 to prevent the class to be extended outside the file it is in, write [sealed] before its definition.
+
+
+Scala Type:
+scala.Any in the top 
+Scala.AnyRef extend Any and all java classes extend it.
+scala.AnyVal extend Any and all (numeric-classes|Unit) in scala extend it.
+scala.Nothing in the bottom can replace any other class.
