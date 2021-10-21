@@ -27,3 +27,13 @@ Stream[java, ]: (beacuse of laziness)
     piece of data, but only as much as necessary.
 
 [read about effectively final in java[8]]
+
+---------------
+When a function uses its argument only once, you don’t have to give it a name. Instead, you can use the so-called placeholder syntax like the following:
+    val increment: Int => Int = _ + 1
+
+Wildcard vs Placeholder:
+    Wildcard arguments should not be confused with the placeholder syntax. 
+    The difference between wildcard arguments and placeholders is that wildcard arguments are followed by an arrow =>.
+        val placeholder = (_: Int) + 1
+        val wildcard = (_: Int) => 42
