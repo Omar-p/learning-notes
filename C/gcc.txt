@@ -1,0 +1,9 @@
+gcc -Wall [file.c]
+  display all warnings
+
+
+gcc -save-temps [file.c]
+    generate all immediate files [assembly .s] [pre-proscessor .i] [object-file before linking with dependencies .o]
+
+gcc -S [file.c]
+    generate the assembly code
