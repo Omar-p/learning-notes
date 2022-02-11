@@ -1,0 +1,75 @@
+https://youtube.com/playlist?list=PLqq-6Pq4lTTb3J4IxKEg80LFTUbzm2p7V
+---------------------------------------------------------------------------------------------
+Java apps with DB
+	1- JDBC
+	2- Data access services
+	3- Data access objects(DAO)
+	
+	Business Services <--DTO--> Data Services <---> JDBC <----> DB 
+	JPA will be exist in the Data Services.
+	
+	we use orm because of the mismatch of paradigms (class vs db-table).
+		for example we need to store employee data.
+		In DB, we will have employee table. each employee is a row(record) in the table.
+		In Java, we will have an employee class. each employee is an instance of the class.
+		
+	Without Using JPA:
+		for Read operation. if we need to retrieve Collectio of Employee instances.
+			1- prepare SQL query.
+			2- Run the query
+			3- Loop through the result set
+				4- Create a new instance of Employee per row
+				5- Extract each column and assign to new instance 
+				6- Put instance in a collection 
+				7- Handle errors
+		for each type of operation we will have to do alot of (repetitive)work.
+		Write Operation
+		persist Employee object as a row in Employee table.
+			1- Get all attribute of this instance
+			2- Prepare a SQL query.
+			3- Manage Keys
+			4- Run the query
+			5- Manage transactions
+			6- Handle errors
+		we talk here about an easy/straightforward case. but we will have to do more work
+		in case we need to handle nested object.
+		
+		JPA handle all those common work by providing for us a java API to do the mapping. 
+------------------------------------------------------------------------------------------------
+Impedance mismatch
+	mismatch in the way u think about the data when it comes to java class instances and the way
+	u think about data on the relational DB.
+	
+	ORM(JPA) is meant for solving these problems (Impedance mismatch).
+-------------------------------------------------------------------------------------------------
+Hibernate VS JPA
+	there is number of options for ORM in java but the most popular framework  is Hibernate. 
+	but it is not standard. and if it goes away or we find a better solution we will need to 
+	re-write alot of code. so JAVA EE/ Jakarta EE standardize the ORM APIs and it is called
+	(JAVA Persistence Apis) JPA.
+	
+	Hibernate is an implementation for JPA.
+-----------------------------------------------------------------------------------------------
+JPA Implementations [Hibernate, Toplink, EclipseLink, Apache OpenJpa].
+
+JPA is Relational database only.
+		-what's problem with SQL? JPA increases developer's productivity. 
+	-Database independence.
+	-Caching[less db hits] and Performance [there is some issues u need to understand to be able to deal with].
+	- But .. SQL is sometimes faster.
+------------------------------------------------------------------------------------------------
+Learning JPA
+	Learning how to map
+	Learning how to invoke CRUD actions for object.
+	Trick parts:
+		Modeling relations.
+		Interacting with relations.
+		Implementing transactions.
+		Object queries.
+		JPQL - 'freeform' quering.
+
+	
+	
+	
+
+
