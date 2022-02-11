@@ -1,0 +1,159 @@
+Course Title: Learning JDBC
+
+Description: Whether developers want to build mobile device apps for Android or web-based or desktop-based applications with the core Java SDK from Oracle, they must contend with the fact that many dynamic applications need to integrate data from a relational database. In this course, Frank Moley helps you get up to speed with the Java Database Connectivity (JDBC) API, showing how to use it to read and manage data from relational databases such as Postgres, Oracle Database, MySQL, and SQL Server in applications programmed with Java. Frank begins by going over key JDBC terminology, the basics of configuring a PostgreSQL database, and how to create the course project. He then provides detailed instructions on how to select and update data, work with transactions, handle exceptions, and more.
+
+
+***********************************************
+Chapter: 1. Introducing Java Data Access
+***********************************************
+
+
+-----------------------------------------------
+Video: Welcome to JDBC
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:02:32            App Mount driver --> Create connection to DB using the driver --> from this connection er can Execute SQL -> commit or rollback. --> close Connection. 
+
+
+-----------------------------------------------
+Video: Terminology of JDBC
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:01:17            DriverManger ->  creating connection for simple use.
+DataSource -> creating connection for complex use[multi-threaded environment]
+Connection -> a class to manage actual communication between the client and the server. 
+
+0:02:45            Statement - the representation SQL to be executed against the database.
+ResultSet - the response from the database in a logical "tabular" form.
+PreparedStatement - an extension of Statement that is used for pre-compiled statements (with inputs). 
+CallableStatement - an extension of preparedStatement that reference stored procedures in the database (with inputs and outputs) 
+
+0:04:13            Transactions allow you to execute a block of code with a single commit. 
+
+
+***********************************************
+Chapter: 2. Data Access Basics
+***********************************************
+
+
+-----------------------------------------------
+Video: The DAO pattern
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:00:21            DAO provide an abstraction layer between your business   code and the raw JDBC code. 
+
+0:03:03            DTO 
+---data transfer object
+---provides single-domain data 
+---should fully encapsulate object and/or contain subobjects
+--Should be output of a single DAO
+DAO
+DAO factory 
+
+0:03:09            if you just want CRUD object, you should go to the repository pattern not the DAO. 
+
+
+-----------------------------------------------
+Video: The repository pattern
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:00:42            Repository pattern vs DAO pattern
+  Repository pattern is focused only on single-table access per class.
+ Repository and DAO when dealing with a single table are very similar. 
+
+0:01:14            Repo vs DAO in JOIN
+Now instead of doing joining in the database, in the repository pattern, you join in the code. So I would select everything from the orders namespace for instance, get the ID of the customer and then go to the customer repository and find the customer with that ID and then join it in code. 
+Whereas of the DAO pattern, I would get the order and then I would take the customer and join it to the order table where that foreign key relationship exists. 
+
+0:01:30            distribution is where repositories really have their strength. Complex joins in the database require a single instance of the database themselves. And in reality, that requires vertical scaling of your database. But when you're distributing around the world, vertical scaling doesn't always work. And the repository pattern allows you to shard your database in such a way that you can focus on single-table access instead of accessing the entire database as a whole. Now you can store one piece of data in a separate database to facilitate this distribution. For instance, if your customer data is need globally, but your order data isn't, then by separating them out and leveraging the repository pattern, you can achieve global distribution of one element while not so much on the other. 
+
+
+***********************************************
+Chapter: 3. Advanced Data Access
+***********************************************
+
+
+-----------------------------------------------
+Video: Using stored procedures
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:01:59            So if you're dealing with someone who's creating your prepared statements and they're outputting data, it's often easier to have them output a table because then you can use simpler constructs in JDBC, especially in something like Postgres. So let's go ahead and do what we've done so many times before. 
+
+
+-----------------------------------------------
+Video: Connection pooling and management
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:02:37            the application makes a request which, ultimately, goes to the JVM. The JVM goes to the OS to get a TCP socket. It reaches out to the server and then does a TCP handshake, which is a two way connection between the client and the server, and they decide on which port they're actually going to communicate on, opening up yet, another socket. Now, once you get back to the client side, the OS has to hand that to the JVM. And then, the JVM to the client driver. 
+
+0:03:18            Connection Pooling request:
+  the request goes from the application directly to the pool. The pool will hand a connection handle to the 
+  application, and if none exists in the pool, or if the pool has run out of connections it will create them for you 
+  following the logic that we previously saw, but it can background some of that tasks because usually it doesn't 
+  create one connection, it creates a block of them at once. And then, you control how many total connections to 
+  have live, how many total have, and how often to recycle them. 
+
+0:03:53            Common Pooling Libraries:
+  Apache Commons DBCP
+  C3PO
+  HikariCP 
+
+
+***********************************************
+Chapter: 4. Transactions
+***********************************************
+
+
+-----------------------------------------------
+Video: Understanding transactions
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:01:31            Transaction breaks down in distributed systems quickly.
+In Distributed system RDMSs are not a good enough choice, and transaction management becomes very painful if not impossible. 
+
+0:02:26            Commit [simple explanation]
+  the commit point tells the system that the transaction is done.
+  Can be "Committed" to disk.
+  Often held in swap[file] until this point. 
+
+0:04:02            Rollback 
+  Now, often, this is part of a failure scenario, but it's not always a failure. You can have scenarios that you 
+  control and you don't fail, but you want to roll back if you get to a certain scenario. So though, most of the 
+  time, we implement rollbacks as part of an exception handling routine, you may have a unique case where you  
+  have to control this situation rolls back the transaction. So it's a powerful tool to use in transaction 
+  management when you actually know when you want to start the commit or when you want to start to rollback outside of error handling. 
+
+0:05:36            Auto-Commit:
+  So if you're using an RDBMS and you're using autocommit, you're probably using the wrong database or you don't really understand transaction management. 
+
+0:06:12            you can, but usually we set autocommit either when we make the connection to the database, we turn it off. Or when we're actually given a handle to the connection and we want to start doing work. The first thing we may do is turn off autocommit in order to make sure we have a transaction boundary set up. 
+
+
+-----------------------------------------------
+Video: Commits and rollbacks
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:03:09            in the real world, you're going to have very complex tasks. And you're going to have to determine where in your code is the transactional boundary. And that is actually the really hard part is figuring out how many things do I put in the transaction without number one, overwhelming it. And number two, getting the commit blocks that I want so that I don't ruin the database for someone else or ruin the database for the session that I'm in. So transaction management is hard. 
+
+0:03:16            Transaction Management:
+  Most of the time, it won't be in your DAO it's going to be much higher up 
+
+
+-----------------------------------------------
+Video: Exception handling in JDBC
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:02:15            Exception Handling all throw SqlException:
+ The first strategy that you can deal with is a common unpacking routine. Now, in this case, you would catch a SQLException and you would unpack it into your own named exception based on the error code. You would log those error codes or you would add them to the common message or maybe both. You would create named exceptions for the most common issues, the ones that we would see most often in your code use case, and everything else you just throw to a generic exception. Now, the benefit of this is you can build a hierarchy. So all of your data access code can actually throw that common exception, and then you can build named exceptions off of that that are much more specific, so if there was a chance to do error control in your application, you could do so because not everything is the same exception. 
+
+
+
