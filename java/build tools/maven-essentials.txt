@@ -1,0 +1,99 @@
+https://youtube.com/playlist?list=PLqq-6Pq4lTTbNRNqJE1XGnazm965uVMJT
+---------------------------------------------------------------------------------
+01- intro & agenda
+	-maven is much more dependency management tool.
+	-maven development workflow
+	-Dependency management[how to add dependency, how maven resolve those dependencies(Dependency mediation), declartive dependency].
+	-lifecycles & phases
+	-plugins
+	-multimodule projects[java application can have multiple maven projects working together, parent & child project]
+
+02- characteristics
+	-IDE agnostic
+	-convention over configuration
+	-consistent
+	-configurable [ex: change src code path from src/main/java to something else]
+	-declarative dependency management.
+	-plugin based architecture
+	...
+
+03- mave is a project management tool.
+	- there is no "project" concept in java. 
+	(in java the project is a group of classes, java file and maybe some xml files / assets) 
+	the application is in ur head. it is not somehing that u manifest as a java concept/thing
+	-A java project structure 
+	 . source code
+	 . test code
+	 . project structure (directories, assets, resources)
+	 			which directory contains which files.
+	 . libraries / dependencies
+	 . configurations
+		 		a lot of configurations that specify how certain jars work.
+		 		how the application work
+	 . task runner - build, test, run (run the tasks in the uniform way.) 
+	 . reporting [#of classes, dependencies, pass rate of test cases, test coverage]
+	 
+	 * Maven manages java project(described above)  using the project object model.
+ 
+ 
+04- 
+	archetype(project template): allows u to start a project exactly as the way u want.
+	
+	maven has the bare minimum executable to work. alot of intelligents the maven has come from taking to an online repository
+	
+	groupid: a way to group all ur maven project. similar to package name in java to organizes classes.
+	version is not so much associated with the project. it is more associated with the artifact that this project generate.
+	
+mvn(local machine) ---talk to online repo--> (repo1.maven.apache.org) contains the archetypes.
+
+07-
+	how does maven identify each artifact ?
+		-Group-id -Artifact-Id -Version -Packaging[jar/war]
+		the combination of these values have to be unique.
+		values of those fields refers to (Maven co-ordinates)
+		these coordinate values are available in the pom.xml
+		
+		
+09- dependency management
+ mvn(in my machine) -- conect to --> remote-repo (contains archetpes & artifacts)
+ 			in the pom.xml -> we declare what dependencies we need(identify it(Maven co-ordinates)) then maven go to the remote repo and fetch it for us. and make it available in the classpath.
+ 			
+10- Transitive dependencies
+	u need a dependency A and A need a dependency C
+		then maven will fetch both A(Direct Dep) and C(Transitive Dep) and make the available in the classpath.
+		
+11- 
+	in some scenario u may need A1.0 & B2.0. but A1.0 need B3.0. maven cannot fetch B with diff versions. so what happend is called -> Dependency Mediation (maven need to chose one)
+		-Nearest definition.
+			(as a graph) fetch one that is closer to ur project.
+		-First declaration
+			(DFS) take which come first.
+		-If u want to overwrtite maven choice make the Dep as Direct dependency by declaring it in the pom.xml.
+		-u can exclude some dependency if u want.
+
+
+12- scopes
+	compile -> default
+	test -> Test dependencies aren't transitive and are only present for test and execution classpaths.
+	provided->  [available in compile time but not in the runtime[final build]] dependencies that should be provided at runtime by JDK or a container.
+	runtime -> [available in runtime but not in the compile time[available in the final build]]db driver. will be present in the runtime and test classpath, but they will be missing from the compile classpath.
+	System ->  is very similar to the provided scope. The main difference is that system requires us to directly point to a specific jar on the system.[deprecated]
+	
+13- maven does not talk to the remote repo directly. it has a local one in ~/.m2 directory to cache the dependency.
+	the top level folder named on the group-name -> artifact-name -> version -> the jar.
+	- Dep with SNAPSHOT -> maven wait for a day to pull the dependency from the remote repo again.
+	
+if u want to overwrite how maven work. we can do it in ~/.m2/settings.xml
+---------------------------------------------------------------------------------
+14-Maven Architecture in the enterprise.
+	- company build a company maven repo. that contains its internal artifacts and
+		work as a cache for the external ones( mvn on the employee machines configure to connect to
+		the company maven repo to search for dependency if it there mvn will fetch it else the company
+		mvn repo will ask the maven central repo to fetch it. and will store it in its repo to make 
+		it available for next need)
+	- this will allow the company to set restrications about which libraries are be allowed to use
+		(banking industry..)
+-----------------------------------------------------------------------------------------
+mvn package --. generate a jar in the target directory.
+mvn install --> generata a jar and publish in the local repo to make it available for me to use as dependency in other project.
+
