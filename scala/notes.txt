@@ -9,10 +9,21 @@ object keyword in scala instantiate a singleton object.
 COMPANION OBJECTS: in the same file write a definition for object and class for the same name.
     put the class level functionality under object definition and instance definition under class object.
         common pattern to write apply method as a Factory under object to make instantiation from the class. 
+    
+    share the same access privileges with the class. they can access the private and protected member of each other
+
+Case Class:
+    provide most common methods [toString, equals, hashCode, copy, apply, unapplay] with a COMPANION object, so you can instantiate without new keyword.
+
+Pattern Matching for case classes:
+    the compiler use unapply method that provided to us to extract("destructure") the instance fields.
+    we can add guard expression in patterns ex:
+        case Task(name, status) if status ..
 
 we can override fields in sub-classes directrly in the constructor class Dog(override val fly: Boolean, food: String) extend Animal(food)
 
 to prevent the class to be extended outside the file it is in, write [sealed] before its definition.
+
 
 
 Scala Type:
@@ -26,14 +37,79 @@ Stream[java, ]: (beacuse of laziness)
     instead it execute a collection of function on each
     piece of data, but only as much as necessary.
 
-[read about effectively final in java[8]]
+[read about  effectively final in java[8]]
 
+
+In-variant Box[A] 
+Co-variant Box[+A]  A <: B -> Box[A] <: Box[B] preserve
+Contra-variant Box[-A] A <: B -> Box[B] <: Box[A] reserve 
+
+  /**
+   * trait Read[-A] => now, we cannot use type A as function return type in the trait
+   * trait Read[+A] => now, we cannot use type A as function parameter type in the trait
+   */
 ---------------
 When a function uses its argument only once, you don’t have to give it a name. Instead, you can use the so-called placeholder syntax like the following:
     val increment: Int => Int = _ + 1
+    
+
+
 
 Wildcard vs Placeholder:
     Wildcard arguments should not be confused with the placeholder syntax. 
     The difference between wildcard arguments and placeholders is that wildcard arguments are followed by an arrow =>.
         val placeholder = (_: Int) + 1
         val wildcard = (_: Int) => 42
+
+
+Algebric data types:
+    set of values, set of ops, set of laws
+Product Type:
+    when we have type built from another types[composite type]: Cardinality of this type = Cardinality of type1 * Cardinality of type2 .. Cardinality of type_n
+    How to build it in scala: case class
+Sum Type:
+    Either[Boolean, TaskStatus]
+    when a type built from one type or another: Cardinality of this type = Cardinality of type1 + Cardinality of type2 .. Cardinality of type_n
+    How to build in scala ?
+        sealed trait TaskStatus
+        case object Pending extends TaskStatus
+        case object Inprogress extends TaskStatus
+        case object Completed extends TaskStatus
+----------------------------------------------------------------------
+https://cwiki.apache.org/confluence/display/FLINK/Coding+Guidelines+for+Scala
+----------------------------------------------------------------------
+Implicit conversions
+
+When the compiler finds an expression of the wrong type for the context, it will look for an implicit Function value of a type that will allow it to typecheck. So if an A is required and it finds a B, it will look for an implicit value of type B => A in scope (it also checks some other places like in the B and A companion objects, if they exist). Since defs can be "eta-expanded" into Function objects, an implicit def xyz(arg: B): A will do as well.
+
+So the difference between your methods is that the one marked implicit will be inserted for you by the compiler when a Double is found but an Int is required.
+
+https://stackoverflow.com/a/10375941/14840351
+-----------------------------------------------------------------------------------
+DEFINITION OF VARIANCE
+Say C[T] is a parameterized type and A, B are types such that A <: B.
+
+In general, there are three possible relationships between C[A] and C[B]:
+
+C[A] <: C[B], C is covariant,
+C[A] >: C[B], C is contravariant,
+neither C[A] nor C[B] is a subtype of the other, C is nonvariant.
+Scala lets you declare the variance of a type by annotating the type parameter:
+
+class C[+A] { … }, C is covariant,
+class C[-A] { … }, C is contravariant,
+class C[A] { … }, C is nonvariant.
+Typing Rules for Functions
+Generally, we have the following rule for subtyping between function types:
+
+If A2 <: A1 and B1 <: B2, then
+
+A1 => B1 <: A2 => B2
+
+So functions are contravariant in their argument type(s) and covariant in their result type.
+
+This leads to the following revised definition of the Function1 trait:
+
+trait Function1[-T, +U] {
+  def apply(x: T): U
+}
