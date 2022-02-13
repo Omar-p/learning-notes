@@ -96,4 +96,32 @@ if u want to overwrite how maven work. we can do it in ~/.m2/settings.xml
 -----------------------------------------------------------------------------------------
 mvn package --. generate a jar in the target directory.
 mvn install --> generata a jar and publish in the local repo to make it available for me to use as dependency in other project.
-
+mvn plugin:phase
+-------------------------------------------------------------------------------------
+default mvn build life cycle:
+	-validate
+	-compile
+	-test
+	-package
+	-verify. for example do integration test.
+	-install
+	-deploy. publish it to remote repo.
+clean mvn build lifecycle:
+	-clean. remove  build generated files(target directory)
+site mvn lifecycle
+	-site. reports about test coverage, code quality ...
+	site-deploy. take the .html file generated from the site and deploy it.
+	
+-------------------------------------------------------
+everything in maven is a plugin.
+----------------------------------------------------------
+reporting & build plugin
+------------------------------------------------------------------------
+multi module maven project
+	- add  modules tag to define its child module in the parent pom
+	- add parent tag with the parent coordinate.
+	why?
+		we can set all the common in the parent pom file. and the childern will inherit it.
+		the lifecycle will be applied to all modules in the order defined in the parent pom.
+--------------------------------------------------------------------------
+there is  an analyze phase in dependency plugin -> to show unused dependencies.
