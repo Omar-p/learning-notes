@@ -1,3 +1,6 @@
+This is all it means for an expression to be referentially transparent—in any program, the expression can be replaced by its result without changing the meaning of the program. And we say that a function is pure if calling it with RT arguments is also RT. We’ll look at some examples next.
+----------
+
 calss parameters are not a fields in the class,
     to make it field use val or var keywords in the declaration:
         class Person(age: Int) to class Person(val age: Int).
