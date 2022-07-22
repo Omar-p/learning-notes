@@ -1,0 +1,37 @@
+Core:
+  Aop:
+    - based on simple predicate[all method in package, all method with specific return datatype..] we invoke some methods. Around | Before | After 
+    - before ProceedingJoinPoint we can for example start transaction, check some condition, log the operation...
+    - capture the return data of invocation.
+    - After it we can close the transaction for example ...
+    - u can do the same without AOP by extending the class. and adding the logic u want. but Aop do it in more convenient way.
+    - useful when u want to execute methods on objects. [cross cutting concerns between objects]
+  Servlet Filter:
+    - implements javax.servlet.Filter
+Security:
+  - out of the box:
+    - content negoatiation
+    - login / logout page
+    - user
+    - protection aganist common attacks [csrf , cors ...
+    - getPrinciple -> access to currently logged in user.
+    - ..
+  - FilterChainProxy -> composing other filters into a single filter.
+    - entry point of all web based security.
+  - spring scurity focus on application security
+    - Authentication | Authorization | protection aganist common attack.
+    - separation between authentication and authorization because of authentication is one time thing. authorization spread through the entire application.
+  
+  - antMatchers vs mvcMatchers:
+    - use antMatchers when u use spring security without spring [strut for example]
+    - when u use spring use mvcMatchers /foo -> willmatch -> /foo.json /foo.php ..
+      - keep order in ur mind most restrictive endpoints in the top.
+      .access('spEl')
+      .access("@beanName.predicateMethod(param1, param..)")
+      .mvcMatchers("/users/{name}").access("#name == principal?.username") <- the user only can access his data only.
+    - map (RequestMatcher, Collection<ConfigAttribute>) FilterInvocationSecurityMetadataSource --> SecurityMetadataSource[default impl -> ExpressionBasedFilterInvocationSecurityMetadataSource]. 
+      - AccessDecisionManager[route of all things access in spring security] 3 impl [default: AffirmativeBased (1 yes -> access), ConsensusBased (majority yes -> access), UnanimousBased (all say yes)]
+      - WebExpressionVoter -> AccessDecisionVoter<FilterInvocation>
+      	FilterInvocation:
+      	  - curr req, curr response, context[all configAttributes]
+ 		- all these work after [AbstractSecurityInterceptor 2 impls (1: FilterSecurityInterceptor, 2: MethodSecurityInterceptor)]
