@@ -1,0 +1,99 @@
+Data Access Methods:
+  DBMSs don't need to perform complicated cpu-intensive calculations. but, it need to process huge amount of data. 
+  performance of DBMS is depending on Memory throughputs. 
+
+  Memory-conscious Algorithms: [Data Processing Algorithms: [working with huge graph, compute statistics, caculating values[aggregation]] + [Data Access Algorithms[finding the data u need[search through disks fasts using indexes for examples]]]
+  
+  Data-Access-Methods-Main-Concepts:
+    Table and Indexes:
+      Indexes: contain data to search in the tables
+      Tables: contain the data iteself
+        1- Heap Organized Table:
+		       -append new data in the file[usually in the end]
+		       -we have fully separate structure for index [B-Tree] to search in the data
+	    	scan through B-tree index, find the row id u need to exeute ur query, then access data in the heap-file.
+		2- Index Organized Table:
+		  	 -the data stored in the index itself [clustered Index, PrimaryKey Index].
+	   scan secondary index to identify the primarykey of the row u need, then scan through primarykey clustered index to find the actual data.
+	    Oracle make u choose between them. postgres use heap. Microsoft SQL SERVER -> Index table.
+----------------------------------------------------------------------
+  initdb	
+  cluster is a set of db managed by one postgres instance 
+  base -> subdir containg db data, each db under its oid directory. 
+  
+  when attributes don't fit in pages of heap, u make a refrence to a TOAST file.
+  
+  pg_ctl [init, start, restart, stop] -> server
+  --------------------------------------------------------
+  Postmaster mode: accept connections from user, fork, start postgres server running in backend mode.
+  backend is responsible for executing a query. has access to all resources from postmaster.
+    one backend is created for one connection. connection is expensive. for managing alot of connection to db we usually use pgbool or pgbouncer.
+    ------------------------------------------------------------------
+    installiation:
+      if the database server machine is a remote machine, you will need to set the PGHOST environment variable to the name of the database server machine.
+      The environment variable PGPORT might also have to be set.
+  -------------------------------------------------------------------------------
+	PostgreSQL uses a client/server model.
+	- A server process, which manages the database files, accepts connections to the database from client applications, and performs database actions on behalf of the clients. The database server program is called postgres.
+	- The PostgreSQL server can handle multiple concurrent connections from clients. To achieve this it starts (“forks”) a new process for each connection. From that point on, the client and the new server process communicate without intervention by the original postgres process.
+---------------------------------------------------------------------
+	-Tables are grouped into databases, and a collection of databases managed by a single PostgreSQL server instance constitutes a database cluster.
+	-SQL is case insensitive about key words and identifiers, except when identifiers are double-quoted to preserve the case 
+	-point type is an example of a PostgreSQL-specific data type.
+	-You could also have used COPY to load large amounts of data from flat-text files. This is usually faster because the COPY command is optimized for this application while allowing less flexibility than INSERT.
+	COPY [table-name] FROM [data-src-filename];
+	-where the file name for the source file must be available on the machine running the backend process, not the client, since the backend process reads the file directly.
+	--------------------------------------------------------------------
+	-[SELECT *] is useful for off-the-cuff queries, it is widely considered bad style in production code, since adding a column to the table would change the results.
+	-In some database systems, including older versions of PostgreSQL, the implementation of DISTINCT automatically orders the rows and so ORDER BY is unnecessary. But this is not required by the SQL standard, and current PostgreSQL does not guarantee that DISTINCT causes the rows to be ordered.
+	-It is widely considered good style to qualify all column names in a join query, so that the query won't fail if a duplicate column name is later added to one of the tables.
+
+  -can not use aggregation in where clause(This restriction exists because the WHERE clause determines which rows will be included in the aggregate calculation; so obviously it has to be evaluated before aggregate functions are computed.) 
+  
+  - UPDATE [table] SET [COLS] WHERE [COND];
+	--------------------------------------------------------------------
+	/usr/local/pgsql/bin
+  psql
+  postgres execute query sequentially, to run differents query in parallel we use different tools 
+  TPC[Transaction Processing Performance Council defines transaction processing and database benchmarks and delivers trusted results to the industry.]
+  pgbench execute TPC-B test. -> output number in transaction per seconds 
+  -----------------------------------------------------------------------------
+  Regression test:
+    make [check:test against temp installation|install-check:Tests against existing installation|chech-world:Do all tests for extensions and "add-on" functionality|standby tests: test behavior of a server recieving WAL logs|installcheck-world: test of extension against existing installation]
+    -----------------------------------------------------
+    statistic for tables and indexes used by query planner and optimizer.
+    to access postgres as client from another machine, the ip need to be added to pg_hba
+    ------------------------------------------------------------------
+  postgres is post-relational db. because it violate atomic attributes[attributes can not be of composite types(json, jsonb)] violating first-normal form.
+postgres save information about databases in table called "pg_database".
+		and about information of each db in "pg_class".
+		-----------------------------------------------------------------------------
+	SHOW -> used to retrieve a configuration value in postgres.
+	SHOW data_directory; -> where postgres save the data.
+	pg_database tables contain information about database[oid, datname, encoding..]
+	pg_class contain information about all objects stored by postgres[indexes, seq, databases, tables in databases]
+	Heap file <-- pages/blocks[8kb][headers][ptrs to tuples stored from end[special space[pg_special]] and grow until meet with ptrs. now block is full][blocks numbered from 0:0xFFFFFFFE] <-- tuples
+	In PG:
+	  -page is an abstraction layered on top of a postgres block. block can be unformatted, page is always a slotted page.[in heap file]
+  To access page
+  1- Read a block
+  buffer = ReadBuffer(scan->IndexRelation, pageItem->blkno)
+  2- Set Lock
+  3-
+  if u write on that page 4- mrak it dirty
+  5-Unlock 
+------------------------------------------------------------------------------
+	naming index convention in PG -> tablename_colname_idx
+	pg_relation_size(relation_name) -> func to get relation size in bytes.
+	indexes cons: 
+	  -Slows down insert/delete/update - the index has to be updated.
+	  -Can be large.
+	  -might not actually get used!
+  PG indexes:
+    -B-tree -> general purpose indexes
+    -Hash -> speeds up somple equality checks
+    -GiSt -> Geometry, full-text search.
+    -SP-GiSt --> Clustered data, such as dates many rows might have the same year.
+    -GIN -> For Cols that contains arrays or Json data
+    -BRIN ->specialized for really large dataset.
+
