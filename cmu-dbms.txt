@@ -1,0 +1,169 @@
+Lec 07:
+  hash table in range scan will be insufficient, because u can only do single-key look up.
+  Table Indexes:
+    - a replica of asubset of a table's attributes that are organized and/or sorted for efficient access using a subset of those attributes.
+    - The DBMS ensures that the contents of the table and the index are logically in sync.
+   - trade-off [#of indexes to create per db]
+     --> Storage overhead
+     --> Maintenance Overhead.
+   - inserting something in index may be expensive.
+   - DBMS is responsible for figuring out what is the most efficient method to use to execute the query. [normally u won't specify what index u want use. some cases u can]
+      --> benefits: if u add new index the dbms can use it to execute the previous query without needing u to rewrite them[[in theory]]. 
+
+    - B+Tree : allows searches, sequential access, insertions and deletions in O((log n).
+               optimized for systems that read & write large blocks of data.
+       - A B+Tree is an M-ways serach tree with the following properties:
+         --> it's perfectly balanced (i.e., every leaf node is at the same depth).
+         --> Every node othe than the root, is at least half-full M/2-1 <= #keys <= M-1.
+         --> Every inner node with K keys has K+1 non-null childern.
+       - B+Tree Leaf Node
+          -level# -Slots# -prev-leaf-ptr -next-leaf-ptr
+          -arr: -sorted keys. -Values.
+       - Value in leaf nodes:
+         - Approach #1 Record Ids [PG, SQL SERVER, ORCALE, DB2]
+           --> A pointer to the location of the tuple that the index entry corresponds to.
+         - Approach #2 Tuple Data [Sqlite, sql server, mysql, orcale]
+           --> The actual contents of the tuple is sorted in the leaf node.
+           --> Secondary Indexes have to store the record id as their values.
+       - In practice:
+         fill-factor: 67%
+         Typical Capacities:
+           - Height 4: 1334 = 312,900,721 entries.
+           - Height 3: 1333 = 2,406,104 entries.
+         Pages per level
+           ---> L1 = 1      page  = 8kb
+           ---> L2 = 134    pages = 1MB
+           ---> L3 = 17956  pages = 140MB
+     
+        - SELECTION CONDITIONS
+           DBMS can use a B+tree index if the query provides any of the attributes of the search key.
+             --> prefix index for example INDEX <A,B,C> 
+                 if u have A or A and B only the DBMS can use that index. in case of B only most DBMS cannot use the index[orcale can[skip scan]] 
+                 for hash index, we must have all attributes in search keys.
+    
+    - NODE SIZE
+      - the slower the storage device, the larger the optimal node size for a B+Tree.
+      - Optimal sizes can vary depending on the workload, --> leaf Node Scans[larger node] vs, Root-to-Leaf[smaller node] Traversals.
+      --> u can have 2 buffer pool with diff size one for dbms pages and other for index pages 
+
+     - Merge threshold slide 25
+     - Var Length Keys slide 26 4 approach
+     	- 3 Padding [pg use it] pad the key to be max len of the key type. so for example if u index on email varchar(150) it will cause alot of wasted space.
+     - Non-Unique INDEXES 
+        --> Duplicate keys[more common]: use same leaf layout but store duplicate keys multiple times.
+        --> Value Lists : Store each key once and maintain linked list of unique value.
+     - optimizations [Prefix compression, suffix truncation, Bulk Insert, Pointer Swizzling]
+     - Clustered Indexes:
+       - the table is sorted according to primary key.[heap or index-organized storage]
+       - pg has clustered index but when u insert the table become out of order.
+=========
+Lec 08:
+  B+TREE: Duplicate Keys.
+    - Approach #1: Append Record Id(pageId+offset)
+       --> Add the tuple's unique record id as part of the key to ensure that all keys are unique.
+       --> The DBMS can still use partial keys to find tuples.
+       PG don't use this approach. [i think because of we reorder records in pages the record id will change] [increase size of index by duplicate record id.]
+    - Approach #2: Overflow LeafNodes
+       --> Allow leaf nodes to split into overflow nodes contain the duplicate keys.
+       --> This is more complex to maintain and modify.
+           [if we want to  do sequential scan in other direction, should we read the overflow page or the other ?!] [we use linear seacrch to find the key we want in the leaf with overflow node.[u can sort them, but u must maintain it with every insert or delete]]
+   - The inner nodes in B+tree cannot tell you whether a key exists in the index. u must always traverse to the leaf node. [this is mean that u could have (at least) one buffer pool page miss per level in the tree just to find out a key does not exit]. .. [TRIE INDEX can answer the key exist or not without traversing to the leaves nodes].
+  Table clustering:
+     CLUSTER [table-name] USING [Index]; sort tuples according to the index.
+     IN PG when u keep modify the table become out of order because its a heap file. In oracle if u choose it as default, orcale will maintain the order.
+     mysql sort by primary key, in oracle and db2 u can choose which column to sort by.
+     
+     [PG] get info about btree indexes:
+       create extension pgstattuple;
+			 select * from pgstatindex('index-name');
+			 
+  
+  Implicit Indexing:
+    Most DBMS automatically create an index to enforce integrity constraints [Primary key | UNIQUE]but not referential constraints (foreign key). if u reference col for referential constraints and that col doesn't have an index dbms will throw an error. because it need an index to be able to satisfy that constraint.
+  
+  Partial Index:
+    Create an index on a subset of the entire table. this potentially reduces its size and the amount of overhead to maintain it.
+    Common Case is to partion index by date ranges. create a separate index per month, year. 
+    - CREATE INDEX idx_name ON table_name(cols..) WHERE [prediate];
+
+  Covering Index: 
+    if all needed fields to process the query are available in an index, then DBMS does not need to retrieve the tuple.
+    this reduces contention on the DBMS's buffer pool.
+    DBMS can figure out it, u don't need to do anything.
+
+  Include  Index:
+    - Embed additional columns in indexes to support index-only queries.
+    - these additionals cols are onlly stored in the leaf nodes and are not part of the search key.
+    - CREATE INDEX idx_name ON table(cols) INCLUDE (additional col);
+
+  Functional/Expression INDEXES
+    - An index does not need to store keys in the same way that they appear in their base table.
+    - You can use expression when using an index.
+    - function used in index expression must be marked [IMMUTABLE] -> PG
+    - CREATE INDEX idx_name ON table (EXTRACT(dow FROM [col])); <- for example.
+  
+  TRIE INDEX:
+    - Use a digital representation of keys to examine prefixes one-by-one instead of comparing entire key. -> also known as [Digital Search Tree, Prefix Tree].
+    - Shape only depends on key space and lengths.
+      - doesn't require rebalancing ops.
+      - doesn't depend on existing keys or insertion order. 
+    - All ops O(k) key len
+    - Radix Tree is a vertically compressed trie.
+  
+  --the tree indexes are useful for "point" and "range" queries. they are not good at keyword searches: --> find all wiki articles that contain the word "Pavlo".
+  
+  INVERTED INDEX
+    stores a mapping of words to records that contain those words in the target attribute.
+    --> sometimes called a full-text search index.
+    --> Also called a concordance[the term used in theoretical literature when building inverted index on all words shakespeare use in his works] in old (like really old) times.
+    [Elasticsearch, Solr, Xapian, lucene]
+    Query Types:
+      Phrase Searches, Proximity Searches: where two words occur within n words of each other, Wildcard Searches[regex].
+    DESIGN DECISIONS
+      #1 what to store
+        --> the index need to store at least the words contained in each record(separated by punctuation chars)
+        --> can also store freq, pos, and other meta-data.S
+      #2 When to update
+        --> Maintain auxiliary data structures to "stage" updates and then updates the index in batches. [because update inverted index is expensive] 
+    
+ --
+ Buffer Pool Manager doesn't interested in what is in the page. whoever asked for a page, he is responsible for interpreted its bits.
+ ----------
+LEC 09:
+  - Redis: one-thread engine
+  - VOLTDB: multi-thread engine but it partion dbs in such a way every b+tree can be accessed by a single thread.
+  
+  - A concurrency control protocol is the method that the DBMS uses to ensure "correct" results for concurrent operations on shared object.
+    - A protocol's correctness criteria can vary: 
+      --> Logical correctence: Can I see the data that I am supposed to see? [I think related to transaction isolation]
+      --> Physical correctness
+    
+  - Locks vs Latches
+    - Locks
+      --> Protects database's logical contents from other txns.
+      --> Held for txn duration
+      --> Need to be able to rollback changes.
+      - separate user transactions
+      - Protect Database Content
+      - Duration : Critical Sections 
+      - Mode : Shared/Update/Exclusive/Intention
+      - Deadlock : Detection and Resolution by waits-for, timeout, aborts 
+      - Kept in Lock Manager. 
+    
+    - Latches 
+      --> Protect the critical sections and internal DBMS's ds from other threads
+      --> Held for operation duration.
+      --> Don't need to be able to rollback change. 
+      - separate threads
+      - Protect In-memory Data Structures 
+      - Duration : Critical Sections 
+      - Mode : READ/WRITE 
+      - Deadlock : need high skilled developer to avoid it by Coding Discipline [good design]  
+      - Kept in Protected data structure 
+      - #1 mutex not scalable 25ns per invocation
+      - #2 test-and-set Spin Latch(TAS): efficient (single instruction per latch/unlatch), Non-scalable, not cache friendly. 
+      - #3 R/W Latches can be implemented on top of spinlocks [Must manage r/w queues to avoid starvation]
+      
+    
+  - HASH TABLE LATCHING
+      
