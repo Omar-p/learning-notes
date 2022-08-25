@@ -166,4 +166,63 @@ LEC 09:
       
     
   - HASH TABLE LATCHING
-      
+------------
+Lec 10:
+  - Query Plan :
+    - The operators are arranged in a tree. - Data flows from the leaves of the tree up towards the root - THe output of the root is the result of the query.
+    - we try to strip out as much useless data as possible sooner in the pipeline rather than later.
+  
+  - Disk oriented DBMS: 
+    - data cannot fit in main memory.
+    - we are also going to perfer algorithms that maximize the amount of sequential access.
+  
+  - Why do we need to sort ?  
+    - Trivial to support duplicate elimination (DISTINCT)
+    - Bulk loading sorted into a B+Tree index is faster.
+    - Aggregations (GROUP UP)
+  - we need algorithms that aware of disk access cost.
+  
+  [EXTERNAL MERGE SORT]
+  
+    - divide and conquer sorting algorithms that splits data set into separate runs and then sorts them individually.
+    - #1 sorting: sorts block of data that fit in main memory and then write back the sorted blocks to a file on disk.
+    - #2 Merging : combine sorted sub-files into a single large file.
+    
+    2-way external merge sort.
+    2 represent num of runs that we are going to merge into a new run for each pass
+    
+    Data set is broken into N pages
+    THe DBMS has a finite #of B buffer pages to hold input and output data.
+    
+    #of passes = 1 + log2(N)
+    Total I/O cost = 2N . (#of passes) 
+    
+    Pass #0
+      --> Use B buffer pages
+      --> Produce [N/B] sorted run of size B
+    Pass #1,2,3 
+      --> Merge B-1 runs 
+
+    #of passes = 1 + [log B-1 [N/B]]
+    total I/O cost = 2N * (#of passes) slide:29
+--------------------------------------------------------
+LEC 11:
+  
+  JOIN in COLUMN STORED DBMS:
+    - only copy the join keys along with the records ids of the matching tuples.
+    - now we know the record ids for the output and we know the column we want to retrieve then we go to retrieve them.
+    - Ideal for columns stores because the DBMS does not copy data that is not need for the query.
+    - This is Called [late materialization] 
+      - vertica get rid of that optimization because it does not help. it may be better to get all attributes in the first time because the data can be on other machine. now, u need to go over the networks to get that data.
+  
+  
+  - IO COST ANALYSIS:
+    COST METRIC: we will ignore output costs because it will be the same for all join algorithms. what is really matter the cost of I/O to compute join
+  
+  - JOIN ALGORITHMS
+    - Nested loop join
+      ---> Simple/Stupide
+      ---> Block
+      ---> Index
+    - Sort-Merge Join
+    - Hash Join

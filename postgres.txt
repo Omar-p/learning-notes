@@ -1,0 +1,66 @@
+Schema:
+  namespace to organize naming of the object.
+  postgres create by default schema called public.
+  [schema_name].[object_name]
+  
+  when u access a table without specifying a schema name, pg searches for that table 
+  by using the [schema search path].
+  
+  $ SELECT current_schema;
+  
+  To view the current search path, you use the SHOW command in psql tool:
+  $ SHOW search_path;
+  
+  change schema search path:
+  $ SET search_path TO [schema_name];
+  
+  Users can only access objects in the schemas that they own.
+  To allow users to access the objects in the schema that they do not own,
+   you must grant the USAGE privilege of the schema to the users:
+   $ GRANT USAGE ON SCHEMA schema_name 
+     TO role_name;
+  
+  To allow users to create objects in the schema that they do not own,
+   you need to grant them the CREATE privilege of the schema to the users:
+  
+   $  GRANT CREATE ON SCHEMA schema_name 
+			TO user_name;
+		
+	$ [CREATE|ALTER|DROP] shema_name;
+
+----
+TABLESPACE: 
+  A tablespace is a location on the disk where PostgreSQL stores 
+  data files containing database objects e.g., indexes, and tables.
+
+  pg uses a tablespace to map a logical name to a physical location on disk.
+  
+  PG comes with two default tablespaces:
+    pg_default tablespace stores user data.
+    pg_global tablespace stores global data.
+  
+  benefits:
+    if a partition on which the cluster was initialized is out of
+    space, you can create a new tablespace on a different partition
+    and use it until you reconfigure the system.
+    
+     you can use statistics to optimize database performance. 
+     For example, you can place the frequent access indexes or
+     tables on devices that perform very fast e.g., solid-state
+     devices, and put the tables containing archive data which is
+     rarely used on slower devices.
+  
+  TO CREATE:
+  $ CREATE TABLESPACE tablespace_name
+    OWNER user_name
+    LOCATION directory_path;  
+  
+  To create table, index, database in another tablespace other than 
+  the default. specify it in the creation.
+    $ CREATE DATABASE [table_name] 
+      TABLESPACE ts_primary;
+      
+---
+first_name || ' ' || last_name,
+  
+    

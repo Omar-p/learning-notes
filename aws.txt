@@ -1,0 +1,255 @@
+-----SECTION 3---------------------------------------------
+cloud computing
+	-On-Demand Self-Service:
+		...can provision capabilities as needed without requiring human interaction.
+	-Broad Network Access
+		Capabilities are available over the network and accessed through standard mechanisms...[http, https,ssh,vpn..]. no need to visit datacenter.
+	-Resource Pooling
+		There is a sense of "location independence" ... no "control" or "knowledge: over the exact "location" of the resorces
+		Resources are "pooled" to serve multiple consumers using a "multi-tenant model"
+		Moved from thinking of hardware as value to thinking of applications and services as things of value that a business offers.
+	-Rapid Elasticity
+		capabilities can be elastically "provisioned" and "released" to scale "rapidly" outward and inward with demand.
+		To the consumer, the capabilites available for provisioning often "appear" to be "unlimited" 
+		Elasticity -> system automatically system size increase as the load increases, and automatically decrease when the demand decrease.
+	-Measured Service
+		Resource usage can be "monitored", "controlled", "reported" .. AND "billed".
+--------------------------------------------------------
+Public vs Private vs Hybrid vs Multi:
+ Multi -> deploy ur app in multiple cloud provider this means that u have got cloud provider level resilience. stay away from single management window to manage multi-cloud because it add  abstraction that make only the common services between each platform are availables and can not use the rest. and that doesn't make use of each one.  
+ Private -> private cloud on-premises [aws outposts, azure stack, google anthos] provide services dedicated to ur business and run on your-permises. they must meet the 5 characteristics of cloud computing. but dedicated to you as a business.
+ Hybrid -> use public and private in the same time. with true hyber cloud. you use the same tooling the same interface to interact with both private and public component.
+	Hybrid Cloud is NOT public cloud + legacy on-permises -> it called hybrid environment or hybrid network.
+-----------------------------------------------------------
+Cloud Service model
+	Infrastructure Stack -> collection of things which the application needs all stacked onto each other[Facilities -> infra -> servers -> virtualizations -> os -> container -> Runtime -> Data -> Application]. 
+	Parts "You" manage, Parts managed by the "vendor".
+	Unit of consumption.[what you pay for, what you consume].
+	
+	on-permises vs data-center hosting
+		data-center: provide racks, building and security. you manage the rest.
+	IaaS: manage [Facilities, Infra, Servers, Virtualization] you consume the OS and mange the above layers. you pay per min ,secs, hours or virtual machine.
+	EC2 uses the IaaS service model.
+	PAAS: u consume the Runtime and manage the above layers[Data, Application]
+		if java app, u pay for a java runtime. PAAS mainly used by developers.
+	SAAS: u consume the application. Netflix, Dropbox, Email.
+_----------------SECTION 2----------------------------------
+aws accounts and users inside of those accounts.
+  AWS Accounts is a container for identities (users) and Resources.
+  
+  'AWS ROOT USER' using Identity and Access Management(IAM) Users, groups, Roles can also be created and given full or limited permission.
+  
+  AWS Accounts can contain the impact of of admin errors, or exploits by bad actors, 
+    Use separate accounts for separate things(DEV, TEST, PROD) or teams or products or client.
+------------------
+  Multi-factor Authentication:(MFA)
+   Factor: different pieces of evidence which prove identity.
+     Knowledge: Something you know, username & password.
+     Possession: Something you have, bank card, MFA device/app. [ATM use possession and knowledge]
+     Inherent: Something you are.. fingerprint, face, voice, iris.
+     Location: A Location (physical), which network (corp or wifi)
+     More Factors means more security & harder to fake.
+   we try to balance between convenience and security.
+-------------------------------
+IDentity provider
+Authenticate Identity
+Authorize based on policies associated with the identity I authenticated to.
+NO COST 
+there are limits
+Global service / global resilience
+No direct control on external accounts or users. control only local identities in your account.
+make use of identity federation -->[take identities u have[fb account] and use it indirectly to use aws] and MFA
+
+ IAM ---> User --> Identities which represent humans or applications that need access to your account.
+     --> Group --> Collections of related users e.g. development team, finance or HR
+     --> Role ---> Can be used by aws services, or for granting external access to your account. [when you want to grant access to services in your account to an uncertain number of entities]. 
+    Example for IAM ROLE -> if you want all EC2 instances in your account to be able to access the simple storage service, then you can create a role which grants access to the simple storage service, and then allow instances to use that role.
+
+ In Brief: 
+    you pick IAM users when you can identify the individual thing that will log in to that user.
+    Roles tend to get used when the number of things is uncertain.
+  
+  IAM policy [object or document]: used to allow or deny access to aws services when and only when they're attached to IAM USERS, GROUPS OR ROLES.
+  policy on their own do nothing they simply define, allow or deny rights to a certain services when you attach the policies to other identities. so users, groups and roles do they have any effect.
+  
+  IAM Access Keys:
+    Long-Term Credentials ...
+    IAM USER
+      has 1 username and 1 password[u can create Iam user to used only in cli or api access and those don't need a password] password is optional.
+      -two access keys [can be created, deleted, made inactive or made active]
+           Access key id / Secert Access Key --> generated by aws and show to oonly only once so you need to store them securly. used to sign your request that sent to aws.
+           can not be change. but you can delete it and create new one.
+    Rotating Access Key. create new one and remove the old one that is why they allow two.
+    IAM USERS and ROOT user can use access key. it's not recommended to the root user.
+    IAM ROLE don't use access keys.
+    
+    
+    
+    
+    
+    
+-------------------SECTION 4-------------------------------
+Yaml Yaml ain't markup lang
+    human readable data serialization language
+      list [] or 
+      list:
+      	- item1
+      	- item2
+    	
+generally, YAML is only userd for CloudFormation. Json is used for both CloudFormation and other things(identity policy doc..)
+-------------------------------------------------------
+Encryption
+  Encryption At Rest:
+    to protect aganist physical theft and physical tampering. [user with encrepted laptop]
+     common when only one party is involved. one person one the encryption and decreption key
+  Encryption In Transit:
+    protecting data while it's being transferred between two places.
+      used when multiple system is involved.
+  
+  Concepts:
+    plaintext: data[image, file, app] u can immediately load into an application and read that data.
+    Algorithms: Blowfish, aes, rc4..
+    Key: password to encrypt for example
+    Ciphertext: encrypted data.
+    ---
+    Symmetric Encryption: the same key used in both encryption and decryption process.
+    Asymmetric Encription:
+      u have public and private key, when someone need to send me a data encrypt it with my pub key and send it. then I use the priv key to decrypt it. used by[SSL, TLS, SSH]
+    
+    Asymmetric encryption is computationally much more diffcult to do than symmetric. so, many processes use a asymmentric to initially agree and communicate a symmetric key and then use it in the communication use symmetric encryption.
+    
+    Another way for using asymmetric keys is [signing]: for ID verification: u sign using ur priv key and send the request the reciver can validate that is you by using the pub key to validate the signed request.
+    
+    --
+    Steganography: hiding that you are encrypt a data, by hiding the encrypted data in another file. using a certain key, a number or a pattern.
+------------------------------------------------------------------------------------
+Networking:
+
+Layer 1 - Physical
+  specifications define the transmission and reception of RAW BIT STREAMS between a device and a SHARED PHYSICAL MEDIUM. it defines things like VOLTAGES LEVELS, TIMING, RATES, DISTANCES, MODULATION, and CONNECTORS. Copper(electrical), Fiber(light) or WIFI(Radio Frequency)
+  to connect two devices you need only a link(point to point) between them.
+  but when we need to connect multiple one. we need a hub[anything recieved on any port, is transmitted on every other port] including errors & collisions.
+  At the stage of layer one networking:
+    No INDIVIDUAK ADDRESSES, At layer 1, one laptop can not address traffic directly at another. it's a broadcast medium.
+    If multiple devices transmit at once. a collision occurs.
+    L1 has No media access control and no collision detection.[which devices can transmit]
+    cannot detect collision it just transmiting in voltage change.
+    No device => device communication. it just broadcast to all connected devices.
+
+Layer 2 - Data Link Layer
+  every thing above this layer rely on device to device communication which the data link layer provides.
+  Devices at L2 have a unique hardware (MAC 2 part OUI of the company + network interface controller = unique MAC) address. 48 bits, in hex, 24 bits for manufacturer.
+    Frames can  be addressed to a dest or broadcast(ALL F's)
+  	FRAME => [[Preamble 56bits/SFD- 8bits], [DEST MAC ADDRESS(Set 6*ff: to broadcast to all devices in the network)], [SRC MAC ADDRESS], [ET(EtherType) 16 BITS: Specify which layer 3 prot put the data in the frame. Ex: IP], [PAYLOAD], [FCS 32bits. check seq to identify any errors in the frame. CRC check]]
+  	
+  	To avoid collision L2 checks for any sign of a carrier signal.(CSMA:Carrier sese, multiple access) if i doesn't detect a carrier then it pass the frame to L1.
+  	If both transmit in the same time L2 can detect it using CSMA/CD. 
+  	  jam signal is sent by all of the devices, and random backoff occurs(a period of time during which no device will attempt a transmission.) after that period which picked randomly a transimission is retried.
+  	  
+  	  L1 & L2 
+  	    to connect more than 2 devices and use benefit of L2. a hub won't work because it doesn't understand L2. So we use a SWITCH.
+	    
+	    SWITCH:
+	      - understand frames and MAC. they maintain a MAC ADDRESS TABLE which starts off EMPTY. As the switch recieves frames on its ports, it learns which devices are connected and populates the Mac address table.
+	      - STORE and FORWARD ..they don't repeat blindly like hubs. it means that ONLY VALID FRAMES are FORWARDED - collisions is isolated on the port they occurred. Every X port switch has X collision domains. It allows switches to scale and be connected together.
+	    
+	    L2
+	      - identifiable devices
+	      - Mac
+	      - Collision Detection
+	      - Unicast 1:1
+	      - Broadcast 1:All
+	      - 
+  
+L3 Network
+  - LAN1 and LAN2 are isolated LOCAL AREA NETWORKS. Using only layer 2, only those networks joined by a direct point to point linnk using the SAME layer 2 protocol could communication.
+  - Ethernet is a L2 used generally for local networks. Long distance point to point links will use other more suitable protocols such as ...PPP/MPLS/ATM[satellite..]
+  - IP is a L3 protocol which adds cross-network IP addressing and routing to move data between LAN without direct P2P links.
+  - Routers(L3) devices remove frame encapsulation and add new frame encapsulation at every hop.
+  
+  -protocol field in IPv4: 1 -> TCP , ICMP -> 6, UDP -> 17.
+  TTL in IPv4 -> Hop Limit in IPv6
+  
+  IP divided into network part and host part.
+  IP Addresses are assigned by machine(DHCP) or Humans.
+  
+  Subnet Mask
+    It's the Subnet Mask which allows a HOST to determine if an IP address it needs to communicate with is local or remote - which influences if it needs to use a GATEWAY or can communicate locally.
+    
+    L3 - Route Tables & ROuters
+      - Router compares packet dest Ip ^ route table for matching destinations.
+        The more specific prefixes are preferred (0 lowest, 32 heights).
+        Packet is forwarded on to Next Hop/Target.
+        
+  	  - Route Tables can be statically populated, or there are protocols such as BGP(Border Gateway Protocol), which allow routers to communicate with each other, to exchange which networks they know about.
+	  
+	  ARP used in L3 when u encapsulate the packet and then send it to a MAC address,
+	    u don't know now the MAC address. so we need a protocol which can find the MAC address
+	    for a given IP address. 
+
+L4 Transport Layer
+  L3 problems:
+		L3 provides no ordering mechansim.
+		L3 is not guaranteed to be reliable.
+		L3 diff packets can experience diff delays.
+  	L3 has no communication channels - packets have a Source and Destination IP but 
+  	  no mthod of splitting by APP or CHANNEL.
+	  No flow control if src is faster than dest. dest can be overwhelmed.
+  
+  TCP segments:
+    segments don'y have SRC or DEST IP's
+    Options - Padding
+    SRC PORT  -		DEST PORT : provides the ability of having multiple streams of data at the same time between 2 devices
+    SEQUENCE NUMBER: increment after sending each segment. unique, can be used for error correction. used in reordering.
+    ACKNOWLEDGEMENT: 
+    FLAGS 'N' things: used to control over the connection[[flags]FIN: finish the connection, ACK: acknowledgement, SYN: sync seq numbers]. 1-close the connection. 2-synchronize sequence numbers. 
+    	data-offset. reserved space.
+  	WINDOW: #of bytes u are willing to recieve between acknowledgements. [flow-control use it]
+  	CHECKSUM: detect error
+  	URGENT POINTER: to detect segments of controlling the traffic to take priority of processing. separate between app segments and traffic segments.
+	
+	TCP is a connection based protocol. A connection is established between 2 devices using random port on client[EPHEMERAL PORT] and a [WELL-KNOWN PORT] on the server. Once esablished the connection is bi-directional. reliable, provided via the segments encapsulated in IP packet.
+	
+	3-way handshake:
+	  to esablish the connection between client and server. they need to agree on the sequence number the client choose one randomly and then increment it for the next packets. the server also choose one to start with it for the packet will be sent to the client.
+	
+	SESSSION & STATE:
+	  A Stateless firewall would see two things.
+			Outbound .. client to server
+			Response ..
+			TWO RULES will be required... OUT & IN
+			Networ ACL(AWS): access control list   . need 2 rules for each TCP connection.
+	
+	 A Stateful firewall views sees one thing [aware of tcp protocol]
+	   Outbound .. Allowing the outbound implicitly allows the inbound response.
+	   In AWS this is how a security groups works.
+	   stateful firewall understand layer four and the state the traffic.
+--------------------------------
+Elastic Beanstalk [ ur code, app service, http service, os, interpreter, host]
+  - Paas - allows quick deployment of ur app.
+  Keeps control in ur hands:
+    - choose ur instance type - choose ur database - set and adjust auto scaling
+    - update ur app - access server log files - Enable Https on load balancer.
+    * support a large range of platform.
+----------------------
+  ..TLS ...asymmetric and then symmetric.
+  TLS start when that a TCP connection is active between the client & server..
+   so this is layer 4 and ath the end of the 3 phases.
+   
+   1 - Cipher suites : is a set of protocols used by tls[a key exchange algorithm, a bulk encryption algorithm, message authentication code algorithm]
+   *begin with established Tcp connection. client send ssl/tls version, list of supported cipher suites, session id, extensions. 
+   * server respond with its ssl/tls version, a selected cipher suite from the client list, server certificate[contain a 'public key'].
+   
+   2 - Authentication: the client trust the public CA - it makes sure that the certificate is valid (date, annd hasn't revoked) and that the DNS name matches the name/names on the cert.
+     . the client verfies the server has the private key.
+     
+   3 - Key Exchange:  . the client generate the pre-master key, encrypt it
+                        with the servers public key and sends it to the server.
+                      
+                      . the server decrypt the pre-master key using its private key.
+                      
+                      . both sides use the same pre-master-key to generate the master secret  
+                        which is used to generate the ongoing session keys which encrypt and 
+                        decrypr data.
+                      . Both sides confirm the handshake and from them on,
+                        communications between client <=> server are encrypted   

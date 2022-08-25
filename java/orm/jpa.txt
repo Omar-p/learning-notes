@@ -8,7 +8,7 @@ Java apps with DB
 	Business Services <--DTO--> Data Services <---> JDBC <----> DB 
 	JPA will be exist in the Data Services.
 	
-	we use orm because of the mismatch of paradigms (class vs db-table).
+	we use orm because of the mismatch of paradigms (class[oop] vs db-table[relational]).
 		for example we need to store employee data.
 		In DB, we will have employee table. each employee is a row(record) in the table.
 		In Java, we will have an employee class. each employee is an instance of the class.
@@ -67,9 +67,220 @@ Learning JPA
 		Implementing transactions.
 		Object queries.
 		JPQL - 'freeform' quering.
+--------------------------------------------------------------------------------------------
+jpa-project-without spring
 
-	
-	
-	
+	- after adding the required dependencies. we need to declare the persistence context -> META-INF/persistence.xml
+	persistence-unit -> define one db that we connect to.
+		transaction-typr ->
+			RESOURCE_LOCAL
+			JTA -> distributed transaction
+		provider -> specify the implementation of jpa(instance-provider)
+------------------------------------------------------------------------------------------------
+@Column has many attribute to give us full control on our relation [insertable, updatable, unique ...]
 
+@Temporal(TemporalType.TYPE) to specify the type in the db we want to map to 
+	for example Date class in java can be mapped to date, time, timestamp.
 
+primitive datatype in java nullable=false by default because the have zero value. but in db integer can have a null value.
+
+@Enumerated(EnumType.[ORDINAL|STRING])
+
+@Transient to prevent jpa from map the field to column in the relation.
+-------------------------------------------------------------------------------------------------------------------
+hibernate.hbm2ddl.auto
+	create – Hibernate first drops existing tables, then creates new tables
+  update – the object model created based on the mappings (annotations or XML) is compared with the existing schema, and then Hibernate updates the schema according to the diff. It never deletes the existing tables or columns even if they are no more required by the application
+  create-drop – similar to create, with the addition that Hibernate will drop the database after all operations are completed. Typically used for unit testing
+  validate – Hibernate only validates whether the tables and columns exist, otherwise it throws an exception
+  none – this value effectively turns off the DDL generation
+	
+	--
+	update - attempt to add new columns, constraints, etc but will never remove a column or constraint that may have existed previously but no longer does as part of the object model from a prior run.
+	
+	in test case scenarios, you'll likely use create-drop so that you create your schema, your test case adds some mock data, you run your tests, and then during the test case cleanup, the schema objects are dropped, leaving an empty database.
+	
+	In production, it's often highly recommended you use none or simply don't specify this property. That is because it's common practice for DBAs to review migration scripts for database changes, particularly if your database is shared across multiple services and applications.
+   When we need to modify the database, we add new scripts to the next version of the application and deploy to staging. Flyway will automatically detect the current version and run the scripts needed to bring the database to the newest version. If everything works we deploy to production
+  
+-------------------------------------------------------------------------------------------------------------	
+hibernate entity lifecycle:
+	transient, persistent, detached, removed
+
+-----------------------------------------------------------------------------------------
+https://stackoverflow.com/a/57941556/14840351
+-----------------------------------------------------------------------------------------
+when we establish a relationship between two entity, there is a two type of fetching[eager and lazy]
+to fetch the entities on the otherside of the relationship. 
+----------------------------------------------------------------------------------------------------------------
+when we have a bi-directional relationship between two entities, if we set one on one side, we didn't have to set 
+the the entity on the other side and jpa provier will manage it. BUT we didn't know when jpa will do it. so it doesn't guarantee 
+data consistency. so we should manage it on the both side. JPA guarantee that when we query stored data we will get it, but
+JPA doesn't guarantee when u update a data when that data will be updated and be saved in the database. 
+-------------------------------------------------------------------------------------------------------------------------
+updating:
+	-fetch the record u want to update
+	- update it.
+	- start a transaction.
+	- persist it.
+	- commit.
+Persistence Context start when we invoke Persistence.createEntityManagerFactory(name). the jpa guarantee when we ask for a data
+it will be updated. but it may retrieve it from its cache and this data doesn't exist in the DB yet.
+//  to read : https://en.wikibooks.org/wiki/Java_Persistence/Caching
+----------------------------------------------------------------------------------------------------------------------------
+clear, refresh
+https://vladmihalcea.com/a-beginners-guide-to-jpa-hibernate-entity-state-transitions/
+https://www.baeldung.com/jpa-cascade-types
+https://stackoverflow.com/questions/12907942/how-does-the-jpa-cascadetype-persist-work
+https://www.baeldung.com/jpa-hibernate-persistence-context
+https://www.baeldung.com/jpa-strategies-when-set-primary-key
+----------------------------------------------------------------------------
+JPQL query against entities.
+Projection for multiple columns produce Object[]
+:param
+@NamedQuery(query=, name=) <- java +11 support using same annotation multiples time
+-------------------------------------------------------------------------------------------------------------------------------
+Spring
+@PersistenceUnit <- to inject Entity Manager Factory.
+@PersistenceContext <- to inject Entity Manager. but this can be not a thread safe. many em will be sharing the same refrence.
+	so you can do read operation only, or u should manage the transaction and set the type of em to @PersistenceContext(type = PersistenceContextType.EXTENDED)
+Spring support declartive transaction using @Transactional, and we can disable rollback on specific exceptions or make it happen on specific exceptions.
+---------------------------------------------------------------------------------
+JdbcTemplate -> if u have a mismatch in the name of table cols and class attributes -> implement RowMapper
+
+@DirtiesContext is a Spring testing annotation. It indicates the associated test or class modifies the ApplicationContext. It tells the testing framework to close and recreate the context for later tests.
+--------------------
+The unidirectional @OneToMany association does not perform very well, so you should avoid it.
+You are better off using the bidirectional @OneToMany which is more efficient.
+
+If MappedBy parameter were to be deleted, then Hibernate would actually create TWO join tables! Why? Because there is a symmetry in many-to-many relationships and Hibernate has no rationale for selecting one direction over the other.
+We therefore use MappedBy to tell Hibernate, we have chosen the other entity to dictate the mapping of the relationship between the two entities.
+--------------------
+
+The owning side of the relation tracked by Hibernate is the side of the relation that owns the foreign key in the database.
+
+This means something like: "modifications on this side of the relation are already Mapped By the other side of the relation IdDocument.person, so no need to track it here separately in an extra table."
+
+PERSON -> DOC
+ONE -> MANY
+Using mappedBy, If we only call person.getDocuments().add(document), the foreign key in ID_DOCUMENTS will NOT be linked to the new document, because this is not the owning /tracked side of the relation!
+
+To link the document to the new person, you need to explicitly call document.setPerson(person), because that is the owning side of the relation.
+
+When using mappedBy, it is the responsibility of the developer to know what is the owning side, and update the correct side of the relation in order to trigger the persistence of the new relation in the database.
+------------------
+
+@UpdateTimestamp -> is a hibernate annotation to maintain last timestamp the row is updated.
+@CreatedTimestamp
+
+@NamedQuery @NamedQueries
+-refresh -clear -detach
+
+by default rollback happen on unchecked runtime exception not on checked exception.
+----------------
+CrudRepository mainly provides CRUD functions.
+PagingAndSortingRepository provides methods to do pagination and sorting records.
+JpaRepository provides some JPA-related methods such as flushing the persistence context and deleting records in a batch.
+-----------
+merge vs persist
+Persist takes an entity instance, adds it to the context and makes that instance managed (i.e. future updates to the entity will be tracked).
+merge returns the managed instance that the state was merged with.
+---------
+Inheritance Mapping:
+  - SINGLE_TABLE [default] add [DTYPE -> u can change its name using @DiscriminatorColumn] COLUMN = [Concrete class name]
+  - TABLE_PER_CLASS
+  - JOINED
+  - MAappedSuperclass
+-----------
+Book:
+
+ JPA 2 : The Metamodel API has been added. [the metamodel class generated for the EntitiyName class will be EntitiyName_ and will look something] https://www.baeldung.com/hibernate-criteria-queries-metamodel
+-----
+ to specify how hibernate access the class fields:
+   property vs field.
+   if u put the annotation[@Id, @Column]  on the field it will use fields
+   if u put it on getters then -> it will use proprty access
+   u can explicitly specify it using @Access(AccessType.[]) on the entity class
+   - we can use property to add some validation in setters. [but i perfer to use fields and validate via custom annotation]
+--
+@Column
+  name, unique, nullable, insertable, updateable[set false for example for createdAt]
+  -
+  if don't set nullabe to false and use NOT NULL constraint in db. and set row with null val.
+    db will throw an exception.
+  but if we set it to false. hibernate will throw that exception not db.
+--
+Surrogate keys and natural keys.
+  - Surrogate keys : unique identifier generated by DB[using sequences..]
+       GenerationType
+         . IDENTITY : rely auto increment of the col in db
+         . SEQUENCE, generator : need @SequenceGenerator(name, sequenceName)
+         . TABLE: 
+         . AUTO : let hibernate choose the appropriate type.
+  - natural keys : unique column has some business meaning used to identify the record
+    use natural keys if u inheriting 
+---
+@Temporal(TemporalType.[TIMESTAMP|TIME|DATE])
+  - u must use it above any datetime field to avoid any casting issues within actual db itself
+--
+@Formula
+  - within sql we use calculated column to dynamically assign value of an attribute.
+  - if u modify field used in calculating the formula, 
+    u should refresh the entity in the context before accessing 
+    formula field to get an accurate val.
+  - when u access it, hibernate will invoke the formula each time.
+  - u can rely on feature provided by the vendor when writing the formula.
+----
+Hibernate Types:
+  - Entity types - have a database identity
+    . corresponds with a database row[has a lifecycle in the context]
+  - Value types - no database identity
+    - No db identity
+    - embedded within an entity.
+       . object fields listed in a separate row in the entity in the same table
+    - do not define their own life cycle[cannot persisted by itself]
+      . Basic (Primitives & String | BigDecimal date blob clob binary ..)
+    		. Map a single db value(column) to a single, non-aggregated Java type.
+      . Composite Types (aggregated) <- not an entity[Embedded(JPA)/Composite Type(hibernate)]
+        @Embedable
+          to override name of column in embadded field:
+            @AttribueOverrides(
+            {@AttributeOverride(name="nameInEmbeddedClass", column=@Column(name="newName"))}
+            )
+      . Collection (of basic or composite type)
+        . composite/basic stored in different table
+          . basic
+            . @ElementCollection
+              @CollectionTable(name="", joinColumns=@JoinColumn(name="refInEntity"))
+              @Column(name="nameOfTheCompositeBasicValue")
+            . Map
+              .need to add @MapKeyColumn
+              
+          . composite [of embedded class]
+            . @ElementCollection
+              @CollectionTable(name="", joinColumns=@JoinColumn(name="refInEntity"))
+              @AttributeOverrides...
+              the rows in table can be access in context of the parent id.
+              - don't mistake it with one to many relationship. because it's a value not 
+                entity type. 
+        . target object cannot be queried, persisted, merged independently of their parent object
+        . Do not have a unique identity. identifiyed by its parent.
+    - collection itself is value type
+==========
+Entity Association:
+  . entity one object mapped to a certain class. has its own identity and lifecycle.
+  . Source Object/Target Object account 1 --- * transaction
+    . account is a target for a transaction. [source has a foreign key]
+  . Bidirectional/Undirectional
+  . @JoinColumn in source
+    . name -> name of foreign key
+    . referencedColumnName -> the column of target entity id if that not match the foreign key col name. must be specified.
+  ** in bidirectional u don't specify cascade and JoinColumn in both side. they are specified only in the owner side.
+     in the inverse side -> secify (mappedBy="fieldInOwningSide") 
+     . u should manage the both side. [set each side in the other] 
+  . cascade:
+    ALL -> when we persist the source, we want to persist the assosicated target as well
+  . uni - OneToMany
+    . u should set a @JoinColumn and set the name of the foreign key col. and set nullable to false.
+  . in oneToMany if the many side can be exist without the other side. we can use extra joinTable to avoid null value.
+owning entity his table has a foreign key to other entity[bidirection rel]. not always true in unidirectional

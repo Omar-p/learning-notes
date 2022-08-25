@@ -1,0 +1,139 @@
+1.1 value of relational DB
+  1 . Concurrency & Transaction
+  2 . Integration : can be accessed by different applications
+      . while the database’s concurrency control handles multiple
+        applications in the same way as it handles multiple users 
+        in a single application.
+  3 . Standard Model
+      . core benefits presented in a standard wa. Different vendors’ 
+        SQL dialects are similar, transactions operate in mostly the same way.
+====
+1.2
+  impedance mismatch: the difference between the relational model and 
+  the in-memory data structures.
+
+
+  All operations in SQL consume and return relations, which leads to 
+  the mathematically elegant relational algebra.
+  
+  Object-relational mapping frameworks remove a lot of grunt work, but 
+  can become a problem of their own when people try too hard to ignore 
+  the database and query performance suffers
+===
+1.3
+
+  Integration DB
+    A structure that’s designed to integrate many applications ends up being more complex.
+
+    Different applications have different structural and performance needs, 
+    so an index required by one application may cause a problematic hit on inserts for another. 
+    
+    the database usually cannot trust applications to update the data in a way that preserves
+    database integrity and thus needs to take responsibility for that within the database itself.
+    
+    A different approach is to treat your database as an application database—which is only
+    directly accessed by a single application codebase that’s looked after by a single team.
+    
+    the responsibility for database integrity can be put in the application code.
+
+  web services as an integration mechanism was that it resulted in more flexibility 
+  for the structure of the data that was being exchanged.
+  with remote communication you want to reduce the number of round trips involved
+  in the interaction, so it’s useful to be able to put a rich structure of information 
+  into a single request or response.
+===
+1.4 Attack of the Clusters
+
+  relational databases are not designed to be run on clusters. 
+  Clustered relational databases, such as the Oracle RAC or Microsoft SQL Server, work on the
+  concept of a shared disk subsystem. They use a cluster-aware file system that writes to a
+  highly available disk subsystem—but this means the cluster still has the disk subsystem as a
+  single point of failure. 
+  
+  Relational databases could also be run as separate servers for different sets of data,
+  effectively sharding  the database. While this separates the load, all the sharding has to be
+  controlled by the application which has to keep track of which database server to talk to for
+  each bit of data. Also, we lose any querying, referential integrity, transactions, or
+  consistency controls that cross shards. A phrase we often hear in this context from
+  people who’ve done this is “unnatural acts.”
+  
+  These technical issues are exacerbated by licensing costs. Commercial relational databases are
+  usually priced on a single-server assumption.
+
+  This mismatch between relational databases and clusters led some organization to consider an
+  alternative route to data storage.
+==
+  [polyglot persistence]—using different data stores in different
+  circumstances. Instead of just picking a relational database because everyone does, we need to
+  understand the nature of the data we’re storing and how we want to manipulate it.
+  
+  there are two primary reasons for considering NoSQL. One is to handle data access with sizes 
+  and performance that demand a cluster; the other is to improve the productivity of 
+  application development by using a more convenient data interaction style.
+==
+ch 02
+A data model is the model through which we perceive and manipulate our data. [metamodel]
+the data model describes how we interact with the data in the database. This is distinct
+from a storage model, which describes how the database stores and manipulates the data internally.
+
+the NoSQL ecosystem: key-value, document, column-family, and graph. Of these, the first
+three share a common characteristic of their data models which we will call aggregate orientation.
+2.1
+  you want to operate on data in units that have a more complex structure than a set of tuples.
+  we like to update aggregates with atomic operations and communicate with our data storage in
+  terms of aggregates.
+  
+  Dealing in aggregates makes it much easier for these databases to handle operating on a
+  cluster, since the aggregate makes a natural unit for replication and sharding.
+  
+  [aggregate] is a collection of related objects that we wish to treat as a unit.
+  
+  [aggregate entity]  can be expressed in the relational model in terms of foreign key 
+  relationships—but there is nothing to distinguish relationships that represent aggregations
+  from those that don’t. As a result, the database can’t use a knowledge of aggregate
+  structure to help it store and distribute the data.
+  
+  An aggregate-ignorant model allows you to easily look at the data in different ways, so it is a
+  better choice when you don’t have a primary structure for manipulating your data.
+  
+  The clinching reason for aggregate orientation is that it helps greatly with running on a 
+  cluster, which as you’ll remember is the killer argument for the rise of NoSQL. If we’re 
+  running on a cluster, we need to minimize how many nodes we need to query when we are 
+  gathering data. By explicitly including aggregates, we give the database important information 
+  about which bits of data will be manipulated together, and thus should live on the same node.
+
+  aggregate-oriented databases don’t have ACID transactions that span multiple aggregates. 
+  Instead, they support atomic manipulation of a single aggregate at a time. This means that
+  if we need to manipulate multiple aggregates in an atomic way, we have to manage that  
+  ourselves in the application code. In practice, we find that most of the time we are able to 
+  keep our atomicity needs to within a single aggregate;
+===
+2.2
+  in a key-value database, the aggregate is opaque to the database—just some big blob of mostly
+  meaningless bits. In contrast, a document database is able to see a structure in the 
+  aggregate. The advantage of opacity is that we can store whatever we like in the aggregate. 
+  The database may impose some general size limit, but other than that we have complete freedom. 
+  A document database imposes limits on what we can place in it, defining allowable structures 
+  and types. In return, however, we get more flexibility in access.
+  
+  Databases classified as key-value databases may allow you structures for data beyond just an
+  opaque aggregate. For example, Riak allows you to add metadata to aggregates for indexing and
+  interaggregate links, Redis allows you to break down the aggregate into lists or sets. You can 
+  support querying by integrating search tools such as Solr. As an example, Riak includes a
+  search facility that uses Solr-like searching on any aggregates that are stored as JSON or XML
+  structures.
+  
+  With key-value databases, we expect to mostly look up aggregates using a key. With document 
+  databases, we mostly expect to submit some form of query based on the internal structure of 
+  the document; this might be a key, but it’s more likely to be something else.
+  
+==
+ch 02 summary
+  NoSql] What they all share is the notion of an aggregate indexed by a key that you can use for 
+  lookup. This aggregate is central to running on a cluster, as the database will ensure that 
+  all the data for an aggregate is stored together on one node.
+  
+  Aggregates form the boundaries for ACID operations with the database.
+  
+  aggregate-ignorant databases are better when interactions use data organized in many
+  different formations.

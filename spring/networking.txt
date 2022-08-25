@@ -1,0 +1,16 @@
+why is https is important ?
+  - to handle man in the middle scenarios:
+    - ISPs are notorious for injecting ads into HTTP sites. they might contain malware.
+    - wifi hotspot can also inject add as well, and u don't know what the content of those ads are.
+      - wifi pineapple, u boot it up. and it is ready to go and u can inject any sort of content into http sites without the user knowing.
+    - malicious user can inject scripts that steal ur cpu cycles, to do bitcoin mining.
+    - HTTP/2 being only over TLS for browsers, HTTPS is faster thant HTTP. [let's encrypt offer TLS for free]
+
+---
+Cross site scripting
+  - stored : attacker inject malicious code in the server and every client consume it will execute it.
+  - reflected
+  - DOM based attacks
+  
+  
+[]disabling csrf in rest apis: because csrf attack happened when we there are sessions and cookies to authenticate the session info. as rest apis are stateless, we can safely disable this feature

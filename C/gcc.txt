@@ -7,3 +7,32 @@ gcc -save-temps [file.c]
 
 gcc -S [file.c]
     generate the assembly code
+    
+gcc -Wall -funsigned-char [file]
+	allows unsigned character.
+
+gcc -D[MACROS] [file]
+	to define macros
+	
+nm executable_file
+    shows functions defined in this file
+ldd  executable_file
+    shows all shared libraries the file depend_on
+    
+
+gcc -g
+	to make use of gdb's feature
+	cause the C compiler to add extra information to the output file
+		variable and structure types, source filenames, and C statement to machine code mapping.
+gdb
+	run : run program until first error or breakpoint.
+	set var [i]=0 : set variable i if it in the execution context to zero,
+		to select variable in a specific scope function or file ex: set var sum::a=0, set var main.c::a=0
+	to list file lines: list 8 or to list range of lines => list lower,upper
+	print: to print variable  value in context.
+	s : step
+	next 
+	c : continue
+	bt : to see stack frames
+	info args : to print the current function argument
+	frame: print the current stack frame

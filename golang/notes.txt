@@ -1,3 +1,18 @@
+Ultimate GO:
+
+Code Reviews:
+  - Integrity:
+    - every allocation, read and write of memory being accurate, consistent and efficient. The type system is critical making sure we have this micro level of integrity.
+    - every [data transformation] being accurate, consistent and efficient. Writing less code and error handling is critical to making sure we have this macro level of integrity.
+  - Go not hide cost like c++
+  - Correctence -> readability ->  Comprehensible Code -> hide complexity without losing readability
+  - Latency: external [sys call, network]; - internal [garabe collection, synchronization, orchasteration]; - how we access memory.; - algorithm efficiency. [readability is important than efficiency in most situations]
+
+when we assign var from literal struct to named struct if they have the same memory layout
+go will make an implicit conversion and accept it.
+but, when we assign 2 var from different nammed struct but with the same memory layout
+we must make an explicit conversion to make go compile.
+------------------------------------------------------------------------
 Go Use 2 words structure for string:
     one word contains a pointer to the start of the string.
     another contains the length of it.
@@ -19,4 +34,36 @@ and move all frame to the new one. because of that go doesn't allow
 sharing data in the stack between different goroutines so any shared data
 moved to the heap memory 
 [go compiler use escape analysis to figure out which data need to be sotred in the heap]
+https://en.wikipedia.org/wiki/Escape_analysis
 _______________________________________________________________________________-
+What is actually involved in a context switch depends on the architectures, operating systems, and the number of resources shared (threads that belong to the same process share many resources compared to unrelated non-cooperating processes). For example, in the Linux kernel, context switching involves switching registers, stack pointer (it's typical stack-pointer register), program counter, flushing the translation lookaside buffer (TLB) and loading the page table of the next process to run (unless the old process shares the memory with the new)s
+----------------------------------------------------------------------------------------------
+https://en.wikipedia.org/wiki/Green_threads
+-----------------------------------------------------------------------------------------
+
+=====
+TESTING
+-- 
+  - when u run test go take all *_test.go files, build an exectuable and exectue it. then delete it. -> u can see it ps aux | grep go
+  ----
+  - Naming Convention : file : *_test.go
+    - in most normal cases u will see one test file for each src file. oneToOne Relationship.
+    - few othe caveats:
+      - `export_test.go` to access unexported variables in external tests.
+      - `*_internal_test.go` for internal tests
+      - `example_*_test.go` for examples in isolated files
+        - others: 
+          - name the desired value in `want` variable.
+          - set result in `got`
+          - u can name the args of the called func `arg`
+  - Signal:
+    - There are 2 basic ways to signal that a test failed:
+      - Fail = fail, but keep running.
+      - FailNow = fail now stop test.
+    these methods called rarely, because most of the time we will combine it with logging:
+    - Error = Log + Fail
+    - Errorf = Logf + Fail
+    - Fatal = Log + FailNow
+    - Fatalf = Logf + FailNow
+    
+    - If not using subtests, Fatal will prevent other test in that func from running.

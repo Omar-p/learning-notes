@@ -8,30 +8,83 @@ Core:
     - useful when u want to execute methods on objects. [cross cutting concerns between objects]
   Servlet Filter:
     - implements javax.servlet.Filter
-Security:
-  - out of the box:
-    - content negoatiation
-    - login / logout page
-    - user
-    - protection aganist common attacks [csrf , cors ...
-    - getPrinciple -> access to currently logged in user.
-    - ..
-  - FilterChainProxy -> composing other filters into a single filter.
-    - entry point of all web based security.
-  - spring scurity focus on application security
-    - Authentication | Authorization | protection aganist common attack.
-    - separation between authentication and authorization because of authentication is one time thing. authorization spread through the entire application.
+    -----------------------------------------------------------------------------
+	Security:
+		- out of the box:
+		  - content negoatiation
+		  - login / logout page
+		  - user
+		  - protection aganist common attacks [csrf , cors ...
+		    - cache control
+		      - Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+		        - add this header to respones from authenticated endpoint. we can disable it or add our owm. 
+		    - Https
+		      - to make spring redirect any request for HTTP to HTTPS .requiresChannel().requestMatchers(r -> [match requests in production for example. because development with http is easier])  hsts headers will included by default, u can disable or configure it.
+		  - getPrinciple -> access to currently logged in user.
+		  - ..
+		- FilterChainProxy -> composing other filters into a single filter.
+		  - entry point of all web based security.
+		- spring scurity focus on application security
+		  - Authentication | Authorization | protection aganist common attack.
+		  - separation between authentication and authorization because of authentication is one time thing. authorization spread through the entire application.
+		
+		- antMatchers vs mvcMatchers:
+		  - use antMatchers when u use spring security without spring [strut for example]
+		  - when u use spring use mvcMatchers /foo -> willmatch -> /foo.json /foo.php ..
+		    - keep order in ur mind most restrictive endpoints in the top.
+		    .access('spEl')
+		    .access("@beanName.predicateMethod(param1, param..)")
+		    .mvcMatchers("/users/{name}").access("#name == principal?.username") <- the user only can access his data only.
+		  - map (RequestMatcher, Collection<ConfigAttribute>) FilterInvocationSecurityMetadataSource --> SecurityMetadataSource[default impl -> ExpressionBasedFilterInvocationSecurityMetadataSource]. 
+		    - AccessDecisionManager[route of all things access in spring security] 3 impl [default: AffirmativeBased (1 yes -> access), ConsensusBased (majority yes -> access), UnanimousBased (all say yes)]
+		    - PasswordEncoderFactories.createDelegatingPasswordEncoder
+		      - new DelegatingPasswordEncoder(id, encoders[id -> endcoder])
+		      - when u want to migrate password to use another encoder , implement UserDetailsPasswordService and override updatePassword and sprind will call it automatically.
+		    - WebExpressionVoter -> AccessDecisionVoter<FilterInvocation>
+		    	FilterInvocation:
+		    	  - curr req, curr response, context[all configAttributes]
+	 		- all these work after [AbstractSecurityInterceptor 2 impls (1: FilterSecurityInterceptor, 2: MethodSecurityInterceptor)]
+			FilterWriter
+			
+			
+			- Oauth is a framework that allows people to grant limited access to protected resources on the web. 
+			    the term access implies that oauth is about authorization, and this is true. however, open Id connect [OIDC], formalizes a way to authenticate with oauth as well.
+	    - CommonOAuth2Provider -> contains info about well-known oauth2 providers.
+	    - ClientRegistrationRepository[InMemoryClientRegistrationRepository] ->
+	    - to initiate login flow OAuth2AuthorizationRequestRedirectFilter [if resolve the req then] redirect to OAuth endpoint itself.
+	    - to get the authorization code and exchange it for a valid user -> [OAuth2LoginAuthenticationFilter] -> pass it to AuthenticationManager that delegat it to [OAuth2LoginAuthenticationProvider] that get a response using the access token response client. 
+	    - from accessToken we need to get the user information for login using OAuth2UserService
+	      --> in this case we're just accessing a URI with the access token that was provided. And then create a user from that.
+	      - if u were using JWT, we could create it from id token itself.
+  -------------------------------------------------------		
+Data:
+  Transaction:
+    ts management ensure data consistency and integrity.
+      - global ts: Multiple resources manage the transactions[managed by app server allowing for access to multiple resources(message queue, db..)]
+      - local ts:  one resource manage the transaction[jdbc connection]
+      
+      -Programmatic: Developers writes custom code to manage transactions and set boundaries.
+      -Declarative: separate transaction managemnt from business code.
+      - LEVELS [DEFAULT(underlying DBMS), READ_UNCOMMITED, READ_COMMITED, REPEATABLE_READ, SERIALIZABLE]
+------------
+AOP
+  joinpoint: where aspect will be applied.
+  advice: what will be applied at particular joinpoint
+  chain of advices: multiple aspect for a single joincut
+  pointcut: predicate expression that match join point.
   
-  - antMatchers vs mvcMatchers:
-    - use antMatchers when u use spring security without spring [strut for example]
-    - when u use spring use mvcMatchers /foo -> willmatch -> /foo.json /foo.php ..
-      - keep order in ur mind most restrictive endpoints in the top.
-      .access('spEl')
-      .access("@beanName.predicateMethod(param1, param..)")
-      .mvcMatchers("/users/{name}").access("#name == principal?.username") <- the user only can access his data only.
-    - map (RequestMatcher, Collection<ConfigAttribute>) FilterInvocationSecurityMetadataSource --> SecurityMetadataSource[default impl -> ExpressionBasedFilterInvocationSecurityMetadataSource]. 
-      - AccessDecisionManager[route of all things access in spring security] 3 impl [default: AffirmativeBased (1 yes -> access), ConsensusBased (majority yes -> access), UnanimousBased (all say yes)]
-      - WebExpressionVoter -> AccessDecisionVoter<FilterInvocation>
-      	FilterInvocation:
-      	  - curr req, curr response, context[all configAttributes]
- 		- all these work after [AbstractSecurityInterceptor 2 impls (1: FilterSecurityInterceptor, 2: MethodSecurityInterceptor)]
+  -Target object: object that advised by one or more aspect. 
+    spring aop will a create a runtime proxy for the target 
+    object in order to add the aspects to the execution.
+  -Introduction: declare additional methods or fields for a given class.
+    spring aop allow that adviced object recieves new interface to implement.
+     [adding additional behavior to a class at runtime] 
+  -Proxy: created by aop to add aspect in the execution
+   2 ways:
+     standard mechanism:
+       - JDK Dynamic proxy
+     CGLIB
+       - code generation library proxy.
+  -weaving: the operation of program transformation that applies the aspect to  
+    the target object in order to create the advised object.
+    - Spring Aop prefer weaving at runtime

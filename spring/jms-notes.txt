@@ -1,0 +1,17 @@
+The JMS spec is a set of interfaces and terms that defines how a JMS client can access the facilities of an enterprise product.
+Third party products are providers that implement the JMS specification, will furnish the needed coded in the implementations for accessing a message oriented middleware product called a MOM. Messaging in general then allows for transmission of specifically formatted messages to a MOM for temporary retention before being accessed by another client. Published MOMs are in synchronized communication between a MOM and other JMS client applications.
+
+Two messaging Domain Types:
+  1 Point to point ptp
+     operate around message queues where a message is published to a specific queue on a MOM and a separate client is established to listen and consume only from that queue on that MOM.
+     Peer to peer systems operate around message queues where a message is published to a specific queue on the MOM and a specific client is established to listen and consume only from that queue on the MOM
+  2 Publish/subscribe(pub/sub)
+     The Pub/Sub message domain type similarly involves publishing a message but instead of to a queue that is only for one and only one consumer, it publishes to a topic on a MOM. That topic can have multiple subscribers.
+
+use JMS without spring:
+  in order to use JMS 1.1 the developer has to first create the JNDI initial context. Then get a ConnectionFactory from the JNDI context. Followed by getting a queue from the queue ConnectionFactory. Then the developer can create the Session object which a Sender or Receiver object can then be created. Finally, the developer can either send or receive a message using the Sender or Receiver object. And then the developer has to close all the JMS resources used for processing the message.
+
+JMS with Spring:
+  Spring JMS simplifies this process by abstracting all of the first five steps and the last step of closing the connection.
+
+Spring JMS provides a JMS abstraction API that simplifies the use of JMS to access the destinations, queues or topics. And publish messages to specify destinations. J2EE developers don't need to be concerned about the differences between JMS versions, such as JMS 1.0.2 versus JMS 1.1. Spring JMS API handles this. And developers don't need to specifically deal with JMS checked exceptions because Spring catches those and returns the unchecked exception for any JMS exception that is re-thrown. Additionally instances of Spring JMS Template Class are thread safe once configured.  

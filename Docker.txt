@@ -1,0 +1,492 @@
+container runtime[/usr/bin/containerd-shim-runc-v2] is running on a host platform and establishes communication between the localhost kernel and the container because containers don't have a kernel by themselves.
+	container: kernel -> runtime -> container[glibc -> give the container the identity of specific  os ]
+	VM: host kernel -> hypervisor -> each vm has its own kernel
+OCI standardization ensures compatibility between containers, no matter which env they originally come from. the res is that for instance images made for Docker work without modification in Red Hat Podman.
+
+image is a tar file with associated metadata.
+image layers are managed by overlayfs driver.
+
+u can not override the ENTERYPOINT. if u want to override specify the whole command as CMD.
+0:01:24            Docker engine is the heart of docker.
+Docker engine is designed as client-server application:
+   [1  docker daemon: installed when u install Docker; the Docker server itself] 
+   [2 REST API: define the interface that all other programs use to talk to the daemon]
+   [3 Docker client(Docker CLI) commands you run to manipulate images and containers] 
+
+0:02:03            Docker_Daemon install on docker_host [your desktop, vm or in the cloud] used to execute your containers and images.
+Client send command to Docker_Daemon. could be on the same host  as Docker_Daemon or could be remote.
+Registry: pull images from and execute it on docker_host(Docker_Daemon) 
+
+                
+
+0:01:19            Container: code, config, Processes, Networking, Dependencies, enough OS to run. 
+
+0:03:17            lsb_release to detect ubuntu version 
+
+0:01:44            you can refer to docker image by its repository and its tag [name and version],
+                   but sometimes the imgae can have no name or no version so we refer to it using [Image ID] 
+
+0:02:17            [Image] = docker run => [running container] 
+
+0:04:32            images have its own set of ids and containers have a different one. 
+
+
+-----------------------------------------------
+Video: The Docker flow: Containers to images
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:04:31            docker commit take a running container and convert it to a new image. 
+
+0:06:18            docker commit [container-name] [new-image-name] 
+
+0:01:15            docker run --rm [image-id] => delete the container when it exit
+shorthand for 
+docker run [image]
+after the container done
+docker rm [container-name] 
+
+0:04:42            to de-attach running container ctrl+p ctrl+q
+to attach de-attached one; docker attach container-name 
+
+0:05:06            to run process in running container use: docker exec
+                docker exec [container-name] [process] 
+
+
+0:01:58            docker kill [container-name] : make it stop
+docker rm [container-name]: remove it 
+
+0:03:21            docker run --name [your-container-name] [image-name]
+
+docker run --memory [maximum-allowed-memory] image-name command
+
+docker run --cpu-shares  [relative-to-other-container]  [image-name] command 
+
+0:04:21            make the container include its dependencies using fetch inside the container itself, saves a lot of pain.
+don't let your containers fetch dependencies when they start. 
+
+0:04:46            don't leave important things in unnamed stopped containers.
+because you may delete it by mistake. 
+
+
+0:00:23            -Programs in containers are isolated from the internet by default.
+-You can group your containers into "private" networks.
+-You explicitly choose who can connect to whom. 
+
+0:00:42            For getting data into and out of the container as a whole, Docker offers the option of exposing a port or publishing a port. 
+
+0:05:45            to refer to localhost host computer we have a special host name [host.docker.internal] 
+
+0:10:38            docker port [container-name]   
+
+ 
+
+0:00:52            docker network(bridge):
+  -we have a (virtual switch): docker0, all containers have been hosted on this docker can communicate with each other. 
+
+
+0:04:21            legacy linking only operates in one direction, client can map to all server port and see all server's env variable, but doesn't work in the opposite direction. 
+
+
+
+
+0:00:18            Volumes : Virtual "discs" to store and share data between containers and (containers and host); 
+
+0:00:42            Two main varieties :
+   -Persistent :  the data will remain in the host even if the container is exit.
+  -Ephemeral: exists as long as the container using them, but when no container is using them, they evaporate.
+No Volumes become part of the images. 
+
+0:02:45            docker run -ti -v [folder-path-host]:[path-in-container] image 
+
+0:04:54            to share between different container:
+docker run -ti -v  [path] --name [container-name] image
+docker run -ti --volumes-from [container-name] image 
+
+
+
+0:00:39            docker build -t [name-of-created-image] [path-of-DOCKERFILE] 
+
+0:01:52            -Each line takes the image from the previous line and makes another image.
+The previous image is unchanged.
+It does not edit the state from the previous line.
+You don't want large files to span lines or your image will be huge. 
+
+0:02:59            docker file is cached so put the most changing part in your code at the end of it to benefit from the cache in the unchanged part. 
+
+
+
+0:02:18            we can set environment variable to the image in the Dockerfile:
+   ENV DB_HOST=db.ex.com 
+
+0:04:46            Avoid definig shared folder in Dockerfile. if you do, you can only run it in ur computer 
+
+0:04:46            -p while running the container = EXPOSE in Dockerfile 
+
+0:05:11            WORKDIR like cd                
+
+
+
+Video: Avoid golden images
+
+              
+0:00:08            The `ENTRYPOINT` statement is for making your containers look like normal programs. 
+
+0:00:08            If you depend on a piece of software to build your image, check it into your image. 
+
+0:01:45            Tag your build with the git hash of the code that build it. 
+
+0:02:17            docker use cgroups [control groups] to group processes together inside a container. 
+
+0:02:22            Use "namespaces", feature of the linux kernel, which allow us to split networking stack.
+so you have one set for a container another set for another container. 
+
+0:05:01            Docker is divided into two programs:
+ communicate over a socket
+  -client:  send commands; create, delete
+  -server: 
+
+
+
+0:02:00            when creating container: 
+  --net=host : give the container full access to the host network stack without any protection. 
+
+0:03:39            docker creating bridge to make container able to recieve/send packets from the outer network 
+
+0:07:04            in routing docker use firewall which use NAT to send and receive packets and forward it to the desired address. 
+
+0:07:37            namespaces in linux allow us to provide complete network isolation between processes.
+processes run in the container are attached to virtual network devices, and those virtual network devices are attached to bridges, which lets them talk to any other containers attached to the same bridges.
+each container has its own networking stack. 
+
+
+-----------------------------------------------
+Video: Processes and cgroups
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:02:10            docker inspect :
+  to get information about running container.
+ex: 
+docker inspect '{{.State.Pid}}' [container-name] => to get the parent process that start the container. 
+
+0:03:41            docker should manage host resources between running containers. 
+
+
+0:04:41            Docker uses storage drivers to store image layers, and to store data in the writable layer of a container. The container’s writable layer does not persist after the container is deleted, but is suitable for storing ephemeral data that is generated at runtime. 
+
+0:05:16            The copy-on-write (CoW) strategy
+Copy-on-write is a strategy of sharing and copying files for maximum efficiency. If a file or directory exists in a lower layer within the image, and another layer (including the writable layer) needs read access to it, it just uses the existing file. The first time another layer needs to modify the file (when building the image or running the container), the file is copied into that layer and modified. This minimizes I/O and the size of each of the subsequent layers. These advantages are explained in more depth below. 
+
+
+***********************************************
+Chapter: 5. Orchestration: Building Systems with Docker
+***********************************************
+
+
+-----------------------------------------------
+Video: Registries in detail
+-----------------------------------------------
+Note Time:         Note Text:                     
+
+0:00:39            Docker registry usually listens on port 5000 
+
+0:01:59            --restrat=always => if this container dies, restart it immediately 
+
+-------------------------------------------------------------
+Why containers ?
+  we have alot of de-coupled services written in diff lang
+  we have multiple environments to deploy to:
+    production, pre-production,multiple-stagging and multiple development environments[working on different features branches].
+      deployment problem : we have all this different thing and different env. that give us what we called matrix from hell. and each row is what i want to deploy.
+       containers solve dpendencies hell problem.
+       help us to build reliable CI. In minutes we can stagging up a new environment for the apllication. run a bunch of tests. take down start again in no time.
+       we have all app versions with its dependencies that allow us to compare between them.
+       we can decouple plumbing[load-balancing, service discovery] from the application logic. 
+       
+-----------------------------------------------------------------------------
+docker logs [container-id] -> print container stdout.
+docker logs [container-id] [-f/--follow] -> keep printing the log
+docker logs [container-id] [-f/--follow] [--tail n] -> start from last n lines.
+-------------------------------------------------------------------------
+docker stop --> send a signal to a specified container to shutdown and wait 10sec. if the container ignore it. the host send a kill signal and stop it forcelly.
+
+Automated --> the image build is done buy the container register itself[we can check it]. more trust.
+	blank . someone build it on his machine and push it to the register.
+---------------------------------------------------------
+ubuntu version schema year.month -> 20.04 -> 2020/4
+------------------------------------------------------------------------
+when we build an image: 
+	Sending build context to Docker daemon  2.048kB
+	when we doing a build docker won't access the Dockerfile only
+	it package the hole directory and send it to the docker engine
+	and docker engine will execute that build.
+	each line in the Dockerfile executed as a step. and if we run the build again,
+	docker engine will use the build cache -> docker will keep track of the images that
+	been built and after before each step he check if he has the same combination [the current image+the next step] if docker found it, docker directly use it without build it again.
+	the cache system can be broken if we use additional space or change param order, docker will treat it as a new image.
+		for example [apt-get install figlet] != [apt-get install  figlet].
+	[docker build --no-cache] to not use the cache.
+	
+for example:
+RUN apt-get update
+	docker do not parse and execute it. docker send it to the shell to run it.
+	exec("sh", ["sh", "-c", "apt-get update"])
+
+when to send a string and when to send a list RUN ["apt-get", "install", "figlet"]
+	if u don't have a shell in the container use the list. 
+	
+ENTRYPOINT the first program run in ur container but it can overrwritten when we run the container using --entrypoint [the command we want to run].
+
+CMD run after run the image if we won't pass another command
+
+in case of we use both ENTRYPOINT and CMD. CMD work as a default parameter for the ENTRYPOINT.
+
+docker labels are useful in filtering the containers but in prodocution if we usingg k8s we don't use the docker labels and be relaying on k8s features.
+
+----------------------------------Troubleshooting-------------------------------------
+strace : to see system call stack for a process
+
+
+we can see pid of container's processes from the host machine
+
+
+ls /proc/{pid}/ns
+	we have a sudo file that represent the namespace of that process
+	  that is how the  kernel can make difference between host and container processes
+------------------------------------------
+docker exec [container-id] [command]
+	execute command in a running container
+----------------------------------------------------
+docker export [container-id] 
+	export the whole filesystem of the container, then we can exploring it.
+-----------------------------------------------------------
+docker diff [container-id]
+  show the difference between the state[files] of the image the container created from and the container after running.
+
+----------------------------------------------------------------------
+to export a specific file from the container without getting the whole filesystem
+  docker cp [id]:path-to-the-file [path-the-file-exported-to]
+----------------------------------------------------------------------------------
+
+---------------------------------Troubleshooting-------------------------------------
+
+docker limiting resource is useful when u use docker directly in production but in most case
+we do the orchestration using k8s
+
+
+docker for disk usage: 
+  device mapper is one of the backend docker use to store. has default limit 10GBs
+docker ps -s -> show us the size of the read write layer (size of file system if exported) in the containers.
+
+
+---------------------------------------------------------------
+docker run -P ]-> -P = expose all port declared in that container
+   
+-----------------------------------------------------------------
+
+built-in network drivers in Docker: 
+	-bridge[default]
+	-none -host -container
+   drive is selected with docker run --net ...
+----------------------------------------------------------------
+default[bridge]
+  -container gets a virtual eth0 interface + its own loopback interface
+  -that provided interface is provided by a veth pair
+  -it's connected to the Docker bridge (Named docker0 configurable with --bridge)
+  -Addresses are allocated on private, internal subnet.(Docker uses 172.17.0.0/16 by default. configurable with --bip)
+  -Outbound traffic goes through an iptables MASQUERADE rule.
+  -Inbound traffic goes through an iptables DNAT rule.
+  -the container can have its own rules, iptables rules, etc.
+----------------------------------------------------------------
+null(none) driver:
+  -docker run --net none
+  -it only gets the lo loopback. No eth0.
+  -can't send or recieve traffice.
+  -useful for isolated/untrusted workloads.
+-------------------------------------------------------------
+host driver:
+  see and access network interface of the host.
+  can bind any address, any port.
+  network traffic doesn't go through NAT, bridge, or veth.
+  Performance=native
+  USE CASES:
+    performance sensitive application[+10GB/SEC](VOIP, gamong, streaming,..
+    Peer discovery.
+------------------------------
+Container driver
+  Container is started with [docker run --net container:id ...]
+  it resue the network stack of the specified container
+  it shares with this other container the same interface, IP addresses, routers, iptables
+  those containers can communicate over their lo interface. (one cane bind to 127.0.0.1 and the other can connect to it.)
+---------------------------------------------------------
+the names and aliases can be resolved via an embedded DNS server.
+-------------------------------------------------------------------
+to communicate between 2 seperated networks in docker we can only by exposing ports
+---------------------------------------------------------
+[--net-alias] to set name in dns registery. 
+docker will not use DNS system in default bridge network driver.
+--------------------------------------------------------
+Ambassador pattern:
+  - ambassadors are containers  that 'masquerade' or 'proxy' for another service.
+  - They abstract the connection details for this services, and can help with.
+	-discovery
+	-migration
+	-fail over
+	-load balancing
+	-authentication 
+--------------------------------------------------------------
+local development workflow:
+  -
+------------------------------------------------------------
+when we try to write a file that is a part of the image, 
+we can't do it directly we made COPY UP, copy that file from the image
+to the read-write layer then we can open that file. 
+changes in the container doesn't appear in docker diff.
+--------------------------------------------------------------
+if i mount empty volume to non-empty one . docker copy the file from container to that volume. if i mount non-empty volume the container will use that volume as it is in the host.
+
+-------------------
+we can bind /var/run/docker.sock to jenkins image and make it build or images in the CI/CD
+--------------------
+Docker Recap:
+  RUN apt-get ... --> use /bin/sh -c. but if ur image not has shell use RUN ["apt-get", ".."]
+
+  RUN:
+     execute command, record changes to the filesystem, work great to install libraries, packages, various files.
+     -DO NOT record state of processes. Autimatically start daemons... to do that use CMD or ENTRYPOINT.
+---
+ to chain multiple commands in one line use && not ; . to catch any error in any command.
+----
+COPY -- we can't refer to a file outside the context.
+COPY /temp/ --> / don't refer to the root of the filesystem but refer to the context equavlant to temp/.
+--------
+ADD
+  if u using it to download a file. every image build docker download the file if the file doesn't change. docker use the cache to the next layers, if it change, docker bypass the cache. [docker don't use ETags or If-Modified-Since]
+  
+docker inspect --format='{{json path filter for example(.NetworkSettings.IPAddress)}}' container name
+  
+_______________________________________
+DOCKER DEEP DIVE
+  - Big picture view
+    container: Isolated area of an OS with resource usage limits applied.
+      built by using control groups and namespaces [Docker Engine Handle that]
+  - Kernel primitives
+     Namespaces[about isolation] and C-groups[about grouping objects and setting limits] are linux kernel primitive
+     Namespaces:
+       taking os and make it like multiple isolated virtual os
+       Linux namespaces:
+         -Process ID (pid)
+         -Network (net)
+         -Filesystem/mount (mnt)
+         -Inter-proc comms (ipc) [process in same container access shared mem but not processes from outside]
+         -UTS (uts) [give each container its hostname]
+         -User (user) [map container user to host os user [root in container] -> unprivilaged on host os]
+        
+ 	Control Groups
+ 	  - group processes and set resources limit
+  	Layers -> Unions fs/mount & CoW
+ 	container is orgainzed collection of them.
+         
+       
+  - Docker Engine
+    - CLI client using rest api - > daemon --use-> containerd --runc--> ref implementation of the OCI container runtime spec.
+    	this decouple running container from the daemon. we can stop/restart/upgrade our daemon without affecting the running container.
+    	- windows container run natively on windows using Namespace & isolation.
+    	- or u Hyper-V container to specify diff Os if u want to.
+	
+	---docker first was a dc[AUFS| LXC interfacing c-groups and namespaces]---
+	  LXC changes constantly and that was break docker which was rely heavily on it. so docker replace it with libcontainer. docker daemon become monolithic and do multiple thing.
+	  then it breaks into multiple compnents:
+	  Client --RestAPI--> daemon --> GRPC{API} ->containerd [Execution/lifecycle][start shim process for every container]  --> OCI[interfacing with kernel][On linux runc is the impl of OCI]
+  - Docker Image: manifest and set of lossly coupled layered:
+     - Layers	 [OS files & objects, App files, Manifest: describe all the layers].
+       - each container built from the image has it's own writable layer.
+       - docker image pull [name] -- layers stored in /var/lib/docker/[storage-driver]-> make a request to registery for the image return the [fat manifest] contains image available for each architecture with its own manifest.
+       - docker has content addressable storage -> hash content of the layer and identify the layer by its hash. so when one ask to specific layer we make sure he can get it not the wrong one.
+       - docker use the kernel of the host os but with the filesystem of the image os. 
+       - Docker EE: has Docker Trusted Registry (DTR)[On-premises] for EE.
+       - layer has id <- hash of its content on the host., 2- hash of compressed version on registry. 3- random one on the file system
+	  -------------------
+	  
+Multi stage builds:
+  [less size] = 
+     . faster build
+     . less money spend on storage.
+     . faster deployment
+     . less attack surface for attackers, because image contains minimum #of packages.
+----
+in docker world [atomic unit of scheduling is a container]
+in vitualization world [atomic unit of scheduling is a vm]
+in k8s world [atomic unit of scheduling is a pod]
+--
+vm on hypervisor. virtualize the hardware resources.
+containers by docker virtualize os resources [fs, network]
+--
+Modernize Traditional Apps with container[lift and shift]:
+Existing App -> converting to container -> modern infra[built on premise, cloud, or hybrid] ->
+  Modern methodologies [integrate to CI/CD and other automation systems] --> Modern microservices
+--
+a container a thin of writable layer on top of read-only image.
+-- 
+run-time arguments override CMD instructions
+run-time arguments are appended to ENTRYPOINT as arguments 
+----
+Logging
+
+daemon logs and  container logs
+
+daemon logs:
+  Linux:
+     - systemd:
+        - journalctl -u docker.service
+     - non-systemd
+        - Try /var/log/messages   
+container:
+  STDOUT  STDERR
+  docker EE support logging drivers integrate container logging
+    with logging solutions [syslog, gelf, Splunk, Fluentd..
+      - set logging driver in daemon.json
+      - override per -container with:
+         --log-driver --log-opts
+---
+swarm is the future of docker(2017)
+  has two parts: 1 - secure cluster 
+                    cluster of docker nodes [Managers & Workers]
+                      - Mutual TLS, where managers & workers nodes mutual authenticate
+                        each other. connections are encrypted
+                      - cluster store[etcd] is encrypted and accessed by all managers
+                      - we can runs 2 type of work in a cluster [swarm vs k8s] for now k8s for EE
+                 2 - Orchestrator.
+ ----
+swarmkit is what power swarm mode.
+docker engine modes:
+  - swarm mode: work with multiple containr as a cluster.
+  - single-engine mode: work with each container independently.
+-
+
+first manager node in any swarm is elected as leader <- root CA of the swarm.
+  u can choose external CA if u need using [docker swarm init --external-ca ..]
+u get default certificate rotation policy. 
+create 2 cryptographic join token : one for manager another for worker
+every swarm has one active single leader manager[root CA issues every node a client 
+  certificate which get used for Mutual authentication, role authorrization 
+    and transport encryption]. other managers are followers.
+if u send command to a follower manager. it will proxy it to the leader.
+each worker has api to all managers.  
+------
+networking:
+  bridge single host
+  overlay: multi-host [swarm]
+	macvlan[get every container ip and mac] must allow promiscuous mode [swarm]
+Network services[swarm]:
+  service discovey.
+    - every service gets a name <--> names are registered with swarm dns 
+        <--> every service uses swarm DNS
+  load balancing.
+     ingress load balancing
+-----
+storage:
+  - non-persistence (graph storage | graph driver) /vat/lib/docker tied to 
+    a life cycle of a container
+  - persistence (volume)  exist outside the container but mounted to a specific point to it.

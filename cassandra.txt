@@ -1,0 +1,9 @@
+Cassandra is a write optimized DB.
+
+when to use cassandra:
+	big data
+	Rapidly changing data [if it big static data rarely changing we can use rdb and use blob]
+	Large #of writes.
+	Availability / uptime important
+	Horizontal scaling important
+	Geographical distribution[need to deal with latency]

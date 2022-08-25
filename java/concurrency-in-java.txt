@@ -1,0 +1,14 @@
+producer Consumer pattern: Decouple #of worker threads from number of tasks.
+	https://www.youtube.com/watch?v=tEwNXnAmc9c
+
+
+
+
+-------------------------------------------------------------------------------------------------
+Semaphore (permits)
+    after declaring it we cannot increase the number of permits but we can decrease it.
+    has the methods in the Lock interface and additional ones:
+        can get the #of waiting threads and reference to them: 	getQueuedThreads() ...
+    u can as for more than one permits at the time.
+		default -> unfair if multiple threads waiting for acquiring. -> chose one randomely.
+--------------------------------------------------------------------------------

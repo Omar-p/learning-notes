@@ -1,0 +1,7 @@
+Communication vs Networking:
+    Communication deal with how the signal get sent. [don't care about what are 0s&1s mean]
+    Networking: the 0s&1s [content] sent between devices. [manage how to send data from the src to destination.]
+
+analogy in transportation networking:
+    communication is about building the road.
+    Networking about policies in these road, make it one way? how many lanes in each side? how to manage traffic ?

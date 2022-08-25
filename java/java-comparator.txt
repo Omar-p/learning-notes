@@ -1,0 +1,22 @@
+Don't use subtraction in the comparing of two integer values. because it may cause an overflow and throw violate its contract.
+
+// how to deals with null.
+
+
+difference between canonical name, simple name and class name in Java Class?
+  the name is the name that you'd use to dynamically load the class with, for example, a call to Class.forName with the default ClassLoader. Within the scope of a certain ClassLoader, all classes have unique names.
+  the canonical name is the name that would be used in an import statement. It might be useful during toString or logging operations. When the javac compiler has complete view of a classpath, it enforces uniqueness of canonical names within it by clashing fully qualified class and package names at compile time. However JVMs must accept such name clashes, and thus canonical names do not uniquely identify classes within a ClassLoader. (In hindsight, a better name for this getter would have been getJavaName; but this method dates from a time when the JVM was used solely to run Java programs.)
+  the simple name loosely identifies the class, again might be useful during toString or logging operations but is not guaranteed to be unique.
+  the type name returns "an informative string for the name of this type", "It's like toString: it's purely informative and has no contract value". (as written by sir4ur0n)
+  
+  
+PECS produces uses extends, Consume use super
+
+
+Class.forName(Driver);
+  when u load the driver, it will invoke a static block.
+  and that static block will instantiate the driver and
+  then invoke a registerDriver method on the Driver Manager.
+  
+  there is an option to preparedStatement -> Statement.RETURN_GENERATED_KEYS
+    accessed by pst.getGeneratedKeys() return resultset

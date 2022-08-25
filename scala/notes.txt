@@ -58,8 +58,9 @@ to prevent the class to be extended outside the file it is in, write [sealed] be
 
 Scala Type:
 scala.Any in the top 
-Scala.AnyRef extend Any and all java classes extend it.
-scala.AnyVal extend Any and all (numeric-classes|Unit) in scala extend it.
+Scala.AnyRef extend Any and all java classes extend it. --alias--java.lang.Object
+  -Null
+scala.AnyVal extend Any and all (numeric-classes|Unit()|Char) in scala extend it.	
 scala.Nothing in the bottom can replace any other class.
 
 Stream[java, ]: (beacuse of laziness)
@@ -82,9 +83,20 @@ Contra-variant Box[-A] A <: B -> Box[B] <: Box[A] reserve
 When a function uses its argument only once, you don’t have to give it a name. Instead, you can use the so-called placeholder syntax like the following:
     val increment: Int => Int = _ + 1
     
+- scala compile literal function to a class extend trait Function[0-22] and instantiate from it.
 
-
-
+- partial applied fuction: 
+  calling the function by not providing all the parameters: return a new function that need the missing ones.
+  def sum(a: Int, b: Int) = a + b
+  val pf: Int => Int = sum(_: Int, 5) 
+  val pf: (Int, Int) => Int = sum _ 
+  
+- closure 
+   free variable allocated in heap.
+  
+- repeated parameters [varargs]
+  def sum(xs: Int*)
+  u cannot pass array of int to that function, for array sum(arr: _*)
 Wildcard vs Placeholder:
     Wildcard arguments should not be confused with the placeholder syntax. 
     The difference between wildcard arguments and placeholders is that wildcard arguments are followed by an arrow =>.
@@ -144,4 +156,25 @@ trait Function1[-T, +U] {
   def apply(x: T): U
 }
 -----------------------------------------------------------------
-tuples are case classes.
+tuples are case classes [covariant members].
+  scala.Tuple[N -> 1:22] for more than 22 scala store them in array and store it in TupleXXL class. 
+----------------------------------------------------------------
+Scala Type 
+
+  Principle of uniform access:
+    there should be no syntactical difference between working with an attribute, pre-computed property, or method/query of an object.
+	
+	val vs def
+	  - def evaluated each time, val evaluated once.
+  
+  re-writing rules:
+    - A field or parametric field like (val foo: Int = 0) get re-written to:
+       private[this] val _foo: Int = 0
+       def foo: Int = _foo
+    
+   - A field or parametric field like(var bar: Double = 0.0) gets re-writtern to:
+       private[this] var _bar: Double = 0.0
+       def bar: Double = _bar
+       def bar_=(d: Double): Unit = { _bar = d }  <--- setters accessed -> bar = 2.0
+   - modifer/setter like: baz.bar = 1.0 --> baz.bar_=(1.0)
+   Dropped: private[this] and protected[this]

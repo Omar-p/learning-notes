@@ -1,0 +1,39 @@
+db -> *collections -> *documents
+
+BSON : Json --MongoDB drivers --> BSON [extends json types(ObjectId ..), efficient storage]
+
+mongo generate unique id, u can insert one but it must has a key _id
+
+[MongoDB driver| BI Connector/shell] -query-> MongoDB server
+
+databases & collections are created lazily, only when u insert a document.
+find() return a cursor, not a list of documents.
+
+db.[dbName].update(matcher, {$set: {what u want to add as json}})
+find({ field: {$gt: val}})
+
+update vs updateOne
+  update replace the whole body with matching documnet
+  updateOne make partial update.
+
+find()
+  return a cursor object to cycle through results.
+  
+to make projections
+  find({matcher/filter}, {desiredField: 1}) id is included by default
+  
+cursor return first 20 documnets
+
+document limit size 16mb
+
+access nested structure filter {"outer.inner": val}
+
+data types:
+  text
+  Integer(int(32)) NumberLong(int(64)) NumberDecimal
+  ObjectId()
+  ISODate("yyyy-mm-dd") Timestamp(sec)
+  embedded doc
+  array
+  limit size of document is 16mb
+  - js shell treat all num as 64float

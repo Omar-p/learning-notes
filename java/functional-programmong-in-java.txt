@@ -4,6 +4,18 @@ Lambda Expression VS Method Reference:
     argument and execute the body of the lambda.
     Method Reference: the code invoke the method directly
 
+
+flatMap
+	in java, flatMap evaluated egarly
+	consume one element
+	may produce zero or more elements
+		T -> Stream<R>
+	compare to map: consumes one, produce one
+	
+reduction
+	think about it as u put an operation between all stream members and then apply and take a single value. [with initial value](identity value)
+	why we provide a seed?  because of the stream may be empty.
+	
 // Get a Taste of Lambdas and Get Addicted to Streams by Venkat Subramaniam
 If when u write lambda expression, the compiler translate it into  anonymous inner object. it will create a .class file for each expression making our jar file bigger. producing more garabge for the garbage collection. 
 so Java use DYNAMICINVOKE(u can attach and detach to the function u want to invoke dynamically. and u can reattach it as well at the runtime[function pointer]). to allow lamabda expression. which is written first in JAVA 7 to the dynamic-typed lang on the JVM to execute faster. they re-write it in the JAVA 8 to introduce the lambda expression in java.
@@ -12,6 +24,17 @@ Polymorphism : u can tell what to do. but u can vary the implementation based on
 
 lambdas are glue code : http://blog.agiledeveloper.com/2015/06/lambdas-are-glue-code.html
 
+for hammer!
+
 when the parameter became argument -> use a method reference.
 if u will use method-reference for more than one parameter. the order of them must be the same.
 limitation in method-reference: 1- u can't use them if u do any manipulation on the data 2- u can't use them if there is a conflict between static mrthod & instance method.
+
+use parallel stream when:
+	a- the problem is paralleliizable
+	b- you are welling to spend more resource to get the result faster
+	c- the data size is big enough. you 'll get a benefit in performance.
+	d- the task in compution is big enough. you 'll get a benefit in performance.
+so just because you parallelize doesn't mean u will always get a better performance. [make sure the answer is correct, the performance is good and u are welling to use so much resources to get the answer]
+
+we can't use method throws checked exception as impl to any java.util.function interface.

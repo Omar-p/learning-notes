@@ -1,0 +1,387 @@
+cluster is a set of nodes
+  node: can be VM or physical machine.
+
+k8s node:
+ control
+   containerd <-- kubelet(r/w etcd)[k8s part that interfaces the container runtime] <-- [scheduler|Api server|controller-manager(taking care of generic cluster ops)] <--- DB[etcd]
+ worker
+
+---------------------
+in a cloud native environment the application is not directly related to any server, so all information the application needs is stored in the cloud.
+---------------------
+master node is the brain of the cluster where all decisions are made.
+  master node contains control plane[scheduler, api server, cluster store, contoller manager, cloud controller Manager: communicate with cloud provider via its api]
+
+	API SERVER:
+		frontend to k8s control plane.
+		all communications go through API server External and Internal
+		Exposes Restful Api on port 443.
+		Authentication & authorization check
+	Cluster Store:
+		Stores configuration and state of the entire cluster.
+		Distributed Key/Value data store 
+		Single source of truth[etcd]
+	Scheduler:
+		Watches for new workload/pods and assigns them to a node based on several scheduling factors[is node healty ?, has enough resources?, port available?, affinity and anti affinity rules, etc]
+	Controller Manager:
+		Daemon that manages the controller loop.
+			-Controller of controllers.
+				[node controller]whenever the current state don't match the desired 
+				state. it react to reach to the desired state.[#of running nodes for 				     example]
+		it has several controllers each one of them is responsible for managing/control part 		     of the system. [replica, endpoint, namepaces, node ...] controller.
+	Cloud controller manager:
+		interact with underlying cloud provider.
+			congigure[load balancer, storage, instance]
+
+  Master runs all cluster's control plane services..
+------------------------------------------------------------------
+worker node do the work [running the application for example].
+	-Vm or Physical machine running linux.
+	-provides running environment for the application
+	-contain pod
+	-Components:
+		Kublet container-runtime kube-proxy
+------------------------------------------------------------------------
+kublet:
+  Main agent run on every single node.
+  Recives pod definitions from api server.
+  interacts with container runtime to run containers associated with the pod.
+  reports node and pod state to the master node.
+container-runtime:
+  -pull image from container registers[docker hub, ecr, gcr, local registery...] 
+  -starting containers [running container and abstract its management for k8s 
+  -stop containers 
+  - CRI - container runtime interface
+	-for 3rd party container runtime[docker was the default for cri  but now deprecated and k8s using containerd]
+Kube-proxy:
+  agent runs on every node through DaemonSets
+  Responsible for :
+    Local cluster networking [make sure each node has a unique ip address]
+    Routing network traffic to load balanced services.
+_-----------------------------------
+Pod[abstraction of a server]  is a smallest deployable unit.
+  Pod contain Main-Contaier, may or may not has Init-container[executed before main-container], side-containers[0 to *][support main-container may be as a proxy to main-container], Volumes[share data between container].
+  Pod has unique IP address.
+  Pod: 
+    -Group of 1 or more container
+    -Represent running process
+    -Share network and volumes
+    -Never Create Pods on its own. Use Controller instead.
+    -Ephemeral and Disposable[not long-lived]. so if u create it on its own and it down k8s will not know about it and won't create a new one.
+    - Pods on its own don't self heal.
+    - Never deploy pods using kind:Pod
+  kubectl get pods -o yaml --> get yaml behind the pod.
+  any thing written after -- will be run on the pod not part of kubectl options.
+Creating pod Declarative vs Imperative Configuraion
+  -Imperative:
+    kubectl run [pod-name] --image=[name] ..
+    - [Learning, Troubleshooting, Expermienting]
+  -Declarative:
+    Using configuration file
+    -[Reproducible in any env] Best-Practice.
+    - Generating yaml file:
+      - kubectl run podName --image= --dry-run=client -o yaml > yamlFile
+
+to access pod for testing purpose:
+ kubectl port-forward pod/[name] [host-port]:[pod-port ]
+ 
+ kubectl get pods --> return pods in the current namespace.
+ 
+ get namespaces:
+   kubectl get namespaces || kubectl get ns
+ specify namespace to apply on
+ 	kubectl get pod -n [namespace]
+
+to format output use --output/-o [wide|json|yaml]
+
+when createing pod by default it get event scheduled -->pulled -->created --> started.
+
+to execute command on pod
+  kubectl exec [-it] [podName] -c [specify-container-if-pod-contain-more-than-one] -- [command]
+to expose port for testing and experimenting purpose only. in prod we use services[NodePort Service]:
+  kubectl port-forward [podName] [hostPort]:[containerPort]
+	kubectl port-forward pod/[podName] [hostPort]:[containerPort]
+	kubectl port-forward service/[podName] [hostPort]:[containerPort]
+	kubectl port-forward anyResourceType/[podName] [hostPort]:[containerPort]
+
+restartPolicy for the container in the pod not for pod itself.
+
+to show k8s resources:
+  kubectl api-resources
+https://kubernetes.io/docs/reference/kubectl/cheatsheet/
+-------------------------
+Deployments
+	- Manages release of new application
+	- Zero downtime deployments
+	- Create ReplicaSet. 
+	- Manage pods with deployments
+	Deployment Strategy:
+	  - Recreate -> delete all pods running before creating the new for the next version [dangerous: downtime]
+	  - Rolling Update: [default] forwarding traffic to previous version. until finish creation of the new one.
+	  spec.strategy.type=[Recreate|RollingUpdate]
+	  spec.strategy.rollingUpdate.maxSurge -> extra pods above desired ones.
+	  spec.strategy.rollingUpdate.maxUnavailable -> unavilable pods during update
+ReplicaSet always make sure that the desired number of pods is always running.
+
+*to pause rollout
+ kubectl rollout pause deployment [name]
+
+metadata -> allows us to specify labels to access our resources.
+=======
+ReplicaSet
+  - ensure desired number of pods always running using [control loop].
+  deployment --create --> replicatset.
+  	- ReplicaSet implement a background control loop checks the desired #of pods are always present on the cluster.
+  	to rollback:
+  	 kubectl rollout undo deployment [name] --to-revision=[revision]
+	  to view history:
+	    kubectl rollout history deployment [name] --revision=
+    k8s by default keep 10 revision of ur deployments to change that. spec.revisionHistoryLimit
+===========
+Services
+  - stable IP address
+  - Stable DNS Name
+  - stable Port
+  Types:
+    - ClusterIP(default)
+      - Only Internal access. No External [service-name:port]
+    - NodePort
+    - ExternalName
+    - LoadBalancer
+======
+[service] NodePort:
+  - Allow you open a port on all nodes
+  - Allowed Port Range: [30000-32767]
+  - if client choose to send the req to Node with no healthy pods, Node responsible to send the req to be handled by another node with healty pods. 
+  - spec.ports[port -> port service listening on, targetPort -> container in service listening on, nodePort] -> if not specified, it will be chosen randomely.
+  DisAdvantages:
+   - One service per port.
+   - If Node IP address change then we have a problem.
+=====
+LoadBalancer
+  - Standard way of exposing Applications to the internet.
+  - Create a load balancer per service.
+  - AWS & GCP - Network Load Balancer NLB[cloud controller manager. handle that]. 
+====
+k8s default service [kubernetes]:
+	- automatically created for us. to make us able to talk to k8s api from and within the app.
+	- all communication go via kubernetes-api-server[kube-apiserver-minikube]
+===
+Labels:
+  - kubectl get pods --show-labels
+  spec.template.metadata.labels[app|environment|tier]
+  select pods:
+  	spec.selector.matchLabels[key:value]
+  	all match or nothing 
+  - kubectl get pods --selector="key=value,.." === kubectl get pods -l key=value,k2=v2  
+  - kubectl get po -l 'labelKey1 in (v1, v2), labelKey2 notin (v1)' 
+===
+annotations: 
+  Annotations is an unstructured key/value map stored with resource that may be set by external tools to store and retrieve arbitary metadata, they are not querable and should be preserved when modifying objects. [used by external tools]
+  spec.template.annotations
+===
+DNS:
+  - k8s use coreDNS
+  - each pod has a file /etc/resolv.conf contains the ip of the nameserver
+-----
+
+
+etcd is a consistent and highly-available key value store used as Kubernetes' backing store for all cluster data.
+
+A Kubernetes cluster already comes with a ServiceAccount, the default ServiceAccount that lives in the default namespace. Any Pod that doesn’t explicitly assign a ServiceAccount uses the default ServiceAccount.
+
+ the API server creates a Secret holding the API token and assigns it to the ServiceAccount. The Secret and token names use the ServiceAccount name as a prefix. 
+
+  - kubectl create serviceaccount build-bot
+  
+--declarative--
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-bot
+----
+
+
+O'reliy
+
+RBAC:
+  - RBAC consists of three key building blocks.
+			Subject
+				The user or process that wants to access a resource[ user, a group, or a ServiceAccount.]
+			Resource
+				The Kubernetes API resource type (e.g., a Deployment or node)
+			Verb
+				The operation that can be executed on the resource (e.g., creating a Pod or deleting a Service)
+
+Authentication strategy	------ Description
+X.509 client certificate  ------- Uses an OpenSSL client certificate to authenticate
+Basic authentication -------- Uses username and password to authenticate
+Bearer tokens --------- Uses OpenID (a flavor of OAuth2) or webhooks as a way to authenticate
+---
+The Role API primitive declares the API resources and their operations this rule should operate on.
+The RoleBinding API primitive binds the Role object to the subject(s). 
+
+To define new Roles and RoleBindings, you will have to use a context that allows for creating or modifying them, that is, cluster-admin or admin.
+
+Roles and RoleBindings apply to a particular namespace. You will have to specify the namespace at the time of creating both objects. Sometimes, a set of Roles and Rolebindings needs to apply to multiple namespaces or even the whole cluster. For a cluster-wide definition, Kubernetes offers the API resource types ClusterRole and ClusterRoleBinding. The configuration elements are effectively the same. The only difference is the value of the kind attribute
+
+	--verb for defining the verbs aka operations, and --resource for declaring a list of API resources.
+	- kubectl create role read-only --verb=list,get,watch --resource=pods,deployments,services
+	
+--section rules lists the resources and verbs. --
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: read-only
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  verbs:
+  - list
+  - get
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - list
+  - get
+  - watch
+---------
+-----Rolebinding--
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-only-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: read-only
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: johndoe
+-----------
+aggregate rules
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: []
+  namespace: []
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+  - matchLabels:
+  - matchLabels: ..
+	
+------
+Default ClusterRole	----Description
+cluster-admin:
+		Allows read and write access to resources across all namespaces.
+
+admin:
+		Allows read and write access to resources in namespace including Roles and RoleBindings.
+
+edit:
+		Allows read and write access to resources in namespace except Roles and RoleBindings. Provides access to Secrets.
+
+view:
+		Allows read-only access to resources in namespace except Roles, RoleBindings, and Secrets.
+	---
+	kubectl explain [resource] -> show what to define in yaml. keys are case sensitive.
+	kubectl explain --recursive [resource] -> option for each keys
+	kubectl apply -f [].yaml -> update mechanism not available for pod. presented to deploy
+s
+-------------------------
+Multi-Container Pods: [logging, monitoring, syncing]
+ The essence is that the main container and the sidecar container have access to shared resource to exchange information. [Volume ..]
+  - sidecar container: a container that enhances the primary application, for instance for logging [Istio service mesh: monitor and shape traffic in a k8s env. fetch traffic statistics about the real app and istio injects sidecar in the real app]
+  - Ambassador container: a container that represents the primary container to the outside world, such as a proxy.
+  - Adapter container: used to adopt the traffic or data pattern to match the traffic or data pattern in other applications in the cluster.
+  
+  -- sidecar containers, etc. are not defined by a specific Pod propertites; from a k8s API resource, it's just a multi-container pod.
+----
+Init Container
+  - initial container in a pod that complete a task before the "regular" container is started.
+  - if init container has not run to completion, the main container is not started.
+----
+kubectl describe pod podname 
+  to see all parameters and their current settings as they currently are in the [etcd -> store in json format] 
+  ----
+  to view pid in pod don't have ps
+  cd /proc
+  ls
+  u will find pid
+  cat {pid}/cmdline
+  ---
+  if shell is pid 1 and u run exit -> u will shut down the container so in this case use CTRL+P CTRL+Q
+  ----
+  logs
+    - the pod entrypoint application does not connect to any STDOUT
+    - Application output is sent to the k8s cluster.
+    - use kubectl logs to connect to this output
+------------
+securtyContext:
+  define privilage and access control settings 
+  for a Pod or container, and includes the following:
+    . Discretionary Access Control which is about permissions to access an object.
+    . Security Enhanced Linux, where security labels can be applied
+    . Running privileged or unprivileged user.
+    . Using Linux capabilities.
+    . AppArmor, which is an alternative to SELinux.
+    . AllowPrivilegeEscalation which controls if a process can
+      gain more privileges than its parent.
+  use kubectl explain for a complete overview.
+---- 
+Managing Jobs
+  . Pods normally created within deployment to run forever.
+  . To create a Pod that runs up tp completion, use Jobs instead. 
+  . Jobs are useful for one-shot tasks, like [backup, calculation, batch processing and more]
+  . Use spec.ttlSecondAfterFinished to clean up completed Jobs automatically.
+Jobs Types:
+  - 3 differents job types can be started, which 
+    is specified by [completions] and [parallelism] parameters:
+      . Non parallel jobs: One Pod is started, unless the pod fails
+        . completions=1
+        . parallelism=1
+      . Parallel Jobs with a fixed completion count: the job is complete   
+        after successfully running as many times as specified in jobs.spec.completions 
+          . completions=n
+          . parallelism=m
+      . Parallel Jobs with a work queue: multiple Jobs are started,
+        when one completes successfully, the job is complete.
+          . completions=1
+          . parallelism=n
+-----
+CronJobs used for task that need to run on regular basis. 
+   when running it a job being scheduled. job will start a pod.
+---
+Resources Limitations
+  . By default, a Pod will use as much CPU and memory as necessary to do its work.
+  . This can be managed by using Memory/CPU requests and limits in 
+    pod.spec.containers.resources
+  . A request is an initial request for resources.
+  . A limit defines the upper threshold of resources a Pod can use.
+  . Memory as well as CPU limits can be used.
+  . CPU limits are expressed in millicore or millicpu, 1/1000 of a CPU core
+    . So, 500 millicore is 0.5 CPU
+  . When being scheduled, the kube-scheduler ensures that the node running
+    the Pods has all requested resources available
+  . If a Pod with resource limits cannot be scheduled, it will show a status of
+    Pending 
+  
+  . when using a deployment, use [kubectl set resources] to change resource limitations
+    on running applications. u cannot do that for pods because pods don't updateable.  
+  . pod/deployment resource limitations can be combined with quota on
+    namespaces to restrict these applications in specific namespace only.
+  
+  . Try not to force resource to deletion, it may bring them in an
+    unmanageable state.
+    
+    kubectl delete all --all
+    don't do this: kubectl delete all --all -A --force --grace-period=-1

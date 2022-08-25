@@ -1,0 +1,219 @@
+CI/CD
+The way it used to be before CI/CD
+            ---> Backend --->
+          |
+Base Code --> User interface --> Integration --> Production
+          |
+          -----> Data -->
+
+CI: [small very frequent integration step, feedback is instantaneously. not 
+  need to wait more than a month to integrate code from all teams]
+  Software dev practice in which members of a team
+  itegrate their work frequently, at least daily,
+  leading ti multiple integration per day.
+
+  team1 and team2
+ 
+  Base code -> checkout -> [changes <--Red/Green-->Local test] -
+    Integration[build/test/Feedback]-> Base code.
+  
+  after code is integrated successfully the other teams need to rebase to pull
+  the new changes done by the team who is recently integrate their code.
+
+CD delivery: 
+  software development discipline where software is 
+  built in a manner that allows for deploying 
+  to customers at any time
+
+  same flow in CI, but we can release the code at any time we need
+  because CI make us sure that our code is production ready.
+
+CD deployment:
+  extend Continous delivery by automating the deployment process
+  so that code is automatically deployed to production after
+  it passes automated testing.
+-------------------------------
+[Jobs=project] in Jenkins:
+  is any runnable task that is controlled by jenkins.
+  
+Freestyle project:
+  This is most common type of project. if u not use a specific build tool
+  and need to run some commands [make,..]. project normally execute a shell
+  in automated way. it doesn't have to be a shell command. but this is most
+  common.
+
+Pipeline
+  this type of project is used to called a pipeline.
+  these projects are normally written in jenkins DSL.
+
+  these type of projects are for things that do not fit in freestyle
+  project, because they are too complicated or span multiple nodes.
+
+Multi-Configuration Project:
+  This is for projects that will be tested on multiple environments[u will have to  to have build agents on nodes that support that], and
+  require different configurations[because we will be building a different code],
+  depending on those environment.
+
+Github Organization:
+  this type of project can use the source control platform's organization and
+  allow jenkins to act on jenkinsfiles stored within organization's repositories.
+
+Folder
+  provide methods to group projexts together. this is not technically a project.
+  It acts as a type of directory structure for the projects, and the folder
+  name becomes part of the path of the project. {FolderName/projectNam}
+
+
+Multi-Branch Pipeline:
+  Jenkins uses a jenkinsfile to mark repositores. If a branch is created 
+  in that repository, jenkins will make a new project in jenkins for that
+  branch.
+
+
+Job/Project scope:
+  this includes all items that are part of that particular Job/project. In
+  some cases, there are global libraries that are brought into the scope of
+  a project simply being included. Other items that are declared within a project
+  only exist in that project's scope, and are not available as a shared resource.
+
+-------------------
+Build:
+  the result of a single execution of a project/job.
+
+Build steps:
+  a single task within a project.
+  jenkins deal with
+    Integration [test/feedback loop] --pass--> Build
+    check SCM for changes; clean checkout; build code; perform testing; 
+     check pass | fail; provide feedback; if pass produce build.
+
+Build triggers:
+  based on SCM(source control manager) if change happen.
+  if pipeline run successfully. produce build.
+
+Artifacts and Repositories:
+  refers to immutable files that are generated during a build or a pipeline
+  run. these are archived on the jenkins master for retrival.
+
+  A single build can have multiple artifacts assiciated with it. these can
+  include jar files, war files, configuration files, and other generated
+  assets.
+
+  Artifacts are maintained in a repository. this can be on jenkins master or
+  in a SCM.
+
+  Reposiotries hold items that need to be retrieved. these item can include
+  source code, compiled code artifacts and configuration files.
+
+Build Tool:
+  jenkins is a automation tool. integrate with build tools that are 
+  actually performs the build portion of the pipeline. [Mave, sbt, ANT..]
+  
+  configuration varies by build tool, but the processes are similar:
+    1 start jenkins and install required plugins.
+    2 perform global configuration steps. tell jenkin how to interact with it.
+    3 create job/pipeline that utilize the build tool.
+    4 Update the tools configuration files: POM .. to build the src.
+--------
+SCM source control manager
+  is software that is used to track changes in code.
+
+  Changes in code, revisions, are timestamped and include 
+  the identity of the person that made the change.
+  
+  Some examples are Git, Subversion, Mercurial, and Perforce.
+
+  Cloud based SCM's such as Github Gitlab can be leveraged as office repositories
+  for code
+
+  Jenkins Changelogs are used for tracking changes in builds.
+
+  Incremental update           vs        clean checkout
+  --------------------------------------------
+  we have cloned version            Delete local copy and clone
+  so we will just pull
+  changes into local branches.
+
+  issues: if u have any thing left over
+  from previous build it will remain in 
+  code.
+
+Checking in code to source control
+  Checking in code is the process of pushing changes to a repository.
+  
+  Checking in code === a code commit
+
+  As  part of CI, code should be committed in often.
+
+  All code commit should have a descreptive message that indicateds what
+  changes the commit includes.
+
+IaaC
+  process of managing and provisioning resources via configuration files.
+ 
+  allows machine configuration to be maintained in source control. those
+  configurations can be rolled back or versioned.
+
+Branching and Mergin strategies:
+  checking in and checking out in code to source control  such a way that
+  a SOURCE OF TRUTH is determined. [when conflicting happened] 
+------------------
+Testing 
+  smoke
+   more generalized than a unit test, this type of test checks the main 
+   functionality of the software to ensure that it is stable enough for
+   further testing.
+
+Notifications
+  notifications are critical to an automated process; they give us active 
+  feedback to the status of processes within the project.
+
+  if a build fails, or if u need to manually approve a deployments, we can
+  configure  a notification to be sent.
+-----
+Distributed Build
+  - Distributed builds are build jobs in which the executor of the build
+    is located on an agent(node) that is separate from the master.
+  
+  - the master is act as the controller for the build, running specific build on specific
+    agents, allowing for parallelism and greater ease in multiconfiguration pipelines.
+      . if u have 3 versions of the software to perform 5 unit tests against, this can be
+        done in one parallel pass, resulting in 5 tests on each agent rather than 15 tests 
+        on the master.
+  - The master acts as the controller for the build, running specific builds on specific 
+    agents, allowing for parallelism and greater ease in multiconfiguration pipelines. 
+
+  - Nodes with specific configuration can be tagged so that pipeline steps specific that
+    configuration are directed to the node.
+  
+  - In most cases Artifacts, progress reports and build results are sent back to the master 
+    repository. Storage on the master must be considered for this reason.
+  
+  
+  - Master / Agent communication is via SSH(perferred) or JNLP(TCP or HTTP)
+  
+  - Agent should be 'fungible' (replaceable). this means that local configuration on the agent
+    should be kept to a minimum and global configuration on the master should be preferred.
+----
+Plugin 
+  - jenkins defines interfaces/abstract classes that model a part of the build system.
+    These define what needs to be implemented, and jenkins plugins extend that implementation
+----
+Credentials
+  - any value that provide access to restricted resource. 
+    [username and password|SSh username and private key| secret files| 
+      secret tokens| certificates].
+  - a credential provider[refer to security context] is a location that has 
+    been configured for jenkins to retrieve [ (LDAP, Active directory) validate credentials ]
+----
+Artifacts:
+  - an immutable file that that is generated during a build or pipeline run.
+  - used to provide the compiled project to end users, facilitate the testing process,
+    create classes, and prevent rebuilding of known good code.
+  - used as a way to version the software.  
+  - [fingerprint] is used to determine which bild produced that artifact.
+  - Retention policies can be configured to prevent bloatin of repositories
+    credentials.
+fingerprint
+  - a globally unique hash used to track artifacts or other entities across multiple pipeline.
+  - stored in jenkins home directory in the [fingerprints] directory.
