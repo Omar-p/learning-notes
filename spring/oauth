@@ -373,4 +373,72 @@ Refresh Token in Native app:
  "iat": timestamp: issued at + "exp": expired] depending on server u may see more or less properties. the main one that we care about, is "sub" subject -> the user's identifier[up to server how to format it++ guarantee to be unique and stable for each user.] 
                            
  ---
+  client-app must not understand what access_token means. <- it's a design principle
+    of OAuth that access tokens are opaque to client-app.
+    "aud": "the api url"
  
+ id_tokens *are* meant to be read by the client-app. the client-app is meant to look inside the 
+  Id_token, validate the signatue, validate the claims, and then learn about the user.
+    "aud": "client_id"
+--
+  to get id_token, in authorization code flow add to "scope" [openid]
+  then when app exchange the authorization code, it will get in the response [id_token]
+    in this flow u get in back_channel and u trust the server so u can forget it's an jwt.
+     and u don't need to validate the signature. we can extract the parts in the middle that
+      we care about[payload] and just use the data directly.
+     --
+  another way is to set response_type to "id_token" instead of "code"
+   this way the OAuth server return the id_token in the redirect instead of authoeization code.
+   https://app/redirect#id_token=**&state=** <- look like implicit flow.
+   
+   in this scenario u must validate the signature.
+   --
+  if we only include openid in "scope" in id_token request, then the ID token we recieve  
+  will have a little information in it. metadata + user_id
+   - to get additional information openid defines scopes that talk about different parts of 
+     a User's profile that client_id can request.
+     
+     * not all OpenID connect servers include that information in id_token,
+       sometimes the additional profile information needs to be requested from
+       a userinfo endpoint using an access_token[depending on the SERVER]
+--
+Hybrid flow
+  response_type=code
+  response_type=id_token
+  hybrid
+  response_type=code+id_token <- send id_token in frontChannel and access_token in back
+  response_type=token+id_token <- legacy
+  -ignoring all response_code combination that include token
+    we get:
+      code  id_token code+id_token
+    -when using code+id_token it's also going to include another claim in the id_token named
+     c_hash to validate the authrization code
+    
+    -to avoid authorization code injection. the server doesn't confirm if the client-app validate
+     the auth_code using the c_hash, so to prevent app from dealing with auth code injection,
+     it's best practice to include PKCE to not relying on the security of every app developer.
+--
+Validating the ID_TOKEN:
+  - validate the signature:
+    . u need to know which key to use. some server hard coded it in its docs.
+    . if server support multiple keys or rotating keys, then the headerr of the ID TOKEN 
+      will contain an identifier that signed the token.
+  - "iss" to make sure the token come from the intended authorization server. 
+  - "aud" should match the client-id   
+  - "iat" "exp" make sure current timestamp in those bound
+  - "nonce" should match the value u send in the request. to prevent injection attack
+  **if we get the token in the back_channel we don't need to validate any of these**
+  ---this is the base line to trust any info in the id_token--
+  "amr" authentication methods, 
+  "auth_time" timestamp for when the user authenticated. 
+  
+  when to re-validate?
+    . if the app store the id_token for example, in a client side cookie,
+      when browser may bringing it back to u at that point, it's now coming
+      from untrusted lication and now u need to validate it all again.
+    . similarly, if ur app takes id_token and passes it to a different part of the app,
+      such as we broke the app into frontend and backend compnent, then the app will need
+      to perform the ful steps of validating the signature and claims every time it uses that.
+===
+NOW, the point of view of the Authorization server.
+  
