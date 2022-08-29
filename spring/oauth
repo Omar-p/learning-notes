@@ -499,7 +499,7 @@ JWT as an access token:
         . client_id         
         . jti jwt id -> unqiue to make resource server able to see if it is being used more than
           once.
-        . scope
+        . scope 
         . auth_time for ex: for sensitive ops require authentication to be happened not more
             than hour
         . acr authentication context class reference: if access token was issued when
@@ -507,4 +507,30 @@ JWT as an access token:
            this would be 0. and it shouldn't be allowed to do any operation that have monetary
            value like purchasing.
         . amr authentication message refrence.   
-  
+---
+only the apis should validate access tokens:
+  . api can post request to the authorization server + token and the server can reply back
+    whether the token is valid or not.(slow way using network)
+  . api can use remote [Token Introspection RFC7662] either to make double sure the token 
+    is really still valid or as just an easier way to avoid bringing in a JWT library.
+     . there is a new endpoint to find called the token introspection endpoint.
+       . it add latency to every api call to validate the access_token.
+       . this is the only way to validate in case of the token is opaque string.
+  . Local Validation:
+    . when we are reading data out of this header before verifying the signature. at this point
+      we have to treat this all as untrusted data. we should accept signing algorithms that we
+      know to expect from the OAuth server.
+  - kid will not be found if OAuth server has one signing key, JWT access spec recommands
+    that OAuth servers publish their public keys and issuer identifier at a URL that can be 
+    found from the servers metadata url. that metadata url can be usually found either in the
+    docs for the OAuth server or u can build it by tracking on .well-known path
+      https://OAuth-server.com/.well-known/oauth-auth-server <- it will ret data decribe the
+      server -? "jwks_uri" <-- the url where we can find the keys.
+    after validating the signature we should validate the claims[iss,aud,..] because someone
+    can use access_token for some other API at our API.
+   
+    . this local validation tell us that the token is valid at the time it was issued, and
+      threr are plenty of ways an access token might become invalid after it was issued,
+      but before the token was scheduled to expire.
+      the longer u make ur access token lifetime, the longer u risk making an authorization
+      decision on out-of-date information
