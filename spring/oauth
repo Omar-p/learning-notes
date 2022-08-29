@@ -534,3 +534,14 @@ only the apis should validate access tokens:
       but before the token was scheduled to expire.
       the longer u make ur access token lifetime, the longer u risk making an authorization
       decision on out-of-date information
+ -
+  . Best of both worlds
+  1 - API Gateway[first line of defense] using local validation to reject invalid tokens
+      [expired/malformed/attacker]. however, this local validation step doesn't have any 
+      way to be aware of user being revoked. so those revoked token still look valid
+      because they haven't expired yet.
+      
+      . [EXTRA CONFIRMATION]api call that will do a sensitive operation should 
+        post request to the TOKEN INTROSPECTION endpoint to ask whether is token is still 
+        valid. now OAuth can 
+        reject the revoked token.
