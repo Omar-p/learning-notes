@@ -440,5 +440,71 @@ Validating the ID_TOKEN:
       such as we broke the app into frontend and backend compnent, then the app will need
       to perform the ful steps of validating the signature and claims every time it uses that.
 ===
+
 NOW, the point of view of the Authorization server.
+===
+Reference Access Token vs Self-Encoded Tokens:
+  - Reference Token: long random string of chars, that doesn't actually mean anything,
+    it's a pointer to something
+     - can be implemented using DB where u have a table for tokens as a unique - key to retrieve
+       [user_id, expires at, scopes] 
+     - or using a caching layer like Memcache or Redis.
+     
+     . advantages:
+       . simple
+       . doesn't mean anything. doesn't contain any data inside it. [issuing server only can read it]
+     . disadvantage:
+       . have to be stored, very time u want to validate it, the API go back into central DB to 
+         query that. storage start to become more concerning. if we don't have central storage,
+         there is actually another extension called TOken Introspection that talks about an API 
+         for resource servers, or APIs to validate access token over HTTP.
+           . if u plan on running multiple copies of ur APIs or scaling them to multiple
+             datacenters, then reference token may not be the best option. because we are
+             pretty limited in the ways that they can be validated. 
+  - self-Encoded: contains data in some sort of format
+    take [User, application_id, expiration, time_created, scopes, auth server, last login]
+     and encrypte & sign them. so the server after that can validate it and decrypt it to
+     extract the information from it. no need for storing them. for example JWT.
+     - it does come with some drawbacks, but oftentimes the advantages outweight the downside
+     - advantages: 
+       . [scalable ]no need to be stored(storage is cheap), 
+         no need to be looked up and revalidate.
+         . resource server gets a request, it can inspect the token, check the signature
+           itself, validate everything inside of it and decide without looking at external 
+           storage
+       . if u build an API and use other product as an OAuth server. then it make a lot of 
+         sense to not have to have any sort of shared storage between those two systems since
+         they operate independently
+    - drawback payload is visible, need extra work to mark it unvalid token before its expiration
+     
+  - OAuth is designed for app to just treat access tokens as an opaque string.
+  - Only the API read the access token.
+----
+JWT as an access token:
+  header & signature can base64 decode these parts and we'll see plain JSON string. 
+  [many oauth server don't encrypt them]
+  --
+  EXTENSION[JSON Web Token profile for OAuth 2.0 Access Token] formalize the use of
+    JSON Web Tokens for access tokens.
+    defines a few claims that are required to be in the token(many are reserved from core JWT):
+      it is possible for server to add custom ones on top of the required.
+        . iss -> issuer [OAuth server's base url]
+        . exp -> expiration [unix timestamp]
+        . iat -> issued at[timestamp]
+        . aud -> "audience" --> indenting party for reading and validating the token ,
+                                 identifier of the resource server
+        . sub -> "subject" identifier for who the token represents. if user involved,
+               that's going to be a user identifier. usually an opaque string rather than email.
+               - with client credentials grant, then this should be the client-id of the app.
+        . client_id         
+        . jti jwt id -> unqiue to make resource server able to see if it is being used more than
+          once.
+        . scope
+        . auth_time for ex: for sensitive ops require authentication to be happened not more
+            than hour
+        . acr authentication context class reference: if access token was issued when
+           the user was already logged in at the server instead of confirming the password,
+           this would be 0. and it shouldn't be allowed to do any operation that have monetary
+           value like purchasing.
+        . amr authentication message refrence.   
   

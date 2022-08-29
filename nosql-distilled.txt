@@ -137,3 +137,38 @@ ch 02 summary
   
   aggregate-ignorant databases are better when interactions use data organized in many
   different formations.
+===
+ch03
+  many databases—even key-value stores—provide ways to make these [inter]-relationships visible
+  to the database. Document stores make the content of the aggregate available to the database 
+  to form indexes and queries. Riak, a key-value store, allows you to put link information in 
+  metadata, supporting partial retrieval and link-walking capability.
+  --
+  Graph DB
+  
+  Although relational databases can implement relationships using foreign keys, the joins 
+  required to navigate around can get quite expensive—which means performance is often poor for
+  highly connected data models. Graph databases make traversal along the relationships very
+  cheap. A large part of this is because graph databases shift most of the work of navigating
+  relationships from query time to insert time. This naturally pays off for situations where
+  querying performance is more important than insert speed.
+  
+  You do need a starting place, however, so usually some nodes can be indexed by an attribute
+  such as ID. So you might start with an ID lookup and then start using the edges.
+  
+  you’ll find such databases are more likely to run on a single server rather than distributed 
+  across clusters. ACID transactions need to cover multiple nodes and edges to maintain
+  consistency.
+  --
+  Schemaless
+  
+  implicit schema is a set of assumptions about the data’s structure in the code that
+  manipulates the data.
+  
+  Essentially, a schemaless database shifts the schema into the application code that accesses
+  it. This becomes problematic if multiple applications, developed by different people, access 
+  the same database. These problems can be reduced with a couple of approaches. One is to 
+  encapsulate all database interaction within a single application and integrate it with other 
+  applications using web services. This fits in well with many people’s current preference for 
+  using web services for integration. Another approach is to clearly delineate different areas 
+  of an aggregate for access by different applications.

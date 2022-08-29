@@ -186,11 +186,18 @@ merge vs persist
 Persist takes an entity instance, adds it to the context and makes that instance managed (i.e. future updates to the entity will be tracked).
 merge returns the managed instance that the state was merged with.
 ---------
+there is no inheritance concept within Relational DB, hibernate try to bridage it.
+  but there is price to pay for each strategy
 Inheritance Mapping:
   - SINGLE_TABLE [default] add [DTYPE -> u can change its name using @DiscriminatorColumn] COLUMN = [Concrete class name]
   - TABLE_PER_CLASS
+    . table for each concrete class. when retrieving all, hibernate make union.
   - JOINED
-  - MAappedSuperclass
+    . field in sub-class mapped to separate table, common attr in other table -> join to 
+      retrieve record for a specific sub class.
+  - MappedSuperclass
+   . .map sub-classes only
+   . we cannot use the super class as a target for a relaionship
 -----------
 Book:
 
@@ -276,11 +283,48 @@ Entity Association:
     . name -> name of foreign key
     . referencedColumnName -> the column of target entity id if that not match the foreign key col name. must be specified.
   ** in bidirectional u don't specify cascade and JoinColumn in both side. they are specified only in the owner side.
-     in the inverse side -> secify (mappedBy="fieldInOwningSide") 
+     in the inverse side -> specify (mappedBy="fieldInOwningSide") 
      . u should manage the both side. [set each side in the other] 
   . cascade:
     ALL -> when we persist the source, we want to persist the assosicated target as well
   . uni - OneToMany
     . u should set a @JoinColumn and set the name of the foreign key col. and set nullable to false.
-  . in oneToMany if the many side can be exist without the other side. we can use extra joinTable to avoid null value.
+  . in oneToMany if the many side can be exist without the other side. we can use extra
+    joinTable to avoid null value.
+    @JoinTable(name, joinColumns, inverseJoinColumns)
+ . ManyToMany 
+ 	====
+ 	Persistence Context:
+ 	  . Session#get retrieve object from db, return null if it is not exist.
+ 	    when try to retrieve the object and hibernate found it in the context. it return it
+ 	     without connecting to the DB.
+ 	  . Session#load retrieve lazily, throws ObjectNotFoundException instead of returning null.
+ 	  . hibernate invoke flush :
+ 	    . commiting a transaction
+ 	    . invoking flush.
+ 	    . before querying the DB.
+  ===
+  EntityManager
+   - Application Managed(we create it)/Resource Local Transaction(container managed: provided in EE environment, support declarative transaction)
 owning entity his table has a foreign key to other entity[bidirection rel]. not always true in unidirectional
+---
+Criteria Query
+  from em Use Criteria Builder to create a query -> specify ret type.
+  -> [FROM]define the root for tables which are involved in the query
+  -> define predicate
+  -> build the typed query from it.
+  
+  Allow complex queries to be created programmatically via the Criteria(hibernate) and
+  CriteriaQuery(JPA) interfaces.
+  
+  good choice in writing dynamic queries
+  
+  JPA Criteria API provides typesafe queries.
+    more verbose than hibernate 
+
+  JPA need Root<EntityType> to access fields
+  to make restrication u need Path[hibernate: Criterion using Restrictions] to select 
+  the column u need restrict it and build it using criteriaBuilder.
+  pagging 
+    TypedQuery . setFirstResult
+               . setMaxResults

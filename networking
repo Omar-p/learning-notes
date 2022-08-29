@@ -180,4 +180,40 @@ TLS Key Players
        . Algorithms:
          . [DSA weaker than others] . RSA[recommanded bit size 2048 bits] 
          . Diffie-Hellman . ECDSA . ECDH
-         
+-----
+Public and private Keys:   
+  - provide [confidentiality]
+  . encrypted data with public key can only decrypted using the correlating private key.
+  Asymmetric Key Pair [used for (SIGNATURE)]
+  . [Authentication] [Integrity]
+    . if one side[A] decrypt a message using his private key, if the other side[B] can decrypt it
+      using the public Key of[A], now he can make sure this message is sent from A and no one
+      modify it.
+Hybrid Encryption[this how ssl/tls protect data]:
+  . for bulk data, asymmetric encryption will be slower, so we generate a random
+    symmetric key and share it with the other side using asymmetric encryption.
+    . now both side have the symmetric key in a secure way, and can use it to share data
+      securely with each other.
+Signatures:
+  . Entire message cannot be "encrypted" with Private Key.
+    . Again, Asymmetric encryption has limitation
+    . to overcome that, we hash the message and encrypte its digest[we got the signature]
+    . append it to the message and send it. the other side[B] use the A public key to decrypt
+      the signature and hash the recived message if they match, we achieve authentication and
+      integrity
+    
+  . Many different  items can be Signed
+    , Messages .. but also Certificates, Software, EMail, etc..
+-----
+HOW SSL/TLS uses Cryptography
+  . everyone can have a asymmetric key. so, how the client know the public key it use to 
+    encrypt the generated symmetric key is belonging to the intended server. [how to authenticate the server]
+    . here where the CA(certificate authority) coe to play. CA is trusted by Client.
+    . CA will generate a Certificate that link an Asymmetric key pair to specifi identity.
+    . certificate is Signed by the CA to detect any modifications.
+    client trust CA --> CA trust the server --> [Anchor trust] client trust the server.
+    (client + CA + server) form a triangle PKI [public key infrastructure]
+    other PKI:
+      code signing [os + code signing ca + software]
+      internal corporate[employee + corporate internal CA + corporate resoruces[internal tools]]
+      

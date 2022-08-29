@@ -75,6 +75,8 @@ Pod[abstraction of a server]  is a smallest deployable unit.
 Creating pod Declarative vs Imperative Configuraion
   -Imperative:
     kubectl run [pod-name] --image=[name] ..
+    kubectl delete po podName
+    restartPolicy on pod for the running container inside the pod not for the pod
     - [Learning, Troubleshooting, Expermienting]
   -Declarative:
     Using configuration file
