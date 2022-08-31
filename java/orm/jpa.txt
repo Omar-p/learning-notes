@@ -328,3 +328,15 @@ Criteria Query
   pagging 
     TypedQuery . setFirstResult
                . setMaxResults
+-------
+The cascade attribute is set to CascadeType.ALL, meaning that all the JPA and Hibernate entity state transitions (e.g., persist, merge, remove) are passed from the parent Post entity to the PostComment child entities.
+don't use cascade.ALL or .REMOVE in ManyToMany
+--spring tips jpa----
+  - LocalEntityManagerFactoryBean
+    - give an entity manager that is aware of spring infrastructure[transaction] and
+      thread safe(proxy around different em that themselves are thread Local).
+      . spring give a proxy of em that itself manage a whole pool pf em and make sure 
+        each thread as its own em
+  - TransactionTemplate
+    . configured by spring boot and has a pointer to JpaTransactionManager that implement
+      ResourceTransactionManager.java 

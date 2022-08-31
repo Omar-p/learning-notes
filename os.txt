@@ -1,0 +1,44 @@
+OS: {
+  "Resource Manager": share hardware between multiple processes,
+  "protection": run each process in isolation,
+  "Abstraction": provide api [system calls] to faciliate interacting with hardware
+}
+
+OS_TYPES: {
+  "Single Tasking": ms-Dos[Inefficient],
+  "multiprogramming & multitasking": ,
+  "multithreading":
+  "multicores",
+  "multi-users": allow multiple users to log into os and use it simultaneously
+}
+
+
+
+program : file resides on the hard disk.
+process : when the file loaded to the memory to be executed
+   - stack - heap - text/code - data
+
+
+single-program-sys: new -> running -> finish states only. most of the time the cpu will be idle.
+  multi-tasking : a multi-programming system where time sharing is used to allocate processor to  different processes. each process has a slice to make use of cpu then become waiting. and the next process take place.
+
+  multiprogramming: allow multiple processes to exist in memory and running them in interleaved fashion interchangeable.    
+process states in multi-programming system:
+                          <--timeout/hPrio-
+   [DISK][[New]]-->[RAM]Ready --dispatcher---->[CPU] [[Running]]---------->[[finished]][last statement/error(aborted)]
+                    |-------[[waiting]]--------------|(i/o req)
+
+   there are to other states [[suspend/block]] [[suspend/ready]]: 
+     - the first in case all processes are waiting, so os move processes from waiting state to disk,
+       to make some space in memory to begin executing other process instead of being idle.
+     - [[suspend/ready]] when we don't have mem to run a higher priority process we move processes from
+        ready state to disk.
+     - each OS has dedicated place to store process data on disk to reload it when it needed,
+       in linux there is something called swap space. win store process pages in .sys files on disk.
+cpu interact with RAM, it's OS responsability to bring required data from disk to ram for cpu to operate on.
+
+--
+ Process Control Block(PCB):
+  1) pid 2) process state. 3) cpu registers.[PC] 
+  4) accounts info(how much cpu time used)
+  5) I/O info.  6)scheduling info.  7)memo info

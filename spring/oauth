@@ -543,5 +543,4 @@ only the apis should validate access tokens:
       
       . [EXTRA CONFIRMATION]api call that will do a sensitive operation should 
         post request to the TOKEN INTROSPECTION endpoint to ask whether is token is still 
-        valid. now OAuth can 
-        reject the revoked token.
+        valid. now OAuth can reject the revoked token.

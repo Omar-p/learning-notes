@@ -121,6 +121,9 @@ Deployments
 	  - Recreate -> delete all pods running before creating the new for the next version [dangerous: downtime]
 	  - Rolling Update: [default] forwarding traffic to previous version. until finish creation of the new one.
 	  spec.strategy.type=[Recreate|RollingUpdate]
+	    Recreate
+	      . useful when u cannot run multiple version for the application at the same time
+	         [DB schema]
 	  spec.strategy.rollingUpdate.maxSurge -> extra pods above desired ones.
 	  spec.strategy.rollingUpdate.maxUnavailable -> unavilable pods during update
 ReplicaSet always make sure that the desired number of pods is always running.
@@ -129,7 +132,26 @@ ReplicaSet always make sure that the desired number of pods is always running.
  kubectl rollout pause deployment [name]
 
 metadata -> allows us to specify labels to access our resources.
+
+  kubectl scale deploy [name] --replicas={num} -> scale the #of current running replicas.
+  kubectl scale edit deploy [name] edit the #of replicas manually.
+  start imperatively
+    kubectl create deploy .. --replicas
+
+change in #of replicas is not reflected in rollout history because it is not a change in the app
+  it's change in how k8s is dealing with the app.
 =======
+DaemonSet and  Stateful set
+  . a DaemonSet is  a deploy that starts one po instance on every node in the cluster
+    . when nodes are added or removed, the DaemonSet automatically change the #of Po accordingly
+
+=======
+AutoScaling:
+  - In real clusters, Po are often automatically scaled based on resource usage properties that
+    are collected by the metrics server.
+  - The Horizontal po autoscaler observes usage statistics and after passing a threshold, will
+    add additional replicas
+=====    
 ReplicaSet
   - ensure desired number of pods always running using [control loop].
   deployment --create --> replicatset.
@@ -139,6 +161,8 @@ ReplicaSet
 	  to view history:
 	    kubectl rollout history deployment [name] --revision=
     k8s by default keep 10 revision of ur deployments to change that. spec.revisionHistoryLimit
+    - replicasets give full compatibility with previously use replicationcontrollers
+    
 ===========
 Services
   - stable IP address
@@ -177,6 +201,10 @@ Labels:
   	all match or nothing 
   - kubectl get pods --selector="key=value,.." === kubectl get pods -l key=value,k2=v2  
   - kubectl get po -l 'labelKey1 in (v1, v2), labelKey2 notin (v1)' 
+  
+  . deploy find its pods using selector
+  . svc find its endpoints pod using a selector 
+  . used to facilitate resource management and selection
 ===
 annotations: 
   Annotations is an unstructured key/value map stored with resource that may be set by external tools to store and retrieve arbitary metadata, they are not querable and should be preserved when modifying objects. [used by external tools]
