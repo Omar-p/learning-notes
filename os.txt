@@ -17,8 +17,34 @@ OS_TYPES: {
 program : file resides on the hard disk.
 process : when the file loaded to the memory to be executed
    - stack - heap - text/code - data
+   
+Process vs Thread
+  Thread: Stack + share from its process [Code, Data, Files, Heap]
+    . cheaper to create and terminate
+    . multiple threads in a process
+      * share address space
+      * easier to communicate
+      * cheaper context switching comparing to processes.
+  Process: Code, Data, Files, Heap, Stack, etc   
+----
+             User Thread                          vs                 kernel managed threads
+management: process create threads kernel is not   |   -       In kernel space        
+            aware of them.
 
-
+context-switching: fast                            |  -       slow
+Blocking: one thread might block all other threads,| -     a thread block itself only
+          can handle that using a jacket.          |          
+                                                   |
+multicore: cannot take advantage of multicore sys. |  - take full advantages of multicore sys.
+           only concurrent execution on single     | 
+           process                                
+           
+           
+-----------------------------------------------------------------------           
+Mapping of user threads to kernal threads:
+  One To many --> work as kernel threads
+  ManyToOne --> multiple threads in one process mapped to one kernel thread
+  manyToMany --> rare
 single-program-sys: new -> running -> finish states only. most of the time the cpu will be idle.
   multi-tasking : a multi-programming system where time sharing is used to allocate processor to  different processes. each process has a slice to make use of cpu then become waiting. and the next process take place.
 

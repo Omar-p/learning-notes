@@ -165,21 +165,39 @@ ReplicaSet
     
 ===========
 Services
+  . expose a logical set of pods
+  . applying round-robin load balancing to forward traffic to specific pods.
+  . set of pods is targeted by a selector
   - stable IP address
   - Stable DNS Name
   - stable Port
   Types:
-    - ClusterIP(default)
+    - ClusterIP(default) [access internally "headless"]
       - Only Internal access. No External [service-name:port]
     - NodePort
+      - allocate specific node port on the node that forward to the svc cluster ip add
     - ExternalName
+      . work on DNS names; redirection is happening  at a DNS level, useful in migration
     - LoadBalancer
+ kube-controller-manager will continuously scan for pods that match the selector and include
+ these in the service
+ 
+ Decoupling:
+   . service exist independently from the [deployment]app they provide access to.
+   . the only thing they do, is watch for Pods that have a specific label set
+     matching the selector that is specified in the svc
+   . that mean that one service can provide access to pods in multiple deploy,
+     and while doing so, k8s will automatically load balance between these pods
+      [used in canary deploy].  
 ======
 [service] NodePort:
   - Allow you open a port on all nodes
   - Allowed Port Range: [30000-32767]
   - if client choose to send the req to Node with no healthy pods, Node responsible to send the req to be handled by another node with healty pods. 
-  - spec.ports[port -> port service listening on, targetPort -> container in service listening on, nodePort] -> if not specified, it will be chosen randomely.
+  - spec.ports[port -> port service listening on, targetPort -> container in service listening on, 
+    nodePort: exposed port on the node] -> if not specified, it will be chosen randomely.
+    if u specify a port the targetPort will take the same val if it is not be specified 
+    - nodePort must be unique.
   DisAdvantages:
    - One service per port.
    - If Node IP address change then we have a problem.
@@ -415,3 +433,15 @@ Resources Limitations
     
     kubectl delete all --all
     don't do this: kubectl delete all --all -A --force --grace-period=-1
+----
+Networking in K8S
+
+  there is an [internal network]pod-network connect all pods. each pod given an ip address.
+  there is an [internal] cluster network exposed to another network (external [node network])
+  we have services that allow cluster network to access pod:
+    - clusterIp: service available on the cluster net[used to expose internal compnents of the 
+      app to the other compnents; for example DB]
+    - nodePort: service on the cluster net; expose high port on nodes.
+       . those node ports are redirecting to the node-port service side.
+    * now, user can access node on that port, but we don't user to be aware of the node ip so
+      there is another service called Ingress the expose our app to the outside world   

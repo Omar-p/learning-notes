@@ -69,4 +69,22 @@ guaranteed delivery
   1) producer send to provider, 2) provider store it, 3) provider ack producer.
   4) provider deliver consumer, 5) consumer ack provider when recieve.
   6) provider delete message from persistent store.
-
+--------
+JMS 1.1
+  . primary api interface 
+    * Connection <- generic interfaces
+       ConnectionFactory --> Connection --> Session --> Message
+                      |----                        |--> MessageProducer
+       Destination <--                             |--> MessageConsumer
+    * QueueConnection Point-to-Point interfaces
+       QueueConnectionFactory --> QueueConnection --> QueueSession --> Message
+                      |----                                        |--> QueueSender
+       Queue       <--                                             |--> QueueReciever
+    * TopicConnection pub/sub interface.
+       TopicConnectionFactory --> TopicConnection --> TopicSession --> Message
+                      |----                                        |--> TopicPublisher
+       Topic       <--                                             |--> TopicSubscriber
+  . sessions created from connection. in JMS session is a unit amount of work.
+  . producers
+  . consumers
+  
