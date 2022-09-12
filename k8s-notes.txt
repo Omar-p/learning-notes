@@ -250,7 +250,7 @@ metadata:
 ----
 
 
-O'reliy
+O'relliy
 
 RBAC:
   - RBAC consists of three key building blocks.
@@ -442,6 +442,74 @@ Networking in K8S
     - clusterIp: service available on the cluster net[used to expose internal compnents of the 
       app to the other compnents; for example DB]
     - nodePort: service on the cluster net; expose high port on nodes.
-       . those node ports are redirecting to the node-port service side.
+       . those node ports are redirecting to the node-port service side. 
     * now, user can access node on that port, but we don't user to be aware of the node ip so
       there is another service called Ingress the expose our app to the outside world   
+-------------
+Ingress
+  - Controller [contains LoadBalancer implementation] + API resource
+    - controller connects to the cluster nodes.
+    - as a resource in the cluster it has direct connection to the other svc
+  - url resolver --via DNS--> connect to the controller in Ingress -> go to api resource -->
+    now packets can be forwarded to the backend pods  
+  - Ingress is used to provide external access to internal Kubernetes cluster resources
+  - To do so, Ingress uses a load balancer that is present on the external cluster.
+  - This Load Balancer is implemented by the ingress controller
+  - As an API resource, Ingress uses selector label to connect pods that are used as a 
+    service endpoints.
+  - To access resource in the cluster, DNS must be configured to resolve to the Ingress
+    Load Balancer IP.   
+  - Ingress expose HTTP and HTTPS routes from outside the cluster to services within the 
+    cluster   
+  - Traffic routing is controlled by rules defined on the Ingress resource
+    [which url redurect to which svc in the cluster]
+  - Ingress can be configured to do the following:
+    . give services externally-reachable URLs
+    . Load balance traffic
+    . Terminate SSL/TLS      
+    . Offer name based virtual host 
+  - Controllers:
+    . Creating ingress resources without ingress controller has no effect.
+    . Many Ingress COntroller exist:
+      . nginx, haproxy, traefik, kong, contour.
+  Rules:
+    - An optional host. if no host is specified, the rule applies to all inbound 
+      HTTP traffic.
+    - A list of paths (like /testpath). each path has its own backend. Paths can 
+      be exposed as a POSIX regular expression.
+    - The backend, which consists of either a default backend in an Ingress 
+      controller for incoming traffic that doesn't match a specific path.
+  Ingress Backends:
+    - A service backend relates to a k8s service.
+    - A resource backend typically refers to cloud based object storage,
+      where Ingress is used to provide access to storage resources
+    - Resource backends and svc backends are mutually exclusive:
+      . either u do it for svc, or u do it for resources              
+    - A defaulttBackend can be set to handle traffic that doesn't deal with
+      any specific backend.  
+  Path Types:
+    - The Ingress pathType specifies how to deal with path requests.
+    - The Exact pathType indicates that an exact match should occur
+      . if the path is set to /foo, and req /foo/ there is no match.
+    - The Prefix pathType indicates taht the request path should start with
+      . if the path set to /, any requested path woll match
+      . if the path set to /foo, /foo as well as /foo/ will match
+  Ingress Types:
+    - Ingress backed by a single service: there is one rule that defines access
+      to one backend Service
+        . kubectl create ingress single --rule="/files=fileservice:80"
+    - simple fanout: there are 2 or more rules defining different paths that refer
+      to different services
+        . kubectl create ingress single --rule="/files=fileservice:80" \
+          rule="/db=dbservice:80"
+   - Name-based virtual hosting: there are 2 or more rules that route requests       
+     based on the host header
+       . Make sure there is DNS entry for each host header
+       .kubectl create ingress single --rule="my.examples.com/files*=fileservice:80" \
+          rule="my.example.org/data*=dataservice:80"    
+  IngressClass
+    - used to set a specific ingress controller as the cluster default.
+    - each ingress resource should specify a class, which refers to the cluster
+      default IngressClass        
+  
+      
