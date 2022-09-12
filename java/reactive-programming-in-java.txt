@@ -1,0 +1,73 @@
+Async: things not happen one after the other, things happen in all places.
+Reactive Programming doen't necessary implies async, we can have it synchronous.
+  and we can async programming that is not reactive.
+  --> don't mix between async and reactive.
+
+Traditional use cases:
+  - User events
+    . when user clicks a button
+    . when I/O response happens
+  --React to something: when user clicks this button, run this function.
+
+  Modern app dev:
+   - high data scale
+   - high usage scale
+   - cloud based costs
+   [more blocking ops --server threads -> idle, wasted hardware.
+
+in spring we code like:
+  it's a single req
+  multiple simultaneous users abstracted out
+  delays abstracted out
+  we pay with sequential blocking op and idling threads
+
+--
+ we can use future api with blocking ops, but at some point we need to block
+  to return the final result[and Error handling is messy]. so we need a new
+    paradigm and support from the framework to deal with that.
+-
+Reactive programming in java: there is a  `Flow` interface,
+  nobody uses the Flow interface directly.
+-- 
+Reactive Programming is not worth for simple application, the benefits for
+  it shows up when the size grows.
+
+Flux: asynchronous sequence of items[it could be synchronous]. zero or N.
+  BackPressure: u can slow down the items 
+Mono: zero or one item.
+
+what's coming?
+  an item
+  a complete event
+  a failure event
+mono after item send a complete event. 
+complete and failure are terminal event, no items come after them.
+
+  u can implement BaseSubscriber<T> interface to define what to on every coming event,
+  but in this case  u need to request the #of event u can handle. in case u don't.
+  u won't get any from the flux.
+--
+  when u dealing with flux u must determine the capacity ur system can handle to not be overloaded.
+  -> u can maintain a queue of items and if its size byond a certain number, u do a back pressure
+     signal to get a less #of items.
+--Josh Long---
+Isomorphic Application: 
+  - application behave interactively through AJAX, they update themself they only worry
+    about the delta after they been loaded. but the first load os server side load.
+    those application in turn make a cascade of calls to other services. so those services
+    need to get back the respone in time for the load to a single user interfaces.
+      -> one user interface can cause many api calls.   
+      ----
+       instead of reactive -horizontal scaling->
+       u can move to microservices and radicate any service state; any state pushed back to scalable data tier.
+       each service is a classic stateless http service. and we can put those services behaind loadBalancer and
+       scale them horizontially. [but it's not cost efficient]
+     --
+     the problem the servlet server spin a new thread for each request, the thread to serve the request
+     will deal with I/O stream which are  blocking. so most of the time the thread will be waiting -idle-
+     and we cannot benefit from it.
+     --
+     Flow -- Reactive Stream
+       we can convert types between them. [FlowAdapters class provide methods for that]  
+  in codebase u accept code of type Publisher and produce Mono and Flux type.
+       
