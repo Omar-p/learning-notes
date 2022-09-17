@@ -1,0 +1,67 @@
+Distributed System:
+  - A collection of independent computers that appear to its users as
+    one computer, with 3 characteristics:
+      . the computers operate concurrently.
+      . the computers fail independently.
+      . the computers don't share a global clock:
+        - the computing that each one of these machines does, is 
+          asynchronous with respect to other machines in the sys.
+
+  - Storage: Relational/Mongo, Cassandra, HDFS
+  - Computation: Hadoop, Spark, Storm
+  - Synchronization: NTP, vector clocks
+  - Consensus: Paxos, Zookeeper
+  - Messaging: Kafka
+-----
+Single-Master Storage -- to -> Read Replication
+  . Complexity
+  . Consistency [take some time for all replicas to be the same]
+  . approperiate in read heavy workload.
+---
+Sharding:
+  - More Complexity.
+  - Limited data model.
+    . we need a common key in all queries we issue, that we can shard on.
+      if u cannot find one then sharding is not a great choice. 
+  - Limited data access patterns.
+    . if u need to query without using the sharding key, u must go to all shards
+       scatter that query out to all of them, get results and gather those back together.
+scatter gather    
+---.
+Consistent Hashing:
+  Amazon Dynamo
+  we 're building our project for scale from the ground up. <- consistent hashing is about that.
+  
+  
+  make a ring of nodes with a known order and make label for each one, when u insert data or 
+  retrieve it -> hash the key according to order u'll know which node to insert/retrieve.
+   [selected node the hash of the record is greater than the previous node and not greater than
+     me, so node will be aware of the label of the previous one].
+     
+     uniformally hashing of the key will guarantee that data are going to be uniformly distributed
+     around the ring.
+  
+  for replication we can write data to the next nodes in the ring.
+  --> for scalability can add more nodes to the ring.
+  
+  how to deal with consistency ?
+    R+W>N 
+    R -> the #of nodes needed to agree on the data when we ask for it.
+    N -> #of replicas we want to keep
+    W -> number of nodes that need to acknowledge the update when we update the data.
+  
+  we make trade of between consistency and latency.
+  
+  entropy problem: when nodes don't agree on data, when one replica is out of data with respect
+    to another, we say that the db has increased entropy. [solution: impl specific]
+    
+  Traditionally in Sharding, u have decide early in the system, make a permanent decision 
+  about how many shards u will ever have, and if u need to grow that u've got a lot of downtime,
+   a major migration need to be considered. in architecture like consistent hashing u've got the 
+   ability to scale kinda baked in and really is designed from the ground up.
+  
+  
+  when to use:
+   -scale
+   -Transactional data [heavy write workload across networks]
+   -Always on  

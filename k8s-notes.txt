@@ -1,11 +1,64 @@
+Versioning:
+  k8s versions are expressed using semantic versioning
+  a K8S version is expressed as MAJOR.MINOR.PATCH
+  there is a new patch release whenever needed.
+  . generally, there is a bout 2 to 4 weeks between patch releases, except when 
+    a critical bug or vulunerability is found.
+  . there is a new minor release approximately every 3 months
+  . at any given time, 3 minor releases are maintained. 
+   about 9 months maintaince for a minor release.  
+
 cluster is a set of nodes
   node: can be VM or physical machine.
 
+
 k8s node:
  control
-   containerd <-- kubelet(r/w etcd)[k8s part that interfaces the container runtime] <-- [scheduler|Api server|controller-manager(taking care of generic cluster ops)] <--- DB[etcd]
- worker
+   containerd <-- kubelet(r/w etcd)[k8s part that interfaces the container runtime] <-- 
+   [scheduler|Api server|controller-manager(taking care of generic cluster ops)] <--- DB[etcd]
+ worker 
+ 
+ : 
+  [infrastructure] + [os] + [container runtime] +  [kublet kube-proxy]
+kubelet kube-proxy : specific k8s processes 
+  kubelet:
+    . kubernetes agent run on every node, it's mission is to connect the node
+       to the controlplace of the cluster 
+  kube-proxy: one of network component of k8s.      
+  
+  ------
+                                                [etcd (key-value DB, SSOT)]     
+                                                            |[gRPC]
+  [Controller Manager(Controller Loops)] <-protobuf-> [API Server(REST API)] <--protobuf----> [Scheduler(Bind Pod To Node)]
+  API Server, Scheduler, and Controller Manager are stateless. everything is stored in etcd[single source of truth]
+  
+  User communicate with API SERVER[mostly REST], API SERVER communicate with work nodes via their
+   kubelet[PROTOBUF].
+  Kubelet communicate with [container runtime](CRI)
+  
+  Pod is a group of containers working together run on the same machine has the same IP.
+  
+  Together or separate
+    - should we put e.g. a web application server and a cache together?
+      ("cache" being something like e.g. Memcached or Redis)
+    - Putting them in the same pod means:
+      . they have to be scaled together.
+      . they can communicate very efficiently over localhost.
+    - Putting them in different pods means:
+      . they can scaled separately
+      . they must communicate over remote IP addresses
+    - Both scenarios can make sense, depending on our goals      
+    
+    apiVersion, Kind, metadata :- will be in every single api response from k8s
+    
+    Endpoints only have a plural form
 
+
+general form of kubectl:
+  kubectl VERB/ACTION KIND/TYPE NAME_OF_RESOURCE --FLAGS
+  
+  when we use kubectl logs --selector label -> for each matching pod, there will be a connection with the api server. 
+    --max-log-request
 ---------------------
 in a cloud native environment the application is not directly related to any server, so all information the application needs is stored in the cloud.
 ---------------------
@@ -126,6 +179,13 @@ Deployments
 	         [DB schema]
 	  spec.strategy.rollingUpdate.maxSurge -> extra pods above desired ones.
 	  spec.strategy.rollingUpdate.maxUnavailable -> unavilable pods during update
+	
+	- when we update a Deployment with a new Pod definition:
+	  . a new Replia Set is created with the new pod definition.
+	  . that new Replica Set is progressively scaled up.
+	  . meanwhile, the old Replica Set(s) is(are) scaled down.
+	
+	  
 ReplicaSet always make sure that the desired number of pods is always running.
 
 *to pause rollout
@@ -462,7 +522,7 @@ Ingress
   - Ingress expose HTTP and HTTPS routes from outside the cluster to services within the 
     cluster   
   - Traffic routing is controlled by rules defined on the Ingress resource
-    [which url redurect to which svc in the cluster]
+    [which url redirect to which svc in the cluster]
   - Ingress can be configured to do the following:
     . give services externally-reachable URLs
     . Load balance traffic
@@ -510,6 +570,26 @@ Ingress
   IngressClass
     - used to set a specific ingress controller as the cluster default.
     - each ingress resource should specify a class, which refers to the cluster
-      default IngressClass        
-  
+      default IngressClass 
+             
+  Network Policies
+    . By default, there are no restrictions to network traffic in k8s.
+    . Pods can always communicate, even if they're in other NameSpaces
+    . To limit this, Network Policies can be used.
+    . Network Policies need to be supported by the network plugin though.
+    . If in a policy there is no match, traffic will be denied. 
+      - a network policy without any rules -> nobody can communicate.
+    . If no Network Policy is used, all traffic is allowed. 
+ Plugin for minikube [minikube start --cni=calico] -verify-> [kubectl get pods -n kube-system]
+   Network Policy Identifiers:
+     . when definig Pod- or NameSpace-based NetworkPolicy, a selector label is used to specify
+       what traffic allowed to and from the Pods that match the selector
+     . In Network Policies, three different identifiers can be used to mach network traffic
+       - podSelector: allows access to a Pod with the corresponding selector label.
+       - namespaceSelector: allows incoming traffic from namespaces with the matching
+         selector label.
+       - ipBlock: used to specify  a range of cluster-external IPs that should get access. 
+    . Network Policies do not conflict , they are additive.      
+     . if a network policy exists, all traffic is blocked. Unless there is a match. 
+     
       

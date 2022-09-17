@@ -66,6 +66,7 @@ Data:
       -Programmatic: Developers writes custom code to manage transactions and set boundaries.
       -Declarative: separate transaction managemnt from business code.
       - LEVELS [DEFAULT(underlying DBMS), READ_UNCOMMITED, READ_COMMITED, REPEATABLE_READ, SERIALIZABLE]
+  - when we add @Repository to any bean, spring automatically translate all JDBC exceptions to Spring Specific Exception    
 ------------
 AOP
   joinpoint: where aspect will be applied.
@@ -88,3 +89,45 @@ AOP
   -weaving: the operation of program transformation that applies the aspect to  
     the target object in order to create the advised object.
     - Spring Aop prefer weaving at runtime
+-----
+Integration:
+  endpoints pass messages[header+payload] via channels:
+    - Adapters(connect ur channel to some other system)
+    - Filter(remove some messages from channels based on header, content, etc.)
+    - Transformer (convert a message content or structure)
+    - Enricher (add content to the message header or payload)
+    - Service activator (invoke service operation based on the arrival of a message)
+    - Gateway (connect your channels without SI coupling)
+ Message Channels
+  . 2 General classifications of message channels
+    - Pollable Channel
+    - Subscribable Channel
+    
+  - Pollable Channel:
+    . May buffer its messages
+      . Require a queue to hold the message
+      . the queue has a designated capacity
+    . Waits for the consumer to get the messages
+      . consumers actively poll to recieve msgs.
+    . Typically a Point-to-Point Channel
+      . Only one reciever of a message in the channel,
+    . Usually used for sending information or "document" message between endpoints      
+  - Subscribable Channel
+     Allows multiple subscribers (or consumers) to register for its messages.
+       Messages are delivered to all registered subscribers on message arrival
+       It has to manage a list or registry of subscribers.
+    Doesn’t buffer its messages
+    Usually used for “event” messages
+      Notifying the subscribers that something happened and to take appropriate action.   
+  -----
+  Adapters
+    An endpoint that connects a channel to an external system.
+      . it "provide the bridge between integration framework and the external
+         systems and service"
+      . Providing separation of the messaging concerns from the transports and 
+        protocols used
+    Adapter are inbound or outbound 
+      . Those that bring messages into the SI channels.
+      . Those that get msg from SI channels to the outside app, db, etc.
+    Built-in Adapter
+      File, JMS, JDBC & JPA, FTP, FEED RSS, MAIL ADAPTER,..             

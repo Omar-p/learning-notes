@@ -1,0 +1,62 @@
+LEC02:
+  Least Privilege:
+    previously browser was run as [Browser Kernel + Rendering Engine + user Files]
+      web site is a js program downloaded and run on rendering engine generate bitmap
+      that sent to the screen; what happened if there is abug on the rendering engine exploited
+      by the website?
+      [drive-by malware: a malicious web page exploits a browser bug to infect local files]
+    Chrome Design: Apply Least Privilege:
+      break the browser into [trusted computing base: Browser kernel, sandbox for each tab:
+      an isolated environment[process] to run unsafe code. Damage in the sandbox will not spread
+       anywhere [where Rendering engne is located]]
+      kernel and engine communicate via very narrow specified channel to [data/bitmap]
+      prevent drive-by malware. 70% of vulnerabilites are in the rendering engine.
+      chrome eat ram because each tab has its own sandbox and rendering engine.
+      [Spectre attack]
+  
+  Separation of Responsibility:
+    if u have something critical need to be done, don't have one thing to do it. 
+    
+    Also known as distributed trust
+    
+    If u need to have a privilege, consider requiring multiple parties to work together
+    (collude) to exercise it.
+     -> it's much more likely for a single party to be malicious than for all multiple parties
+        to be malicious and collude with one another.
+  
+  Ensure Complete Mediation  
+    make sure every request go through the security system
+    *Reference Monitor* single point through which all access must occur.
+      Example: network fireware.
+    - vulnerability  : Time-of-check to Time-of-Use
+  
+  Don't Rely on security through Obsecurity  
+    the only part of a cryptographic system unknown to the adversary are the cryptographic keys
+  
+    always asume that the attacker know every detail about the system u are worrking on.
+    
+  Use Fail-Safe Defaults  
+    choose default settings that "fail safe" balancing security with usability when a sys 
+    goes down
+    
+  Design in Security from the start  
+---
+Register:
+  - fixed width. backward compatiability is maintained by allowing access to subset of registers
+     so 32bits code still run on 64bits machine because processor can treat half of 64bits register as 32bits reg
+     
+  [global keyword] make the identifier accessible to the linker.   
+    identifier + :  = label
+    int 0x80 -> make a system call; determined by val in eax
+    mul, sub operate implicitly on val in register eax
+    EIP -> instruction pointer, his val changed by Jump ops
+    -> nasm -f elf32 [file]
+    elf32 -> 32bits executable and linking format.
+    ld -m elf_i386 [object file]
+    ld _> linker ld format to build executale from obj 
+    db -> 1 byte, dw -> 2 bytes, dd -> 4 bytes.
+    x86 stack:
+      . LIFO
+      . Random access, -> add/sub from the stack pointer to access any address.
+      . ESP register hold the lowest addr of the stack 
+      . pop put data in eax

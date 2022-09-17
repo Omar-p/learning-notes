@@ -1,0 +1,19 @@
+CODD's Originial Relational model:
+  - Structure:
+      types("domains")
+        conceptual pool of values from which actual columns and actual tables
+        take their actual values.
+      n-ary relations
+      attributes, tuples
+      keys: candidate, primary, foreign
+  - INTEGRITY:
+     entity integrity
+       has to do with primary key
+     referential integrity
+       has to do with foreign key
+  - Manipulation:
+     relational algebra:
+       intersection, union, -, x,
+       restrect[filter tuples], project, join, divide
+       - restrict & project are the only ops that take one relation as input !2.  
+     relational assignment

@@ -4,7 +4,11 @@ Schema:
   [schema_name].[object_name]
   
   when u access a table without specifying a schema name, pg searches for that table 
-  by using the [schema search path].
+  by using the [schema search path], which is a list of schemas to look in.
+  . The first schema in the search path is called the current_schema. 
+  . PostgreSQL will access the first matching table in the schema search path. 
+    If there is no match, it will return an error, even the name exists in another
+     schema in the database.
   
   $ SELECT current_schema;
   
@@ -61,6 +65,67 @@ TABLESPACE:
       TABLESPACE ts_primary;
       
 ---
-first_name || ' ' || last_name,
+Sequence[relkind = 'S']:
+  CREATE SEQUENCE [ IF NOT EXISTS ] sequence_name
+    [ AS { SMALLINT | INT | BIGINT } ]
+    [ INCREMENT [ BY ] increment ]
+    [ MINVALUE minvalue | NO MINVALUE ] 
+    [ MAXVALUE maxvalue | NO MAXVALUE ]
+    [ START [ WITH ] start ] 
+    [ CACHE cache ]  ->  (determines how many sequence numbers are preallocated and stored in 
+                         memory for faster access. One value can be generated at a time. 
+                         default 1)
+    [ [ NO ] CYCLE ]      
+    [ OWNED BY { table_name.column_name | NONE } ]
+
+  . when you use the SERIAL pseudo-type for a column of a table, behind the scenes, 
+    PostgreSQL automatically creates a sequence associated with the column.
+----
+If a column alias contains one or more spaces, you need to surround it with double quotes like this:
+  first_name || ' ' || last_name AS "full name",
+------
+ORDER BY sort_expresssion [ASC | DESC] [NULLS FIRST | NULLS LAST]
+--
+DISTINCT ON (cols,..) must match the prefix of cols in ORDER BY clause:
+  . select first row in each group.
+  cols in ON define the equality rows.
+  Without ORDER BY, will picks any row in each group.
+  SELECT DISTINCT ON (column1) column_alias,  column2 FROM table_name ORDER BY column1, column2; 
+---
+WHERE
+  . The condition must evaluate to true, false, or unknown. It can be a boolean expression
+     or a combination of boolean expressions using the AND and OR operators.
+  . If you use column aliases in the SELECT clause, you cannot use them in the WHERE clause.
+    -> because query evaluates as: FROM -> WHERE -> SELECT -> ORDER BY
+---
+LIMIT row_count OFFSET row_to_skip;
+  . If row_count is zero, the query returns an empty set. In case row_count is NULL, 
+    the query returns the same result set as it does not have the LIMIT clause.  
+    
+  . The statement first skips row_to_skip rows before returning row_count rows generated
+    by the query. If row_to_skip is zero, the statement will work like it doesn’t have 
+    the OFFSET clause.  
+--
+FETCH is a SQL standard, LIMIT is not.
+  . OFFSET start { ROW | ROWS }
+    FETCH { FIRST | NEXT } [ row_count ] { ROW | ROWS } ONLY
+    
+    - start is an integer that must be zero or positive. By default, it is zero.
+      In case the start is greater than the number of rows in the result set, 
+      no rows are returned;
+  . OFFSET clause must come before the FETCH clause in SQL:2008, IN postgres 
+    any order of them  will work.
+  
+  - FETCH FIRST and FETCH NEXT do exactly the same thing. The reason both exist 
+    because of the preceding OFFSET clause. Using the word FIRST combined with 
+    OFFSET can be confusing to a human reader.
+---
+  PostgreSQL supports the ILIKE operator that works like the LIKE operator. 
+  In addition, the ILIKE operator matches value case-insensitively.
+  
+   ~~	LIKE
+   ~~*	ILIKE
+  !~~	NOT LIKE
+  !~~*	NOT ILIKE
   
     

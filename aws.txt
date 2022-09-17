@@ -60,9 +60,26 @@ Global service / global resilience
 No direct control on external accounts or users. control only local identities in your account.
 make use of identity federation -->[take identities u have[fb account] and use it indirectly to use aws] and MFA
 
- IAM ---> User --> Identities which represent humans or applications that need access to your account.
+  - every aws account come with its own running copy of IAM, it's own db
+  - IAM is globally resilience service, any data is always secure in any 
+    aws regions.
+    .IAM u see in each of ur AWS accounts is  your own dedicated instance of IAM
+     separate from other account and from any one else accounts. 
+     .my AWS account trust my  instance of IAM.
+     .IAM is trusted fully by the account, IAM as a service can do as much as the root
+      user.
+      .inside IAM we can create other identities, IAM can allow those identities to
+       do certain things. because a single aws account trust IAM, if IAM allows one of 
+       identity that it manages to do something, the account automatically trust the 
+       identity in the same way it trust IAM.
+       
+       
+ IAM ---> User --> Identities which represent humans or applications that need access 
+                   to your account.
      --> Group --> Collections of related users e.g. development team, finance or HR
-     --> Role ---> Can be used by aws services, or for granting external access to your account. [when you want to grant access to services in your account to an uncertain number of entities]. 
+     --> Role ---> Can be used by aws services, or for granting external access to your
+                   account. [when you want to grant access to services in your account 
+                   to an uncertain number of entities]. 
     Example for IAM ROLE -> if you want all EC2 instances in your account to be able to access the simple storage service, then you can create a role which grants access to the simple storage service, and then allow instances to use that role.
 
  In Brief: 
@@ -71,6 +88,23 @@ make use of identity federation -->[take identities u have[fb account] and use i
   
   IAM policy [object or document]: used to allow or deny access to aws services when and only when they're attached to IAM USERS, GROUPS OR ROLES.
   policy on their own do nothing they simply define, allow or deny rights to a certain services when you attach the policies to other identities. so users, groups and roles do they have any effect.
+  
+  - IAM has 3 main jobs:
+    1- Manage Identities- And ID Provider(IDP)
+      . allow to create, modify, and delete identity such as users and roles.
+    2- Authenticate those identities
+      . anyone attempt to make a request to aws need to be authenticate, attached to
+        a known identity.
+    3- Authorize: allow or deny access to resource based on policies associated 
+      with the identity that I authenticate with
+  
+  IAM 
+    . NO COST
+    . Glocal service/Global resilience
+    . No direct control external accounts or users
+    . Identity federation and MFA
+      . take identities that u're already have, and use this indirectly to access aws 
+        resources
   
   IAM Access Keys:
     Long-Term Credentials ...
@@ -202,13 +236,17 @@ L4 Transport Layer
     SRC PORT  -		DEST PORT : provides the ability of having multiple streams of data at the same time between 2 devices
     SEQUENCE NUMBER: increment after sending each segment. unique, can be used for error correction. used in reordering.
     ACKNOWLEDGEMENT: 
-    FLAGS 'N' things: used to control over the connection[[flags]FIN: finish the connection, ACK: acknowledgement, SYN: sync seq numbers]. 1-close the connection. 2-synchronize sequence numbers. 
+    FLAGS 'N' things: used to control over the connection[[flags]FIN: finish the connection, 
+     ACK: acknowledgement, SYN: sync seq numbers]. 1-close the connection. 2-synchronize sequence numbers. 
     	data-offset. reserved space.
   	WINDOW: #of bytes u are willing to recieve between acknowledgements. [flow-control use it]
   	CHECKSUM: detect error
-  	URGENT POINTER: to detect segments of controlling the traffic to take priority of processing. separate between app segments and traffic segments.
+  	URGENT POINTER: to detect segments of controlling the traffic to take priority of processing. separate between 
+  	app segments and traffic segments.
 	
-	TCP is a connection based protocol. A connection is established between 2 devices using random port on client[EPHEMERAL PORT] and a [WELL-KNOWN PORT] on the server. Once esablished the connection is bi-directional. reliable, provided via the segments encapsulated in IP packet.
+	TCP is a connection based protocol. A connection is established between 2 devices using random port on 
+	client[EPHEMERAL PORT] and a [WELL-KNOWN PORT] on the server. Once esablished the connection is bi-directional.
+	 reliable, provided via the segments encapsulated in IP packet.
 	
 	3-way handshake:
 	  to esablish the connection between client and server. they need to agree on the sequence number the client choose one randomly and then increment it for the next packets. the server also choose one to start with it for the packet will be sent to the client.
@@ -240,7 +278,8 @@ Elastic Beanstalk [ ur code, app service, http service, os, interpreter, host]
    *begin with established Tcp connection. client send ssl/tls version, list of supported cipher suites, session id, extensions. 
    * server respond with its ssl/tls version, a selected cipher suite from the client list, server certificate[contain a 'public key'].
    
-   2 - Authentication: the client trust the public CA - it makes sure that the certificate is valid (date, annd hasn't revoked) and that the DNS name matches the name/names on the cert.
+   2 - Authentication: the client trust the public CA - it makes sure that the certificate 
+       is valid (date, annd hasn't revoked) and that the DNS name matches the name/names on the cert.
      . the client verfies the server has the private key.
      
    3 - Key Exchange:  . the client generate the pre-master key, encrypt it
@@ -253,3 +292,95 @@ Elastic Beanstalk [ ur code, app service, http service, os, interpreter, host]
                         decrypr data.
                       . Both sides confirm the handshake and from them on,
                         communications between client <=> server are encrypted   
+----------
+DDoS Attacks
+  - Attacks designed to overload websites
+  - compete against 'legitimate connections' and overload hardware & software provide the svc
+  - Distributed - hard to block individual IPs/Ranges
+    - Application Layer - HTTP Flood
+      . take advantage of the imbalance of processing between client & server.
+         it's easy for the client to request a web page but it's often very complex for a
+          server to deliver the same page
+    - Protocol Attack - SYN Flood
+      . A Botnets generate a huge #of spoofed SYN's (connection initiations) the server sees
+        these as normal and sends SYN-ACK's back to the spoofed IPs.
+      . the servers will wait for an ACK ..which will never happens as the remote IPs will never 
+        respond.   servers will consume available network resources attempting to establish 
+        connections and won't be able to service legitimate connections.
+    - Volumetric - DNS Amplification  
+       . An attackers controls network of compromised devices(botnet) via a control
+         location(often using vpn to digest real location)  
+       . A botnet exploits a protocol where a response is significantly larger than the
+         request. in this case making a spoofed request to DNS.
+         
+         .The DNS servers respond to the `spoofed IP`, the frontend servers for our application,
+          which is overwhelmed by the amount of data. this prevents legimate customers accessing 
+          services. 
+    - ..often involve large armies of compromised machines(botnets) 
+--      ---
+Network Address Translation(NAT):
+  - designed to address the growing shortage of IPv4 addresses.
+      . IPv4 addresses:
+        - publicly routable: assigned by central agency & regional agencies, which in turn 
+          assign them to ISPs, ISP allocate them to business or consumer end-users          
+        - private address space:
+            in range 10.0.0.0 can be used in different places, but can't be routed over the internet.
+            . to givve interbet access to private devices, we need to use NAT.
+  - provide some securitiy benefits          
+  - Translate private IPv4 addresses to public
+  - Static Nat - 1 private to 1 (fixed) pubic address (IGW) [in NAT table 1:1 private:public]
+    . translate from 1 specific private ip address to 1 specific public address[this how IGW within aws works]
+    . used when 1 public ip need to be consistent.
+  - Dynamic NAT - 1 private to 1st available public[from address pool]
+    . same as static but a public ip is not permnent for a device, it's allocated temporarly from a pool.
+    . if a device from a private network attempt to access the internet and no available public ip,
+      this access will fail
+    . when we have large #of private ip address and want them all to have internet access via public IPs.
+      but when we have less public ip addresses than private ip addresses.
+  - Port Address Translation(PAT) - many private to 1 public (NATGW)    
+    . allow a large #of private devices to share one public address, it's how the AWS gateway functions\
+      within AWS environment, it has a many to one mapping architecture.
+    . THe NAT Device record the src(private) and src Port. it replaces the src IP with the
+      single public IP and a public source port allocated from a pool which allows IP overloading(many to one)
+      PAT record the mapping in the NAT table, to translate the incoming packet from the internet to its
+      proper ip & port.
+  - IPv4 only ..make no sense with IPv6
+---
+
+ 
+---
+
+
+----
+ public Vs Private Service
+  - public & private services term are referring to networking only.
+     A public service is something is accessed using public endpoints such as the Simple Storage
+     Service(S3), S3 can be accessed from anywhere which has an internet connection.
+  - private aws service is something which runs within VPC. only things that are connected to 
+    that VPC can access the service.
+  . for both of these, there are a permissions  as well as networking. even S3 is public
+    service. by default an identity other than the account root user has no authorization
+    to access that resource.
+    - Permissions & Networking are two different considerations when talking about
+      access to a service.
+   
+  - "Public Internet Zone" where Internet services lay[gmail, online game..]    
+    "AWS PRIVATE zone" are called Vitual Private Clouds or VPCs, there are isolated.
+      VPCs can't communicate with each other unless u allow it. and nothing from the internet
+       can reach these private networks unless u configure it. service can be placed into
+        these private zones such as EC2 instances and just like the home private network it
+        can access the internet and the internet can access it iff u allow it and configure it .
+   - "AWS Public Zone" between public internet and "AWS private Zone", it's not on the public
+     internet and it's not part of public internet, it's a network which is connected to the 
+     public internet.
+     It's where aws public services operate from, Services with public endpoints(S3).
+     . u can access AWS public services from anywhere with an internet connection because
+       the internet is used to carry package from u to the aws public zone and back again.
+     . we can also configure virtual or physical connections between on-premises network and AWS 
+       VPCs.
+     . u can also create and attach Internet gateway to a VPC. this provide a few additional 
+       pieces of functionality: 
+         - allow private zone resources to access the public internet as long as EC2
+           has an allocated IP address0
+         - allow access to public AWS services, without touching the public internet
+        
