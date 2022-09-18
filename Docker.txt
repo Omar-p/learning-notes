@@ -268,7 +268,9 @@ docker diff [container-id]
 to export a specific file from the container without getting the whole filesystem
   docker cp [id]:path-to-the-file [path-the-file-exported-to]
 ----------------------------------------------------------------------------------
+docker-machine used in testing when u can spin new servers on any cloud u choose, install docker, run docker on them. 
 
+docker ps -aq --> ret container id -> docker rm $(docker ps -aq)
 ---------------------------------Troubleshooting-------------------------------------
 
 docker limiting resource is useful when u use docker directly in production but in most case
