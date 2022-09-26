@@ -1,3 +1,11 @@
+  - Previously, our focus has been deploying applications to individual machines
+    [limited workflow]
+    K8s allows us to abstract the way in the individual machines and treat the 
+    entire cluster as a single logical machine. the application becomes a first
+    class citizen which enables us to manage them using high level abstractions.
+    In k8s, we can describe a set of application and how they should interact with
+    each other and the let k8s figure out how to make that happen.
+
 Versioning:
   k8s versions are expressed using semantic versioning
   a K8S version is expressed as MAJOR.MINOR.PATCH
@@ -11,7 +19,18 @@ Versioning:
 cluster is a set of nodes
   node: can be VM or physical machine.
 
-
+unlike vm, containers are not meant to host an os, containers are meant to run specific
+ task or process
+ default command  in entrypoint, defaut args in CMD both in json array
+ override in pod definitation Enterypoint -> command
+                              CMD -> args
+  ENv variable in pod definiation
+  containers:
+    env:
+      -name: KEY
+       valueFrom:
+         (configMapKeyRef|secretKeyRef)
+-----                       
 k8s node:
  control
    containerd <-- kubelet(r/w etcd)[k8s part that interfaces the container runtime] <-- 
@@ -23,7 +42,8 @@ k8s node:
 kubelet kube-proxy : specific k8s processes 
   kubelet:
     . kubernetes agent run on every node, it's mission is to connect the node
-       to the controlplace of the cluster 
+       to the controlplace of the cluster .
+    . perform liveness check[liveness probes] for the container running into the pods   
   kube-proxy: one of network component of k8s.      
   
   ------
@@ -142,6 +162,11 @@ to access pod for testing purpose:
  
  kubectl get pods --> return pods in the current namespace.
  
+ -Use the
+    kubectl edit pod <pod-name> command to edit pod properties.
+    - kubectl get pod <pod-name> -o yaml > pod-definition.yaml
+
+
  get namespaces:
    kubectl get namespaces || kubectl get ns
  specify namespace to apply on
@@ -194,7 +219,7 @@ ReplicaSet always make sure that the desired number of pods is always running.
 metadata -> allows us to specify labels to access our resources.
 
   kubectl scale deploy [name] --replicas={num} -> scale the #of current running replicas.
-  kubectl scale edit deploy [name] edit the #of replicas manually.
+  kubectl scale  deploy [name] edit the #of replicas manually.
   start imperatively
     kubectl create deploy .. --replicas
 
@@ -222,9 +247,16 @@ ReplicaSet
 	    kubectl rollout history deployment [name] --revision=
     k8s by default keep 10 revision of ur deployments to change that. spec.revisionHistoryLimit
     - replicasets give full compatibility with previously use replicationcontrollers
-    
+  
+======
+taint and toleration
+  taint -> node.
+=======
+Node Affinity:
+  - to ensure some pods deployed on a particular nodes.
 ===========
 Services
+  . a stable endpoint to connect to a pod or a group of pods.
   . expose a logical set of pods
   . applying round-robin load balancing to forward traffic to specific pods.
   . set of pods is targeted by a selector
@@ -253,16 +285,26 @@ Services
 [service] NodePort:
   - Allow you open a port on all nodes
   - Allowed Port Range: [30000-32767]
-  - if client choose to send the req to Node with no healthy pods, Node responsible to send the req to be handled by another node with healty pods. 
+  - if client choose to send the req to Node with no healthy pods, Node responsible to send
+     the req to be handled by another node with healty pods. 
   - spec.ports[port -> port service listening on, targetPort -> container in service listening on, 
     nodePort: exposed port on the node] -> if not specified, it will be chosen randomely.
     if u specify a port the targetPort will take the same val if it is not be specified 
     - nodePort must be unique.
+  - Under the hood: kube-proxy sets up a bunch of iptables rules on our nodes****
+  - Sometimes, it's the only available option for external traffic
+    (e.f. most clusters deployed with kubeadm or on-premises)  
   DisAdvantages:
    - One service per port.
    - If Node IP address change then we have a problem.
 =====
 LoadBalancer
+  - An external load balancer is allocated for the service (typically cloud load balancer, AWS..
+  - this is available only when the underlying infrastructure provides some kind of "load 
+    balancer as aservice:
+  - each service of that type will typically cost a little bit of money.
+  - Ideally, traffic would flow directly from the load balancer to the pods.
+  - In practice, it will often flow through NodePort first.  
   - Standard way of exposing Applications to the internet.
   - Create a load balancer per service.
   - AWS & GCP - Network Load Balancer NLB[cloud controller manager. handle that]. 
@@ -292,7 +334,8 @@ DNS:
   - k8s use coreDNS
   - each pod has a file /etc/resolv.conf contains the ip of the nameserver
 -----
-
+when a sa is created, it automatically create a token that used by the external
+  app to authenticate when access to k8s api . create a secret resource to store the token.
 
 etcd is a consistent and highly-available key value store used as Kubernetes' backing store for all cluster data.
 
@@ -468,6 +511,37 @@ Jobs Types:
 -----
 CronJobs used for task that need to run on regular basis. 
    when running it a job being scheduled. job will start a pod.
+   
+   kubectl create cronjob every3mins --schedule="*/min hr dd " 
+   
+   kubectl create deployment web --image=nginx
+     - client send to API Server
+     - API Server write to etcd [Depoyment] respond to the user deployment is created.
+     - Controller manager notice the new deployment in etcd via API SERVER, and create 
+       the replicaSet corresponding to that definiation, and write to etcd
+     - another controller manager see the ReplicaSet through API SERVER create 
+        it's pods in PENDING state.
+     - Scheduler check if their is a resourc limit on the pending pod, 
+       and assign it to worker node.
+     - kublet on the worker node connect to the API SERVER and reported 
+       to create the pod and respond to the API SERVER with the state of it.
+       ------------
+  K8s network model:
+   . TL, DR:
+     our cluster (nodes and pods) is one big flat IP network.
+   . In detail:
+     .   all nodes must be able to reach each other, without NAT.
+     .   all pods must be able to reach each other, without NAT.
+     .   pods and nodes must be able to reach each other, without NAT.
+     .   each pod is aware of its IP address (no NAT)
+     .   Pod IP address are assigned by the network implementation
+  . kubernetes doesn't mandate any particular implementation
+  --   
+  1 the pod to pod network
+  2 the pod to service network:
+     . provide internal communication and load balancing.
+     . is generally implemented with kube-proxy(or e.g. kube-router)
+  3 Network policies
 ---
 Resources Limitations
   . By default, a Pod will use as much CPU and memory as necessary to do its work.
@@ -591,5 +665,155 @@ Ingress
        - ipBlock: used to specify  a range of cluster-external IPs that should get access. 
     . Network Policies do not conflict , they are additive.      
      . if a network policy exists, all traffic is blocked. Unless there is a match. 
-     
+---------------
+Storage:
+  container can has a volume[only support pointing to(NFS or local storage)]
+  container can has a volume point to any type of storage [..cloud storage, fiber channel, ISCSI]
+  
+  - we can configure pods with locally configured volumes, but as App developer
+    we want to distribute a manifest file and we want the mainfest to be able to
+    work at our customer site as many customer as possible. so we are not going to 
+    point any site-specific information in the manifest file. --> PVC come in, so we 
+    won't point to a specific type of storage in the pod manifest. we'll point volume
+    to PVC.
+    - when u deploying a manifest on customer site u need its admin to create
+      a persistence volume [a separate Api resource], allow site admin to connect
+      to any site type of storage, when pod is deployed, it will bound to PV.
+    * the last step is not a cloud friendly, that's where StorageClass comes in.
+    - StorageClass: no matter which site u're using, any site if it's local cluster or
+      an AWS cluster... all of those sites, they have their own specific storage.
+   .. StorageClass automatically provisioning the storage for u. if PVC requests access
+      to specific persistence volume and the specific persistence volune is not there, 
+      it can request storageClass and SC will create a persistence volume on demand.
+    * now, u don't need a site admin anymore. the only thing we do need is a site-soecific
+      storage, being allocated by a provisioner. so storage provisioner need to be available.
+        --> finding the right storage provisioner is sometimes challenging. 
+  --in more formal way---
+  . File stored in container will only live as long as the container itself.
+  . Pod Volumes are used to allocate storage the outlives a container and
+    stays available during pod lifetime.
+  . Pod Volumes can directly bind to a specific storage type
+  . Pod Volumes can also use persistent volume claims, to decouple
+    the pod from the request site-specific-storage[size, r/w ].
+  . A Persistent volume define access to external storage available in a specific 
+    cluster.          
+  . a wide rang of PV types is available.
+  . Persistent Volume Claim(PVC) are used to connect to PV
+  . when a PVC is created, it will search for an available PV that matches
+    the storage request.
+  . if a perfect match doesn't exist, StorageClass can automatically allocate it.  
+  . in this scenario, the Pod uses the PVC storage type is completely decoupled
+    from the site-specific storage.
+  . A PVC bind is exclusive: after successfully binding to a PV, the PV cannot
+    be used by other PVC anymore  
+  ..StorageClass
+    . every cluster env]s have their own specific storage type .
+    . kubernetes StorageClass allows for automatic provisioning of PVs when a 
+      PVC request for storage comes in.
+    . StorageClass must be backed by a storage provisioner, which takes care
+      of the colume configuration.
+    . Kubernetes comes with some internal provisioner, alternatively external 
+      provisioner can be installed using Operators.    
+  ..StorageClass..as..a.selector
+    . Normally, PVC binding to a PV is based on best match.
+    . While using Storage class in PV as well as PVC, a PVC will only bind to a PV
+      that has the same StorageClass setting.
+    . if such a PV is not available, the PVC will stay in a status of pending  
+PVC(Persistence volume claim):
+  read-writable or read only storage and a specific amount of storage.
+    
+-------------
+pod local volume:
+  pod.spec.volumes -> point to a specific volume type.
+    --> for testing purpose emptyDir and hostPath are common
+     emptyDir: a temp directory that will dynamically be created on the host that runs
+               the pod.
+     hostPath: a persistent directory that is defined and will outlive the lofetime of
+               the pod.
+     hostPath is  a little bit better than emptyDir
+  The volume is mounted through pod.spec.containers.volumeMounts              
+create deployments
+expose svc
+-----------------
+decouple site specific information from ur generic app code
+
+Providing Variables to kubernetes Application
+  . k8s does not offer a command line option to provide variables while running 
+    a deployment with [kubectl create deploy  ]
+    . first, use kubectl create deploy mydb --image=mariadb
+    . second, use kubectl set env deploy mydb KEY=VALUE
+  . while running a Pod, env var acn be provided, but u shouldn't
+    run naked Pods
+      . kubectl run mydb --image=mysql --env="KEY=VALUE"  
+Understanding the need for decoupling
+  . It's good idea to separate site-specific information from code.
+  . Code should be static, which makes it portable, so that it can be used in other
+    environments
+  . Variables are site-specific, and for that reason should not be provided in the
+    the Deployment configuration.
+  . K8s provides ConfigMaps to deal this issue.
+  . A ConfigMap can be used to define variablesm and the Deployment just points to 
+    the ConfigMap.
+  . While using ConfigMaps, site-specifi information is included in the ConfigMap,
+    which allows you to keep the Deployment manifest files generic.             
+Understanding ConfigMap
+  . ConfigMaps are used to provide different types of configuration to an application
+  . ConfigMaps can be used for three different types of configuration
+    . Variables
+    . Configuration Files
+    . Command Line arguments(not common to use cm for it)
+    --> configMap created in different ways according to for what they are created.
+  . Note that according to these different types of configurations, ConfigMaps are created
+    and used in a very different way!
+  . If an application refers to a ConfigMap, the ConfigMap should exist in the cluster 
+    before running the applciation.  
+    --
+    env
+    envFrom: 
+      - configMapRef:
+        name: cm
+    --
+    single env
+    env:
+      - name: KEY
+        valueFrom:
+          configMapKeyRef:
+            name: cm-name 
+            key:         
+   --
+   volumes:
+   - name: app-config-vol
+     configMap:
+       name: app-config
+----
+Secret is a special type of configMap that add encoding                  
+  - secret allow for storage of sensitive data such as pass, Auth tokens, and SSH Keys.
+  - some secrets are automatically created by the system, users can also use secrets.
+  - system-created secrets are important for k8s resources to connect to other cluster
+    resources.
+    types:
+      - docker-registry used for connecting to docker registry <-
+      - TLS used to store TLS key material
+      - generic creates a secret from local file, directory or literal value. 
+      
+      kubectl create secret [type] ..
+  ----
+  - to access k8s API, all k8s resources need access to TLS keys.
+     because at every single level, TLS key provide authorization between different
+     k8s components, between ur pods and the backend svc
+  - these key are provided by secrets and used through ServiceAccounts.
+  
+  - By using the ServiceAccount, the application gets access tp its secret/
+  
+  --
+  Secrets in application 
+  - There a different use cases for using secrets in applications:
+    . To provide TLS keys to the application: 
+       kubectl create secret tls my-tls-keys --cert=tls/my.crt --key=tls/my.key
+    . To provide security to passwords:
+       kubectl create secret generic my-secret-pw --from-literal=password=verysecret
+    . To provide access to an ssh private key:
+       kubectl create secret generic my-ssh-key --from-file=ssh-private-key=.ssh/id_rsa
+     . to sensitive files which would be mounted in the app with root access only:
+       kubectl create secret generic my-secret-file --from-file=/my/secret  
       

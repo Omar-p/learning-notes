@@ -1,0 +1,94 @@
+started by netscape 1995, adopted by microsoft jscript.
+  ECMAScript fprmed to standardize JS implementation 1996.
+   AJAX allowed for js to make server-side requests 1999.
+    Node.js released 2009.
+     
+  
+link ur js files in the bottom of body tag:
+    If you do this <head>, the browser cannot begin displaying your HTML and CSS until it has finished 
+    downloading your JavaScript. It delays your users from viewing your content.
+    If you want to add your JavaScript file at the top of your HTML, make sure to use the async 
+    attribute which tells browsers to download the file only after it’s done with other tasks.
+    <head>
+    <title>Title of website</title>
+    <script src="js/main.js" async></script>
+    </head>
+
+(``). Strings created with backticks are called template strings.
+  recognize  whitespaces we add to the str
+ 
+ primitives. They are:
+    String
+    Number
+    Boolean
+    Null
+    Undefined
+    Symbol
+    BigInt
+ [] {}
+ fn()
+ $ async/await fn* Map Set [...]
+ 
+  === equal for val and type
+ 
+ let ob = {key:val} <- object literal notation
+ --
+If you declared a parameter, but did not pass an argument to it, your parameter would be undefined.
+
+Function hoisting gets confusing because JavaScript changes the order of your code. 
+    I highly recommend you declare your functions before you use them. Don’t rely on hoisting.
+    hoisting : js reorder code to move or functions declaration to the top
+
+use brackets over dot notation only when:
+    When your property name is an invalid identifier 'First Name'
+    When you need to get the value of a property through a variable
+        const propertyToGet = 'storage'
+        const storageWithDotNotation = macbook.propertyToGet -correct way --> const macbookStorage = macbook[propertyToGet]
+        console.log(storageWithDotNotation) // undefined 
+
+
+Double negation is used to explicitly cast a truthy or falsey value into a boolean (true or false). You’ll almost never need it.
+
+undefined is a value that indicates an absence of a value. We say that something is undefined when it is not explicitly defined.
+    let a
+    console.log(a) // undefined
+    If you have a function that returns nothing, the result of the function will be undefined.
+
+
+null is a value that is used to indicate “nothingness”.
+Developers need to explicitly set a value to be null.
+
+    null === undefined // false
+
+
+BOM stands for Browser Object Model while DOM stands for Document Object Model.
+    BOM refers to the set of JavaScript objects browsers provide you with. It gives you the window object in JavaScript
+
+
+const element = document.querySelector(selector)
+    selector refers to the id, class, tag, or attribute of the element you want to select.
+    To select an element with an id, you prepend it with #
+            document.querySelector('#master-yoda')
+            // => <div id="master-yoda">Yoda</div>
+    To select an element with a class, you prepend it with .
+            document.querySelector('.class-of-assassins')
+            // => <div class="class-of-assassins">Assassin</div>
+    To select an element with a tag, you write the tag name directly (ie. button)
+            document.querySelector('p')
+            // => <p>The three little pigs</p>
+    To select an element with an attribute, you write the attribute in square ([]) brackets
+            document.querySelector('[data-type="rocket"]')
+            // => <div data-type="rocket">🚀</div>
+    querySelector returns only one element [the first matched element]
+    If you want to select multiple elements, you’ll need to use another method called querySelectorAll
+    All elements have the querySelector method too. 
+
+adding class to element
+    Note: You don’t need to add . before your classes when you use Element.classList.
+    This is a common mistake if you mix up the syntax for querySelector and Element.classList.
+        element.classList.toggle('red') <- add if not exist. remove if exist.
+
+All event listener callbacks accept an argument.
+  This argument is the event object. People usually abbreviate it either to evt or e.
+
+a callback is a function that is passed into another function as an argument to be executed later.

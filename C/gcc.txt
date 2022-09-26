@@ -27,7 +27,8 @@ gcc -g
 gdb
 	run : run program until first error or breakpoint.
 	set var [i]=0 : set variable i if it in the execution context to zero,
-		to select variable in a specific scope function or file ex: set var sum::a=0, set var main.c::a=0
+		to select variable in a specific scope function or file ex: set var sum::a=0, 
+		 set var main.c::a=0
 	to list file lines: list 8 or to list range of lines => list lower,upper
 	print: to print variable  value in context.
 	s : step
@@ -35,4 +36,10 @@ gdb
 	c : continue
 	bt : to see stack frames
 	info args : to print the current function argument
-	frame: print the current stack frame
+	     frame: print the current stack frame
+	     locals
+	step next go to next line
+	stepi  go to next instruction
+	disas  show the assembly of the current func
+	disp print specified var after each exectued line
+	layout split: split the GDB interface into source, assembly and command section

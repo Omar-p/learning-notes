@@ -1,7 +1,14 @@
 db -> *collections -> *documents
 
 BSON : Json --MongoDB drivers --> BSON [extends json types(ObjectId ..), efficient storage]
+ binary representaion of JSON
 
+ObejctId 12 bytes in length:
+  - first 4 representing the seconds since the unix epoch
+  - next 5 random number
+  - last 3 bytes random counter value
+  ObjectId("").getTimestamp()
+ 
 mongo generate unique id, u can insert one but it must has a key _id
 
 [MongoDB driver| BI Connector/shell] -query-> MongoDB server
@@ -18,7 +25,50 @@ update vs updateOne
 
 find()
   return a cursor object to cycle through results.
+  db.collectionName.find(
+    {query criteria  }, --> { key: {$gt: 18}}
+    {projection } --> exclude field set its val to 0
+  ).limit(num)  <-- cursor modifier  
   
+-------------
+model documents:
+it depends but general rules.
+normalized :
+  - many to many relationships
+  - large hierachical data sets.
+  - when embedding would result in duplication of data but would not
+    provide sufficient performance advantages to outweigh the implication 
+    of the duplications.   
+denormalized :
+  - u may embed related data in a single structure or document. these
+    schema are generally as "denormalized" models, and take advantage of 
+    MongoDB's rich document.
+  - one to one rel
+  - one to many
+  - better performance for read ops  
+----------------------
+ find ret a cursor with iterator ret the first 20 items, cursor has multiple 
+ func we can use to manipulate the retrieved data.
+ --------
+  we can pass a validator contains a $jsonschema when we create a collection 
+  to specifiy the required fields, data type, description -- enum, regex
+--------
+index: 
+  cursor.explain("executionStats")
+  db.collection.createIndex({"field": 1 asc | -1 desc})
+  --
+  /etc/mongod.conf.orig
+   configuration for mongo instance.
+ ----
+ mongodump -u username -p pass
+   dump ur db to /dump/
+ u can then restore them via
+ mongorestore {dumpDir} -u user -p pass
+ --
+ authorization: 
+  RBAC role based access control    
+
+
 to make projections
   find({matcher/filter}, {desiredField: 1}) id is included by default
   

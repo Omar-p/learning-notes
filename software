@@ -70,6 +70,62 @@ Function:
     "Make it correct, make it clear, make it concise, make it fast. In that order." -
      Wes Dyer
 --------------
+ - Single-tier applications
+   - In a single-tier application, the user interface, backend business logic, 
+     and the database reside in the same machine.  no network latency since every 
+     component is located on the same machine
+   - the actual performance of a single-tier app largely depends on the 
+     application’s hardware requirements and how powerful the machine it 
+     runs on is.
+   - when it comes to data privacy and safety, it is of the highest order in 
+     single-tier apps since the user’s data always stays in their machine and 
+     doesn’t need to be transmitted over a network for persistence.  
+   
+   * Once the software is shipped, no code or feature updates can be made until 
+     the customer manually updates it by connecting to the remote server or 
+     downloading and installing a patch.    
+   * no room for any mistakes.  
+   * The code in single-tier applications is also vulnerable to being tweaked 
+     and reversed engineered. The product security for the app publisher is minimal.
+     
+   a single-tier applications’ performance and look and feel can be inconsistent as 
+   the app rendering largely depends on the configuration of the user’s machine.  
+   ----
+ - Two-tier application
+   - A two-tier application involves a client and a server. The client contains the user 
+     interface with the business logic in one machine. Meanwhile, the backend server 
+     includes the database running on a different machine. The database server is hosted 
+     by the business and has control over it. 
+   - a good example of two-tier apps is the browser and mobile app-based games. The 
+     game files are pretty heavy, and they only get downloaded on the client once when
+     the user uses the application for the first time. And they make the network calls
+     to the backend only to persist the game state.  
+ ----
+ - Three-Tier Applications
+   - In a three-tier application, the user interface, business logic, and the database 
+     all reside on different machines and, thus, have different tiers. They are 
+     physically separated.    
+ ---
+ - N-tier applications#
+   - An n-tier application is an application that has more than three components 
+     (user interface,  backend server, database) involved in its architecture
+  
+  author opinion about stored procedural:
+   - Stored procedures enable us to add business logic to the database, which is always 
+     a big no. What if, in the future, we want to plug in a different database? Where do 
+     we take the business logic? Do we take it to the new database? Or do we refactor the
+      application code and squeeze in the stored procedure logic somewhere?
+  
+    
+  Tier vs Layer
+   - Tiers are the logical separation of components in an application or a service. The components 
+     are the database, backend application server, user interface, messaging, and caching.
+
+  - Layers in an application mean the logical separation at the code level. The layers are the 
+    user interface layer, business layer, service layer, and data access layer.
+  
+
+--------------
 Incremental OO software:
   ch 01:
     - Incremental development builds a system feature by feature, instead of building

@@ -271,6 +271,11 @@ to export a specific file from the container without getting the whole filesyste
 docker-machine used in testing when u can spin new servers on any cloud u choose, install docker, run docker on them. 
 
 docker ps -aq --> ret container id -> docker rm $(docker ps -aq)
+
+enterypoint of the container if it must run in foreground or the container will exit 
+ immediately. for example nginx deamonize itself if we use it as enterypoint when it fork 
+ itself to run in background, it will then exit and when the enterypoint process exit the 
+ container stop.
 ---------------------------------Troubleshooting-------------------------------------
 
 docker limiting resource is useful when u use docker directly in production but in most case
@@ -281,16 +286,24 @@ docker for disk usage:
   device mapper is one of the backend docker use to store. has default limit 10GBs
 docker ps -s -> show us the size of the read write layer (size of file system if exported) in the containers.
 
-
+--------
+gosu make sure the process u run will take pid even if u're not the root user
+ sudo command
+ pid 1 sudo command
+ pid n command
+ --
+ gosu root command
+ pid 1 command
 ---------------------------------------------------------------
 docker run -P ]-> -P = expose all port declared in that container
    
 -----------------------------------------------------------------
 
 built-in network drivers in Docker: 
-	-bridge[default]
+	-bridge[default] -overlay
 	-none -host -container
    drive is selected with docker run --net ...
+   bridge : good for containers on the same machine, overlay : distibuted.
 ----------------------------------------------------------------
 default[bridge]
   -container gets a virtual eth0 interface + its own loopback interface
@@ -492,3 +505,7 @@ storage:
   - non-persistence (graph storage | graph driver) /vat/lib/docker tied to 
     a life cycle of a container
   - persistence (volume)  exist outside the container but mounted to a specific point to it.
+-----
+compose:
+  - depends_on <- dependeny on the container level, has nothing to do with 
+    what happen inside. it meets when the container start.
