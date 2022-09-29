@@ -123,8 +123,126 @@ Function:
 
   - Layers in an application mean the logical separation at the code level. The layers are the 
     user interface layer, business layer, service layer, and data access layer.
+  ----
+  Thin client#
+   - A thin client is a client that holds just the user interface of the application. 
+     It contains no business logic of any sort. For every action, the client sends 
+     a request to the backend server  
+  Thick client#
+   - On the contrary, the thick client holds all or some part of the business logic.
+     . The typical examples of fat clients are utility apps, online games, and so on.
+  -----
+  Server
+    - web server:
+      The primary task of a web server is to receive the requests from the client and 
+      provide the response after executing the business logic based on the request 
+      parameters received from the client.
+      Every online service needs a server to run. Servers running web applications 
+      are commonly known as application servers[tomcat, jetty, netty].
+      - Besides the application servers [Proxy server, Mail server, File server,
+         Virtual server, Data storage server, Batch job server]   
+  - Server-side rendering# Often the developers use a server to render the user interface
+     on the backend and then send the generated data to the client. This technique is 
+     known as server-side rendering.     
+  ---
+  - HTTP: It’s a stateless protocol, and every process over HTTP is executed independently 
+    and has no knowledge of previous processes.  
+  - ----
   
+ HTTP PULL#
+  . for every response, there has to be a request first. The client sends the request 
+    and the server responds with the data. This is the default mode of HTTP communication
+      
+ HTTP PUSH#
+  .  the client sends the request for certain information to the server just once. 
+     After the first request, the server keeps pushing the new updates to the client 
+     whenever they are available.
+  
+  Clients use Asynchronous JavaScript & XML (AJAX) to send requests to the server 
+  in both the HTTP PULL and the HTTP PUSH mechanism.
+  
+  There are multiple technologies involved in the HTTP PUSH-based mechanism, such as:
+    [Ajax Long polling, Web Sockets, HTML5 Event Source, Message Queues, Streaming over HTTP]  
+ -----
+ HTTP Pull - Polling With AJAX 
+   - AJAX enables us to fetch the updated data from the server by automatically 
+     sending the requests over and over at stipulated intervals.
+   - Upon receiving the updates, a particular section of the web page is updated 
+     dynamically by the callback method.
+   - AJAX uses an XMLHttpRequest object to send the requests to the server. This object
+     is built in the browser and uses JavaScript to update the HTML DOM      
+     
+  * It is important to note here that AJAX polling and AJAX Long polling are 
+    different techniques. Do not confuse them as one.
+    AJAX polling is the HTTP Pull mechanism and AJAX Long polling is a hybrid 
+    between the HTTP Push and the Pull, based on the BAYEUX protocol.    
+    
+ Time to Live (TTL)#
+   - In the regular client-server communication, which is HTTP PULL, there is a 
+     Time to Live (TTL) for every request. It could be 30 secs to 60 secs, varying 
+     from browser to browser.  
+     
+ Persistent connection
+  - a network connection between the client and the server that remains open for 
+    future requests and responses, as opposed to being closed after a single communication.    
+    
+ Heartbeat interceptors#
+  - The connection between the client and the server stays open with the help of 
+    Heartbeat Interceptors.
+  - These are just blank request responses between the client and the server to 
+    prevent the browser from killing the connection.   
+    
+ * Persistent connections consume a lot of resources compared to the HTTP PULL behavior.
+    However, there are use cases where establishing a persistent connection is vital to 
+    an application’s feature. For instance, a browser-based multiplayer game. 
+ ----
+ Web Sockets#
+  - A Web Socket connection is preferred when we need a persistent bi-directional low 
+    latency data flow from the client to the server and back.
 
+  - Typical use-cases of web sockets are messaging, chat applications, real-time social
+    streams, browser-based massive multiplayer games, etc. These are apps with quite 
+    a significant number of read writes compared to a regular web app.
+    
+  - -----
+ AJAX – Long polling#
+  - Long polling lies somewhere between AJAX and Web Sockets. In this technique, instead 
+    of immediately returning the empty response, the server holds the response until it
+    finds an update to be sent to the client.
+
+  - The connection in long polling stays open a bit longer compared to polling. The server
+    doesn’t return an empty response. If the connection breaks, the client has to re-establish
+     the connection to the server.
+ --
+ HTML5 Event-Source API and Server-Sent Events#
+   - Instead of the client polling for data, the server automatically pushes the data 
+     to the client whenever the updates are available. The incoming messages from the 
+     server are treated as events.
+   - the servers can initiate data transmission towards the client once the client has 
+     established the connection with an initial request.     
+     
+   - once the client establishes a connection with the server, the data flow is in 
+     one direction only, from the server to the client.
+
+   - SSE is ideal for scenarios like a real-time Twitter feed, displaying stock quotes 
+     on the UI, real-time notifications, etc.  
+ --
+  Streaming over HTTP#
+    - Streaming over HTTP is ideal for cases where we need to stream extensive data over 
+      HTTP by breaking it into smaller chunks. This is made possible with HTML5 and 
+       a JavaScript Stream API.   
+    - The technique is primarily used for streaming multimedia content, like large 
+       images, videos, etc., over HTTP. Empowered by this technique  
+       
+ ----
+   However, modern websites are highly dependent on AJAX. On such websites, content for 
+   a particular module or a page section has to be fetched and rendered on the fly. 
+    In this use case, the server-side rendering doesn’t help much.
+
+   If we render the UI on the server for AJAX-based websites, for every AJAX request, 
+    the approach will generate the entire page on the server as opposed to just sending 
+     the updated content to the client in response.       
+       
 --------------
 Incremental OO software:
   ch 01:

@@ -479,7 +479,11 @@ docker engine modes:
   - swarm mode: work with multiple containr as a cluster.
   - single-engine mode: work with each container independently.
 -
+monitor:
 
+  - docker container stats [name]
+  cAdvisor
+-------------------
 first manager node in any swarm is elected as leader <- root CA of the swarm.
   u can choose external CA if u need using [docker swarm init --external-ca ..]
 u get default certificate rotation policy. 
@@ -509,3 +513,4 @@ storage:
 compose:
   - depends_on <- dependeny on the container level, has nothing to do with 
     what happen inside. it meets when the container start.
+    

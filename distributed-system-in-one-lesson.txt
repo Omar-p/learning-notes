@@ -65,3 +65,22 @@ Consistent Hashing:
    -scale
    -Transactional data [heavy write workload across networks]
    -Always on  
+-----
+CAP:
+  - Consistency: when u request to read data, u will get the last write.  
+  - Availability:  no error returns
+  - Partition Tolerance: when Partition fail and then healed, the system is able to deal with
+     life when the partiton is healed, 
+  P is not negotiable  in Distributed system. nodes will break. so we need to be
+   prepared for it.
+   
+   C in ACID after commit, data will be in valid state[refrential integrity]
+   
+   
+  - most don't fo with distributed transaction. they prefer to deal with failure by
+    [write off, retry, compensation actions] rather than rollback the whole transaction
+    because this increase the throughput and decrease the latency.
+  - spliting the work  allows us to parallelization sub-tasks, in unevenly workload
+    we can increase the #of nodes for the heavy tasks.  
+   
+   

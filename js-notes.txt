@@ -32,10 +32,40 @@ link ur js files in the bottom of body tag:
   === equal for val and type
  
  let ob = {key:val} <- object literal notation
+ 
+ iterate over object keys
+   for (let key in object) 
+    access key's val : object[key]
+    
+  
+ destructuring assignment
+   const {key1, key2} = object
+ 
+ object literal enhancemnt.
+ 
+ spreading operator:
+    ...
+    can used in spreading the nested object fields to be as outer object fields.
+    
+ 
+ object to JSON:
+   JSON.stringify(object, , )
+ JSON to object:
+   JSON.parse(json)  
+ 
+    
+ function declarations are hoisted, but function declared as a value : let f = func.. is not.
+ 
+ when u need to import json file, require it.
+ 
+ setInterval will run forever to interrupt it after some sec.
+ setTimeout(() => clearInterval(interval), sec*1000)
+ 
  --
-If you declared a parameter, but did not pass an argument to it, your parameter would be undefined.
+  If you declared a parameter, but did not pass an argument to it, your parameter
+  would be undefined.
 
-Function hoisting gets confusing because JavaScript changes the order of your code. 
+  Function hoisting gets confusing because JavaScript changes the order of your code. 
     I highly recommend you declare your functions before you use them. Don’t rely on hoisting.
     hoisting : js reorder code to move or functions declaration to the top
 
@@ -88,7 +118,28 @@ adding class to element
     This is a common mistake if you mix up the syntax for querySelector and Element.classList.
         element.classList.toggle('red') <- add if not exist. remove if exist.
 
-All event listener callbacks accept an argument.
-  This argument is the event object. People usually abbreviate it either to evt or e.
+  All event listener callbacks accept an argument.
+   This argument is the event object. People usually abbreviate it either to evt or e.
 
-a callback is a function that is passed into another function as an argument to be executed later.
+  a callback is a function that is passed into another function as an argument 
+  to be executed later.
+-----
+
+example of promise:
+  
+  // if click in 5secs win
+  const playGame = new Promise((resolve, reject) => {
+    document.addEventListener("click", () => {
+      resolve("win")
+    })
+    
+    setTimeout(() => {
+      reject("lose)
+    }, 5000)
+  })
+  
+  playGame().then(executeIfResolveInvoked).catch(executeIfRejectInvoked)
+  
+  
+  --
+  fetch("dataSOurce").then((data) => if data retrieved successfully).catch(ifCannotFetch)
