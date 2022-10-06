@@ -794,6 +794,310 @@ IAM groups:
        policy .
 ------
 IAM Roles:
-  - 
+  - assigned to multiple aws users, services . inside or outside the aws account [unknown number]
+  - if u cannot determine the #of principles who will use the identity then IAM ROLE is a good
+    candidate. 
+  - or we have mor than 5000 principles[limit for IAM USERs], IAM ROLE is a also a candidate.   
+  * IAM ROLES are assumed.. u become that role for a period of time then stop.
+  * IAM ROLE don't identify a specific user, it just provide a certain level of permission 
+    inside the AWS account.
+ - roles are real identity and can be refrenced within the resource policies
+    any thing assume the role can access what the role can access.   
+    
+ IAM ROLE has 2 policy: Trust policy and permission policy.
+   Trust Policy:
+     - specify identities can assume that role.
+     * can specify users or service inside the account or outside.
+       and even can allow an anonymous usage of that role and 
+       other type of identity such as fb, google, and twitter. 
+    - if a role get assumed for entity in the trust policy, AWS generate temporary
+      security credentials by STS[secure token service] sts:AsumeRole, and these 
+      are made available to the identity which assumed
+      the role. [ temporary security credentials] are like access keys[time limited].
+       - after expiration of the credentials. the identity need to renew them by 
+         assuming the role.
+   Permissions Policy:
+     - every time temporary credentials is used , the access is checked against
+       this permission policy.
+     - what is allowed to access by identity in the trust policy.
+  
+  when to use:
+    - aws services run on your behalf and they need access rights to
+      perform certain actions.  
+       - AWS Lambda[start/stop EC2, do real-time data processing].
+         - so function invokation need to have the permissions to perform.
+           . rather than hardcoded aws access key in the code we can 
+             a role known as (Lambda Execution ROle)
+              -trust policy: trust lambda service
+              -permission policy: grant access to the needed services.
+              when execute: first assume role [sts:AssumeRole] generate credentials
+                            second, access the resources using the temp credentials
+        --if u hardcoded aws access key instead, it's a security risk,
+          u will need to change them if u rotate the access key.                    
+       
+   - Break Glass For Key     
+     - when the default conditions require a certain level of permissions, 
+        and u want to provide more in emergency situation. u can define role for
+         that. and the role is assumed when it is required for that situation.
+  
+  - we have co-operate with existing identities and we need to offer SSO, 
+    or we have more 5000 identities.
+    external identities cannot be used directly in aws.  -- we need to
+    allow IAM Role inside aws account to be assumed by one of the external 
+    identities, after sts:assumeRole they can know access the resources
+    defined in the permission policy.   [ID federation].
+  
+  - developing mobile app with many users.  
+    when the app need to store or retrieve data from aws service [DynamoDB], 
+    we cannot create IAM USER for each app user. we can fix it using process
+    called (web identity federation). use IAM ROLE.
+    - if u use web identities [google, fb, twitter] we can allow these identities 
+      to assume an IAM ROLE based on ROLE TRUST POLICY.
+      advantages: - no aws credential on the app, can scale, using existing customer login.
+      
+      
+      
+-----------------------
+S3 -- S3 is private by default
+  - the only identity which has any initial access to an S3 bucket is
+    the account 'Root User' of the account which own that bucket.
+  S3 Bucket Policies:
+    - Bucket policies are a type of AWS resource policy.
+    - like identity policy, but instead they attached to a resource
+      instead of identities.
+    * idenetity perspective : u can only attach identities inside ur aws account.  
+    - Resource perspective permissions  
+      . Allow/DENY same or different account, anonymous principals.
+        we can reference all principals in the world.
+   --see examples of bucket policies---
+     main keys in the statement. ["Sid", "Effect[Allow|Deny]", 
+                "Principla" not exist in identity policy, "Action", "Resource[arn]"]
+       . another keys "Condition" <-- policy apply if cond is true. 
+    - on bucket policy on a bucket, but it can have multiple statements.
+    - access right for identities in the account is the combination of the resource 
+      polices and any identity policies attached to the account.
+      . for anonymous principle, resource police only apply. [because no identity] 
+      . for cross acount access, [identity policy in their account must allow 
+        access to the bucket in ur account and the bucket policy must also allow them]
+  - ACL access control list -- [legacy]
+    . can apply on objects & bucket -- cannot select a group of them         
+    . a subresource , legacy
+    . inflexible & simple permission [READ|WRITE|READ_ACP|WRITE_ACP|FULL_CONTROL]
+  - Block Public Access:
+    . added in respone to lots of public PR disaster, where buckets were being configured
+      incorrectly and being set open to the world.  this resulted in a lot of data leaks.
+    - ex: bucket with resouece permissions granting public access, until block access
+      was introduced, if u have public access configured the public could logically 
+      access a bucket. 
+      Block public access added a further level of security. apply to pervent 
+       the public access no matter what the resource policy say. [4-options]
+         not apply on any aws identities
+   
+   Key points[identity, resource policy]:
+     identity: controlling different resources, u have a preference for IAM, same account.
+     bucket: just controlling S3, anonymous or Cross-account
+         
+ -----
+ S3 Static Hosting:
+  - normal access[CLI, UI] is via AWS APIs.
+  - this feature allows access via HTTP - e.g Blogs
+  - enable it, set Index and Error documents.
+  - website endpoint is created. influenced by the bucket name
+     and the region that the bucket is in
+     - to use custome domain name via R53 - 
+       bucketname matters. u can use it it the name of the bucket match the custom domain.
+       
+  - two use cases: 
+   . Offloading
+     - server run on compute service [ec2], delivers a dynamic HTML page and 
+       it deliver static media. 
+       dynamic may need access to DB so that's not suitable for static s3 hosting.
+       but the static media are sitting there waiting to be delivered. [make over 95%
+        of the data volume]
+        we can move all the static media from the ec2[which is expensive] to static S3. 
+        when ec2 deliver the dynamic generated html which point at the
+         media that hosted on the S3 bucket to customer browser.
+         so the media is retrieved from S3, not the compute service.
+   . Out-of-band pages
+     - accessing something that is outside of the main way.
+     . store error page/static on it, so when the compute service face an issuse.
+        we redirect customer to it .
+   - Pricing on [put, get, copy]requests, storage, data out.
+     move data from internet to s3  is free. 
      
+  Object Versioning    
+   - controlled at a bucket level.
+     . start at disable. 
+     . once enabled cannot be disabled.
+     
+     . we can suspend the bucket but we can enable it back.
+     . lets us store [multiple versions] of objects within a bucket.
+       operation which would modify objects generate a new version.
+     . attribute id=null, when versioning is disabled.
+     . when enabled for each object  aws allocate id to objects.
+     . when u access object without specifying its id, u will get the latest version.
+     . when delete, S3 add delete marker to hide all versions of specific object.
+     . but u can undo the operation.
+     . if u want to fully delete, specify the object id and this version will be fully deleted.
+ --------
+  MFA delete    
+   - enabled in [versioing configuration]
+   - MFA is required to change bucket [versioning state].
+   - MFA is required to delete any version of an object.
+   . to fully delete any versions, u need MFA token.
+   . Serial number (MFA) + code passed with API CALLS.
  
+ S3 Performance Optimization:
+   . Single PUT Upload[default]:
+     . Single data stream to S3 , if stream fails - upload fails, require full restart.
+     . Speed & reliability = limit of 1 stream.
+     . single put upload limit to 5GB of data as maximum.
+  
+  . Multipart Upload  
+   . Data is broken up
+   . Min data size 100MB for multipart
+   . broken to 10000 max parts, 5MB -> 5GB. last piece can be smaller
+   . Parts can fail, and be restarted.
+   . transfer rate = speed of all parts.
+ S3 Accelerated Transfer(OFF by default)  
+   - use network of aws Edge Location 
+   - restrictions to enable it:
+     . the bucket name cannot contain periods, and it needs to be DNS compatible
+        in its naming.
+  - when upload data to S3, instead going to it directly, it immediately enters
+    the closest best performing AWS edge location 
+    - reaching edge location occur over public internet, but geogeraphically its really close.
+      - Edge location transit the data over AWS global network which is directly under the 
+        control of AWS. tends to have a direct link between these lcoations and other areas
+         of the AWS global network, in this case, the S3 bucket. 
+---
+ Key Management Service(KMS)  
+  - Regional & public service.       
+  - occupies AZ public zone and it can be connected to from anywhere with access to
+    this public zone. [if u have permissions to access it]
+  - Create, Store and manage Keys.
+  - handle [Symmetric] and [Asymmetric Keys]  
+  - perform  Cryptographic operations(encrypt, decrypt...)
+  - [Keys never leave KMS] - Provide FIPS 140-2(Layer 2)
+    KMS can create keys, keys can be imported, it manages keys, it can use these keys
+     to perform operations, but keys are locked inside KMS.
+  Customer Master Key(CMK)
+   - used KMS within cryptoghraphic ops, u can use them, applications can use them
+     and other AWS services can use them.        
+   - CMKs are logical  - containers of the actual physical master key.
+     contains [ID, date, key policy, desc & state]
+     ..backed by physical key materials.
+     these physical material can be generated by KMS or imported into KMS.
+     - this material contained inside a CMK can be used by the KMS product to directly
+       encrypt or decrypt data 
+       - CMKs can be used for up to 4kb of data.
+       --
+   KMS encrypt the cmk [CreateKey] before it's stored persistently on disk.    
+    when we wanto encrypt data we send it to KMS, which decrypt the cmk and use it to
+     encrypt data and return it. in decrypt operation KMS can use the correct CMK because
+      that information is encoded into the ciphertext of the encrypted data by kms.
+      
+    to get around limit of 4kbs in cmk  
+  - Data encryption keys(DEKs)
+   . aother type of key which KMS can generate, and generate it using CMK.
+   . GenerateDataKey - works on > 4kb
+   . links to specific CMK
+   . KMS does not store the DEK in anyway:
+     - it provide it to who use it and then discards it. because KMS doesn't
+      perform encryption or decryption of data using the DEK. the user do that.
+      KMS doesn't use DEK for anything beyond generating them  .
+      
+   . after KMS create it, it provide to u 2 versions of the key:
+     - plaintext version - ciphertext version[encrypted be the CMK].
+    . Discard it.
+   
+   -user of the service use the plaintext of cmk encrypt the data and 
+     store the encrypted data and encrypted version of the key.
+     . when user want to decrypt data- > send the encrypted DEK) to kms to 
+       decrypt it and return the plaintext of the key to use it.  
+       
+   S3 use KMS:
+     - generate DEK for every single object, encrypt the object and discard the plaintext
+       version .
+   Key points for KMS in the exam:
+    . CMKs are stored within KMS specific to a region & never leave.    
+    . u can't directly deal with cmks, u must use APIs available from KMS.
+    . Aws managed CMK or customer managed CMKs
+      - AWS managed CMKs are created automatically by aws when use a service such as S3 
+        which use KMS for encryption.
+      - Customer managed key are created explictly by the customer.  
+        . much more configurable :
+          - u can edit key policy, allow other AWS accounts access the CMK to perform ops 
+    . CMK support key rotation  .. physical backing material . data that's used
+       to actually do the cryptographic operations is changed. with AWS CMK managed key
+        it always enabled for every 1095 days. if u enable it for customer CMK it will happen
+         every one year.
+    . CMK itself contains the current backing key, and previous backing keys
+         [the physical material] . caused by rotating that material.
+    . u can use Aliases[per region] to CMKs. u can point to the cmk alias and change
+      the CMK beneath it as required.      
+      
+  --
+  Key Polices and security
+   . key policy (resource)  
+   . every CMK has one!   --> need to explicitly set who can access the key
+   . Key policies + IAM policies.   
+   
+ ----
+ S3 encryption: 
+  - Bucket aren't encrypted .. objects are..  
+  - each object inside the bucket could use a different encryption settings.
+  - S3 support [Client]-side Encryption and [Server]-Side Encryption.
+   both of these reer to encrption at rest.
+    method of determining how objects are encrypted, when they're persistently stored on disk
+     it doesn't refer to encryption in transit. [ encryption in transit] come standard with s3.
+    
+    Server-Side Encryption:
+       Server-Side Encryption with Customer-Provided Keys(SSE-C)
+         customer is responsible for encryption key.
+         s3 store the encrypted object and the hash of the key. 
+       Server-Side Encryption with Amazon S3-Managed Keys(SSE-S3 AES256)
+         u send data, s3 generate Master Key to use[key for each object]
+       Server-Side Encryption with CMKs stored in AWS KMS (SSE-KMS)
+         - generating key by KMS, DEK
+         - default master key cmk
+         - this CMK used to generate a unique DEK for each object/
+         - u can use customer managed CMK
+         benefits[separation of roles]
+          - if u have permission on S3 to manage it, and u don't have access to KMS
+            u cannot decrypt the data inside S3.
+  Bucket default encryption: 
+    data ---PUT---> S3 
+      u specify header [ x-amz-server-side-encryption ] if u don't the object isn't 
+      be encrypted. if u configure the bucket with default val it will be used.
+      if u set it to AES256 SSE-S3 will be used,  aws:kms -> SSE-KMS
+       
+   ----
+   S3 Object Storage class
+    - S3 standard
+      . object store across at least 3 AZs in the aws region.
+        return HTTP/1.1 200 OK
+      . provide 11 9s durability for 10m objects, 1 object loss per 10k years.
+      . Replication over 3AZ's & Content-MD5 Checksums and Cyclic Redundancy Checks (CRCs)
+        are used to detect and fix any data corruption.
+      . billed GB/m fee for data stored. No specific retrieval fee, no minimum duration, no
+        minimum size.
+      . S3 standard has a 'milliseconds' first byte latency and objects can be made publicly 
+        available.  
+      . used for frequently accessed data which is important and Non replaceable.  
+   - S3 standard-IA
+      . same as S3 standard but,
+        a new cost component,  which a retrieval fee for each GB of data retrieved from
+         the product there is the cost + transfer fee.
+        objects can be stored for less, but the minimum biling always applies. 
+      . minimum duration charge of 30 days - object can be stored for less, but minimum 
+         biling always applies  
+      . standard-IA has a minimum charge of 128kb per object
+      . cost effect as long as u don't access the data very often, or u don't need
+        to store it short term, u don't need to store lots of tiny objects.
+   - S3 One zone-IA     
+     . data replicated but inside on Az
+     . used for long-lived data, which is Non-critical & replaceable and where access
+       is infrequent -> replica copies if u're using same or cross-region replication,
+        then u can use this class for your replicated copy. or if u're generating intermediate
+        data that u can afford to lose, 
