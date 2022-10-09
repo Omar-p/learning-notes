@@ -597,6 +597,8 @@ Elastic Compute Cloud (EC2)[IAAS]:
 --------
 S3:
   - Global [public service] Storage Platform - regional based/resilient.
+    because bucket name is unique, u don't need to select a region when 
+     using a console. u specify the region in creation.
   - Public service, unlimited data & multi-user.
   - ...Movies, Audio, Photos, Text, Large Data sets.
   - Economical & accessed via UI/CLI/API/HTTP.
@@ -854,9 +856,93 @@ IAM Roles:
     - if u use web identities [google, fb, twitter] we can allow these identities 
       to assume an IAM ROLE based on ROLE TRUST POLICY.
       advantages: - no aws credential on the app, can scale, using existing customer login.
-      
-      
-      
+  
+  - Cross Accounts Access:
+    - if u want users from other AWS account to access service from ur account,
+      u can create IAM ROle for that. and the accounts from other account can 
+      assume it.
+---
+AWS organization:
+  - how to manage many aws accounts.        
+    . each one will have its own pool of IAM users, separate payment method.
+  -  u take standard AWS account[not in organization], u create AWS organization.
+    -  the standard account. become now the management account(previously Master).
+    - using the management account. u'll invite other AWS accounts to join the organization
+      those accounts if accept the invite become members account.
+      u can group accounts inside the organization [organization units]
+      . organization root -> container of  accounts not in ou.
+    - individual billing  information for each member accounts is removed
+      and sent to the management account. [Consolidated Billing]
+    - servic control policy: specify what each member account can do.
+    - using management account u can directly create new member AWS account
+      instead of inviting existing AWS account.
+
+    - best practice: u don't  have to have iamuser in each member accounts, instead
+      IAMROLE can be used to allow IAM USER to access other memeber account.
+      u have a single account to log into, and use IAM ROLE to access the others.
+
+      . we log in to this account and using ROLE Switch to access the others.
+  - Service Control Policies
+    .  accounts permissions boundaries
+    . they limit the account (including account root user) can do. 
+      - u can never afffect the account root user, but if u restrict the account
+        u also affect the root user.
+    . feature of organization to restrict members account 
+    . they don't grant any permissions, only restrict. 
+    . json document can attach to the root to affect all acc in the organization
+      or can attach to a specific OU or to individual account.
+    . management account cannot be restricted  by SCP.  
+
+    . Allow list vs Deny list
+      . FullAWSAccess by default and u deny what u want.
+      . most go for deny all because aws will add new services to deny all[remove FullAWSAccess]
+        . explicit allow services.
+      . to reduce admin overhead of allowing each required service u can allow all and deny 
+        what u want.   
+    . only allowed service in both Identity policies in account and SCP will be allowed.
+     - allowed in SCP but not granted!!!    
+     - Identity policies allow's access but only what allowed in SCP () will be allowed.
+-----
+  - CloudWatch Logs
+   . public service - usable from AWS or on-premise.
+   . store, monitor and access logging data [information + timestamp]
+   . AWS Integrations with - EC3, VPC FLow logs, Lambda, CloudTrail, R53 ....
+   . can integrate with outside application by setup an agent, development kit.
+   . can generate metrics based on logs - metric filter.
+   . regional service. 
+   . logging source inject data as log events. -> stored in log stream
+   . log stream : sequence of log events from the same source.
+   . Log group: container of multiple log stream from the same type.
+     - store configuration settings: Retention & Permissions.
+        . apply on all log stream in the group.
+        .
+     - store metric filter --> metric --> fire an alarm based on the value. 
+ 
+  - CloudTrail [regional]
+    . log api actions which affect AWS Account.  
+      . terminating EC2 instance, create / delete S3 bucket ...
+    . log actions as CloudTrail event.  
+    . by default store Event of last 90 days.
+    . To customize the service .. create 1 or more Trails.
+    . Management Events[log of action on aws resource (control-plane)] and 
+       Data Events(usage of the resource. upload/access object in S3).
+    . by default store Management Events only.   
+
+    - CloudTrail trail : unit of configuration within CloudTrail, CloudTrail log
+      events belonging to its region. u can configure trail to operate on its region,
+       or to operate on all regions[think of it as trail for each region but working as one].
+      . global service log its event to trail for all regions. [IAM, STS, CLoudFront]  
+      . u can configure a trail to store in a specific S3 to persist it forever.
+        . stored in json u can parse a specific information u want.
+        . can integrate with (cloudwatch log) and store/monitor data there.
+      . u can create a trail for all accounts in the organization.  [organizational trail]
+
+    Exam powerup:
+     . cloud trail enabled by default for 90 days for free.  
+     . trails are how u configure S3 and CWLogs.
+     . Management events only by default.
+     . IAM, CLoudFront, STS => global services events [us-east-1]
+     . NOT REALTIME - There is a delay[~15mins].
 -----------------------
 S3 -- S3 is private by default
   - the only identity which has any initial access to an S3 bucket is
@@ -1085,7 +1171,7 @@ S3 -- S3 is private by default
       . S3 standard has a 'milliseconds' first byte latency and objects can be made publicly 
         available.  
       . used for frequently accessed data which is important and Non replaceable.  
-   - S3 standard-IA
+   - S3 standard-IA infrequent access.
       . same as S3 standard but,
         a new cost component,  which a retrieval fee for each GB of data retrieved from
          the product there is the cost + transfer fee.
@@ -1101,3 +1187,75 @@ S3 -- S3 is private by default
        is infrequent -> replica copies if u're using same or cross-region replication,
         then u can use this class for your replicated copy. or if u're generating intermediate
         data that u can afford to lose, 
+   - S3 Glacier - Instant
+     . 3AZ
+     . minimum duration charge of 90 days.
+     . a minimum capacity charge of 128kb
+     . instance access as S3 standard but cost increase in frequent access.
+   - S3 Glacier - flexiable
+     . 3AZ
+     . 11 9s durability.
+     . 1/6 cost of s3 standard retrieval. 
+     . Objects cannot be made publicly accessible .. any access of data
+       (beyond object Metadata) require a [retrieval process].
+        . retrieval process: a job u need to run, u pay for it.
+          when u retrieve the object is stored in S3 IA on a temporarly basis
+           u access it then object will be dropped.
+       - Data in [glacier flexiable] is retrieved to s3-ia temporarily
+         . Expedited (1-5mins)
+         . standard (3-5hrs)
+         . bulk (5-12hrs)
+         ** faster = More expensive
+         **first byte latency = mins or hrs!!
+     . 40kb min size, 90 day min duration.
+     * suitable for archival data where frequent or realtime access 
+       isn't needed (e.g. yearly) mins-hours retrieval.
+  - S3 glacier Deep Archieve
+    same as [flexible] but:
+     . standard (12hrs)
+     . bulk (up to 48 hrs)
+     **first byte latency = hours or days!!     
+
+    - 40kb min size, 180 days min duration.
+    * suitable for archival data that rarely if ever needs to be accessed -
+      hours or days for retrieval. e.g. Legal or Regulation data storage
+      in term of Retention length. 
+  
+  - S3 Intelligent-tiering
+    . contain 5 different storage tier:
+      - frequent access tier. *like* s3 standard
+      - IA tier.
+      - Archieve instanc access tier. [up to 90 days]
+      - Archieve access tier. [90 -> 270]
+      - Deep archieve tier.  *glacier deep archieve* [180 or 730]
+      u don't have to worry about moving data between tiers, AWS
+      handle that according to how many the object accessed.
+
+      - cost: Intelligent Tiering has a monitoring and automation cost per {1000
+        objects}. the frequent access tier costs the same as S3 standard, the 
+        infrequent the same as Standard-IA. Archieve Instant, Archieve and Deep 
+        Archieve are comparable to their S3 glacier equivlents.
+
+      - As objects are accessed, they are moved back to the frequent access tier.
+        there are no retrieval fees for accessing objects.
+
+      - S3 Intelligent-Tiering should be used for long-lived data, with
+        changing or unknown patterns.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
