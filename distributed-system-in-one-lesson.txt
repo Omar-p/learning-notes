@@ -83,4 +83,37 @@ CAP:
   - spliting the work  allows us to parallelization sub-tasks, in unevenly workload
     we can increase the #of nodes for the heavy tasks.  
    
-   
+-----
+Distributed computing:
+  - Scatter/Gather
+    . general paradiagm we saw in Distributed computatuion,
+      where we scatter a computation out to lots of individual
+      nodes where it process usually on local data. and gather 
+      those results back together.
+    . data being local is the key.   
+    . move computation close to data.
+  - MapReduce
+    . key paradiagm that hadoop implement.
+    . computation strategy not a piece of code.
+    . 
+  - Hadoop
+  - Spark
+  - Storm
+    . another distrbuted computation solution but it's oriented 
+      around event processing instead of working on data persisted 
+      on some storage. realtime very small computation based on
+      incoming events.
+  - MapReduce
+    what happen is Map/shuffle/reduce.
+    but we just give the system the mapper and reducer.
+    . as word count example:
+      Mapper take a text file.
+       produce list of key/value pair. pass the to the shuffling stage.
+        where hadoop for example bring all common key across different nodes
+        in one place for good data locality. [one key, list of values]. 
+      Reducer take the output of shuffling and do some king of aggregation, 
+       probably produce a scalar.
+
+      . shuffling can use hash partitioning, i.e. to get value of common 
+        key together.
+        key is assigned to reduce # = hash(key)%number of reduce  
