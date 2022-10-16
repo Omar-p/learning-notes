@@ -17,3 +17,63 @@ CODD's Originial Relational model:
        restrect[filter tuples], project, join, divide
        - restrict & project are the only ops that take one relation as input !2.  
      relational assignment
+     
+     
+     
+---------------
+ER modeL:
+  - Entity Set: [tables in ur system]
+    . rectangle represent entities, double rectangle represents weak entities.
+    . weak entity: can be identified by itself, it's a part from other entity.
+        . have a totla participation in the rel between the primary entity.
+          . identified by its key and primary key.
+            - section in  a class : each class contains n section.
+  - Relationship Set: how entities interact with each other. ex: customer (order) product.
+    . diamond represent relationships, double diamond represents weak relationship.
+    . degree of rel
+      - unary : entity has relationship with itself. [employee manage employee] [person marry p]
+      - Binary: rel between two e ([student] attend [course]) ..
+      - n-ary : rel between more 2 e.
+    . Cardinality:
+      - OtoO  one from an E is related to only one in the other E. ([citizen] [election vote])
+      - OtoM  one from an E is relate to multiple e in the other E. ([post] [comment])
+      - MtoO
+      - MtoM [student () courses]
+    . Participation:
+      - total: every entity in the set participate in the relationship.
+          all [employee] (Join) [department]. double line in drawing.  
+      -      
+  - Attributes: columns in each table: 
+      represented by eclipse
+    . simple
+    . composite:
+      .  contain multiple fields. [address, full name, ]
+    . multivalues : double eclipse  
+    . drived attributed: deduced from other attribute 
+      [attr: dob, derived: age] [attr: course begin and end, derived: duration]dotted eclipse
+    . Key:
+      define a particular entity. [underlined]
+
+
+Transactions:
+    2 concurrent transcation operate on the same records.
+     - Dirty Read:
+       one transaction read uncommited data affected by another transaction.
+     - Non Repeatable Read:
+       reading the same data more than once in the same transaction
+       and getting different value.
+     - Phantom Read:
+       - same query get different num of rows in the same transaction.
+     
+     * Isolation Level
+      Read Uncommitted: can have [Dirty Read, Non repeatable Read, Phantom Read]
+       . can be achieved by setting a lock on updated vals, until the end of the transaction.  
+      Read Committed: can have[Non repeatable Read, Phantom Read].
+       . the other concurrent transaction will not see the updated vals, until the 
+         current transaction is commited.
+      Repeatable Read: can have [Phantom Read]
+      Serializable: don't have any.
+       .lock on any row satisfy the query constraints.
+       
+    in spring data we can set default level of transaction using property
+      spring.jpa.properties.hibernate.connection.isolation=   

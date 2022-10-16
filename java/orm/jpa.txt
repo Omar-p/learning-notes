@@ -340,3 +340,34 @@ don't use cascade.ALL or .REMOVE in ManyToMany
   - TransactionTemplate
     . configured by spring boot and has a pointer to JpaTransactionManager that implement
       ResourceTransactionManager.java 
+------------------
+Caching :
+  PersistenceContext --> L1 Cache --> L2 Cache --> DB      
+   each running transaction has it's own persistenceContext.
+    rach trans has it's l1 cache.
+    l2 cache shared between different transaction.
+    
+    L2 caching need to be configured.
+     hibernate-ehcache artifact for example
+     
+     1- enable L2 cache: spring.jpa.properties.hibernate.cache.use_second_level_cache=true
+     2- specify the caching framework : 
+         spring.jpa.properties.hibernate.cache.region.factory_class=
+     3- specify what to cache [NONE|ALL|SELECTIVE] 
+  
+  Distrbuted Cache:
+    caching across all application instances ex[HazelCast]   
+----------
+ we can implement soft delete by mark row as deleted using a boolean column
+   @SQLDelete(sql="update entitiy set is_deleted=true where id=?") for example.
+   we can add a constraints to all query operate on a specifi entity:
+     @Where(clause="is_deleted=false") -> doesn't aplly on native query..
+     * hibernate doesnot know what is happened, so u can use lifecycle method PreRemove[hook] to
+       affect the cached Entity.
+       
+       others:
+         . PostLoad    . PostPersist . PostRemove
+         . PostUpdate  . PrePersist  . PreRemove
+         . PreUpdate
+
+

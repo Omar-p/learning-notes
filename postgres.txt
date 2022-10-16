@@ -91,6 +91,7 @@ DISTINCT ON (cols,..) must match the prefix of cols in ORDER BY clause:
   cols in ON define the equality rows.
   Without ORDER BY, will picks any row in each group.
   SELECT DISTINCT ON (column1) column_alias,  column2 FROM table_name ORDER BY column1, column2; 
+  *SELECT DISTINCT ON (bcolor) bcolor, fcolor FROM distinct_demo ORDER BY bcolor, fcolor; *
 ---
 WHERE
   . The condition must evaluate to true, false, or unknown. It can be a boolean expression
@@ -119,6 +120,7 @@ FETCH is a SQL standard, LIMIT is not.
   - FETCH FIRST and FETCH NEXT do exactly the same thing. The reason both exist 
     because of the preceding OFFSET clause. Using the word FIRST combined with 
     OFFSET can be confusing to a human reader.
+  * SELECT film_id, title FROM film ORDER BY title OFFSET 5 ROWS FETCH FIRST 5 ROW ONLY; *   
 ---
   PostgreSQL supports the ILIKE operator that works like the LIKE operator. 
   In addition, the ILIKE operator matches value case-insensitively.
@@ -127,5 +129,18 @@ FETCH is a SQL standard, LIMIT is not.
    ~~*	ILIKE
   !~~	NOT LIKE
   !~~*	NOT ILIKE
+-----
+Inner Join:
+  - The inner join examines each row in the first table (basket_a). It compares the value 
+    in the fruit_a column with the value in the fruit_b column of each row in the second 
+    table (basket_b). If these values are equal, the inner join creates a new row that contains 
+    columns from both tables and adds this new row the result set.
   
+  - When you join a table to itself (a.k.a self-join), you need to use table aliases. 
+    This is because referencing the same table multiple times within a query results in an error. 
+ 
+ Left Outer Join, Right Outer Join, Full Outer Join.
+ ----
+ Data Types:
+   Big Serial is backed by a sequence.
     
