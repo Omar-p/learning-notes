@@ -16,10 +16,14 @@ cloud computing
 		Resource usage can be "monitored", "controlled", "reported" .. AND "billed".
 --------------------------------------------------------
 Public vs Private vs Hybrid vs Multi:
- Multi -> deploy ur app in multiple cloud provider this means that u have got cloud provider level resilience. stay away from single management window to manage multi-cloud because it add  abstraction that make only the common services between each platform are availables and can not use the rest. and that doesn't make use of each one.  
- Private -> private cloud on-premises [aws outposts, azure stack, google anthos] provide services dedicated to ur business and run on your-permises. they must meet the 5 characteristics of cloud computing. but dedicated to you as a business.
- Hybrid -> use public and private in the same time. with true hyber cloud. you use the same tooling the same interface to interact with both private and public component.
-	Hybrid Cloud is NOT public cloud + legacy on-permises -> it called hybrid environment or hybrid network.
+ Multi -> deploy ur app in multiple cloud provider this means that u have got cloud provider level resilience. stay away from single management window
+          to manage multi-cloud because it add  abstraction that make only the common services between each platform are availables and can not use the rest. 
+          and that doesn't make use of each one.  
+ Private -> private cloud on-premises [aws outposts, azure stack, google anthos] provide services dedicated to ur business and run on your-permises. 
+            they must meet the 5 characteristics of cloud computing. but dedicated to you as a business.
+ Hybrid -> use public and private in the same time. with true hyber cloud. you use the same tooling the same 
+           interface to interact with both private and public component.
+           Hybrid Cloud is NOT public cloud + legacy on-permises -> it called hybrid environment or hybrid network.
 -----------------------------------------------------------
 Cloud Service model
 	Infrastructure Stack -> collection of things which the application needs all stacked onto each other[Facilities -> infra -> servers -> virtualizations -> os -> container -> Runtime -> Data -> Application]. 
@@ -1241,6 +1245,80 @@ S3 -- S3 is private by default
 
       - S3 Intelligent-Tiering should be used for long-lived data, with
         changing or unknown patterns.  
+  -------
+  S3 Lifecycle configuration
+    - u can create Lifecycle rule on s3 bucket which can automatically
+      expire object in the bucket. great way to optimize the cost of S3.
+    - set of rules, consist of [actions] do x if y is true.
+    - can be applied on a Bucket or groups of objects.
+    - Transition Actions: change object class [S3 standard -> S3-IA]
+    - Expiration Actions: Delete object or a specific version.
+      . actions on version is more complex.
+    S3 Standard
+     S3 Standard-IA
+      S3 Intelligent-Tiering
+       S3 one AZ
+        S3 Glacier - Instant retrieval
+         S3 Glacier - Flexible Retrieval
+          S3 Glacier Deep Archieve
+  lifecycle rules can move object downward not upward.
+  all can move data down to any lower class, but S3 one AZ
+   cannot move objects to S3 glacier - Instant view.
+   
+
+ A single rule cannot transition to Standard-IA or One Zone-IA. and then
+  to glacier classes ... within 30 days (duration minimums)            
+  
+  in single rule to move fro s3 to [s3-ia or S3-1-AZ-IA] rule applied after 30 days,
+   and to move with the same rule to galcier class u need to wait another 30 days.
+   
+   . u can have 2 rules without 30 days gap.
+
+  smaller objects can cost more on classes under standard because (minimum size).
+
+
+
+-------
+VPC : how to design a scalabe network inside VPC.
+  Considerations:
+    - What size should the VPC be ...
+    - Are there any Networks [we can't use] ...
+    - VPC's, CLoud, On-premises, Partners & Vendors
+      . try to avoid ranges which other parts use, 
+        which u might need to interact with.
+    - Try to predict the future...
+    - VPC Structure - Tiers & Resiliency (Availability) Zones. 
+      . Tier : separate application components and allow different security to be  
+               applied.
+      . Networks are often split and part of that network are assigned 
+        to each of this AZ.       
+  
+  Custom VPC:
+    - Regional Service - All AZs in the region.
+    - Isolated network
+    - Nothing IN or Out without explicit configuration.
+      . if u have one resource or multiple are exploited, the impact is limited 
+        to the current VPC and only anything connected to it.
+    - Flexible configuration - other cloud & on-premises
+    - Default or Dedicated Tenancy!
+      . control whether the resource is created inside the VPC are procisioned
+        on shared hardware or dedicated hardware.
+      . if u choose dedicated hardware on VPC level, any resource created on that VPC
+        will be on dedicated hardware. increase cost. be careful, don't select it 
+        only if u know what u doing. 
+    - IPv4 private CIDR Blocks & [public IP] 
+       (when u want to make a svc available for public access).     
+    - 1 Primary Private IPv4 CIDR block, allocated in creation.
+    - Minn /28 (16 IP) Max /16 (65536 IP)
+    - optional secondary IPv4 Blocks.
+    - optional single assigned IPv6 /56 CIDR Block.
+  DNS in a VPC
+    . Provided by R53
+    . VPC `Base IP +2` Address
+    . [enableDnsHostnames] - give instances DNS Names .
+      - indicate whether public instances inside VPC are given dns public hostname.
+    . [enableDnsSupport] - enables DNS resolution in VPC
+      - whether DNS resolution inside VPC enable or disable. if e [VPC +2 is available]
 
 
 
