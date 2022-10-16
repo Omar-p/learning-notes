@@ -1,3 +1,8 @@
+  if we set properties file in the same path with the jar of our app, it 
+  will override the properties file that is inside the jar.
+
+
+----------------------------------------------------------------
 Core:
   Aop:
     - based on simple predicate[all method in package, all method with specific return datatype..] we invoke some methods. Around | Before | After 
@@ -19,14 +24,17 @@ Core:
 		      - Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 		        - add this header to respones from authenticated endpoint. we can disable it or add our owm. 
 		    - Https
-		      - to make spring redirect any request for HTTP to HTTPS .requiresChannel().requestMatchers(r -> [match requests in production for example. because development with http is easier])  hsts headers will included by default, u can disable or configure it.
+		      - to make spring redirect any request for HTTP to HTTPS .requiresChannel()
+		            .requestMatchers(r -> [match requests in production for example. 
+		            because development with http is easier])  hsts headers will included by default, u can disable or configure it.
 		  - getPrinciple -> access to currently logged in user.
 		  - ..
 		- FilterChainProxy -> composing other filters into a single filter.
 		  - entry point of all web based security.
 		- spring scurity focus on application security
 		  - Authentication | Authorization | protection aganist common attack.
-		  - separation between authentication and authorization because of authentication is one time thing. authorization spread through the entire application.
+		  - separation between authentication and authorization because of authentication is one time thing. 
+		     authorization spread through the entire application.
 		
 		- antMatchers vs mvcMatchers:
 		  - use antMatchers when u use spring security without spring [strut for example]
@@ -35,11 +43,14 @@ Core:
 		    .access('spEl')
 		    .access("@beanName.predicateMethod(param1, param..)")
 		    .mvcMatchers("/users/{name}").access("#name == principal?.username") <- the user only can access his data only.
-		  - map (RequestMatcher, Collection<ConfigAttribute>) FilterInvocationSecurityMetadataSource --> SecurityMetadataSource[default impl -> ExpressionBasedFilterInvocationSecurityMetadataSource]. 
-		    - AccessDecisionManager[route of all things access in spring security] 3 impl [default: AffirmativeBased (1 yes -> access), ConsensusBased (majority yes -> access), UnanimousBased (all say yes)]
+		  - map (RequestMatcher, Collection<ConfigAttribute>) FilterInvocationSecurityMetadataSource --> 
+		     SecurityMetadataSource[default impl -> ExpressionBasedFilterInvocationSecurityMetadataSource]. 
+		    - AccessDecisionManager[route of all things access in spring security] 3 impl 
+		       [default: AffirmativeBased (1 yes -> access), ConsensusBased (majority yes -> access), UnanimousBased (all say yes)]
 		    - PasswordEncoderFactories.createDelegatingPasswordEncoder
 		      - new DelegatingPasswordEncoder(id, encoders[id -> endcoder])
-		      - when u want to migrate password to use another encoder , implement UserDetailsPasswordService and override updatePassword and sprind will call it automatically.
+		      - when u want to migrate password to use another encoder , implement UserDetailsPasswordService and override 
+		        updatePassword and sprind will call it automatically.
 		    - WebExpressionVoter -> AccessDecisionVoter<FilterInvocation>
 		    	FilterInvocation:
 		    	  - curr req, curr response, context[all configAttributes]
@@ -48,11 +59,14 @@ Core:
 			
 			
 			- Oauth is a framework that allows people to grant limited access to protected resources on the web. 
-			    the term access implies that oauth is about authorization, and this is true. however, open Id connect [OIDC], formalizes a way to authenticate with oauth as well.
+			    the term access implies that oauth is about authorization, and this is true. however, 
+			     open Id connect [OIDC], formalizes a way to authenticate with oauth as well.
 	    - CommonOAuth2Provider -> contains info about well-known oauth2 providers.
 	    - ClientRegistrationRepository[InMemoryClientRegistrationRepository] ->
 	    - to initiate login flow OAuth2AuthorizationRequestRedirectFilter [if resolve the req then] redirect to OAuth endpoint itself.
-	    - to get the authorization code and exchange it for a valid user -> [OAuth2LoginAuthenticationFilter] -> pass it to AuthenticationManager that delegat it to [OAuth2LoginAuthenticationProvider] that get a response using the access token response client. 
+	    - to get the authorization code and exchange it for a valid user -> [OAuth2LoginAuthenticationFilter] -> 
+	       pass it to AuthenticationManager that delegat it to [OAuth2LoginAuthenticationProvider] that get 
+	         a response using the access token response client. 
 	    - from accessToken we need to get the user information for login using OAuth2UserService
 	      --> in this case we're just accessing a URI with the access token that was provided. And then create a user from that.
 	      - if u were using JWT, we could create it from id token itself.
@@ -131,3 +145,68 @@ Integration:
       . Those that get msg from SI channels to the outside app, db, etc.
     Built-in Adapter
       File, JMS, JDBC & JPA, FTP, FEED RSS, MAIL ADAPTER,..             
+----------
+TEST
+ @DataJpaTest
+   - by default, each test method runs in its own transaction, which is rolled back after 
+     the method has executed. This way, the database state stays pristine between tests and 
+     the tests stay independent of each other.      
+  - @TestPropertySource(properties = {
+        "spring.jpa.hibernate.ddl-auto=validate"
+    })
+-----------------------
+Data
+---------------
+Boot:
+  @SpringBootApplication annotated with:
+    @SpringBootConfigurations <- specialization of Spring @Configuration
+    @ComponentScan
+    @EnableAutoConfiguration <- switch on spring boot intelligent 
+        configuration based on classpath and configured properites.
+   ---
+   @ComponentScan
+     search for components declared in the same package or any child of it.     
+     
+     @Compnent   
+      specailized ones:
+        @Configuration
+        @Service
+        @Repository
+        @RestController
+        @Controller
+    
+     - u don't have to use it in the app, we can declare all our
+       components in a Configuration class using @Bean. if we don't
+       like ComponentScan. we can use @Import in the configuration class
+        to pull beans declaration from other classes or xml.
+        
+    ---
+    spring boot use User configuration under @CompnentScan to add user beans then
+     the @EnableAutoConfiguration add beans based on what defined in the classpath 
+    @EnableAutoConfigurations   
+      - get all classes defined in spring.factories, if there are conditional annotations
+        on them then evaluate if all are true. spring will check the conditional annotations
+        on the method of beans' definiation and register what are evaluated to true.
+      - if our configurations depend on each other, we need to explicitly order them by 
+        annotation (relatively is easily)   @AutoConfigureAfter(*.class) @AutoConfigureBefore()
+         if u depend on one from other project u can specify string of the fully qualifiedName
+           of that configuration
+
+    @ConditionalOnMissingBean --> applied if there is no other bean definiation with
+     the same type.
+    
+    class level @ConditionalOnClass([].class) configs applied if the class not in the classpath.
+    
+    
+    spring-boot-configuration-processor
+      - generates metadata about classes in your application that are 
+        annotated with @ConfigurationProperties
+      - looking for all classes annoted with ConfigurationProperties and provide 
+       auto-completion for them in the properties file. 
+       
+   to register configurations to spring to load:
+        src/main/resources/META-INF/spring.factories
+         org.springframework.boot.autoconfigure.EnableAutoConfigurations=qulifiedClassName
+
+   to get what match and what don't, run in --debug, or if u enable actuator:
+     /autoconfig endpoint will give u the report for that.
