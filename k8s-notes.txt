@@ -171,6 +171,19 @@ to access pod for testing purpose:
    kubectl get namespaces || kubectl get ns
  specify namespace to apply on
  	kubectl get pod -n [namespace]
+ - each namespace has its own DNS zone.
+   - so we can run different copies from our app in diff ns
+   to change ns
+   - kubens [name]<-- doesn't come by default
+   - kubectl config set-context --current --namespace=[name]   <- edit .kube/config
+   
+   u can access svc in specific namespace curl svc.ns
+   
+   - ns organize app, not isolate it.
+    to isolate u can use NetworkPolicy
+
+while working  with multiple clusters env insall [kube-ps1]. it shows 
+ the current cluster/context/namespace    
 
 to format output use --output/-o [wide|json|yaml]
 
@@ -225,6 +238,11 @@ metadata -> allows us to specify labels to access our resources.
 
 change in #of replicas is not reflected in rollout history because it is not a change in the app
   it's change in how k8s is dealing with the app.
+=======
+Imagine we have n nodes, one node is down.
+  k8s will run the pods that were on the unavaiable node on the other nodes.
+    when the node become. now it's empty. k8s doesn't re-balance the pods on the nodes
+     when we scale up, because that node is empty. k8s will schedule all pods on that node.
 =======
 DaemonSet and  Stateful set
   . a DaemonSet is  a deploy that starts one po instance on every node in the cluster
@@ -815,5 +833,20 @@ Secret is a special type of configMap that add encoding
     . To provide access to an ssh private key:
        kubectl create secret generic my-ssh-key --from-file=ssh-private-key=.ssh/id_rsa
      . to sensitive files which would be mounted in the app with root access only:
-       kubectl create secret generic my-secret-file --from-file=/my/secret  
+       kubectl create secret generic my-secret-file --from-file=/my/secret
+       
+----------
+kustomize: 
+  - base yaml, and then have overlay[for each deployment] patch on top of that yaml.
+helm:
+  - more powerful and complex. 
+    - let us to write yaml template, and the helm will evaluate it before applying in k8s cluster
+    - can used as package manager ,      
+
+
+
+
+       
+labels are limited in size, annotations have no limit
+  labels can be used in selectors, annotations cannot.
       
