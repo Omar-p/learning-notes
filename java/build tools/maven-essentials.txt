@@ -56,14 +56,16 @@ mvn(local machine) ---talk to online repo--> (repo1.maven.apache.org) contains t
 		
 09- dependency management
  mvn(in my machine) -- conect to --> remote-repo (contains archetpes & artifacts)
- 			in the pom.xml -> we declare what dependencies we need(identify it(Maven co-ordinates)) then maven go to the remote repo and fetch it for us. and make it available in the classpath.
+ 			in the pom.xml -> we declare what dependencies we need(identify it(Maven co-ordinates)) then maven go to the remote repo and fetch it for us. 
+ 			and make it available in the classpath.
  			
 10- Transitive dependencies
 	u need a dependency A and A need a dependency C
 		then maven will fetch both A(Direct Dep) and C(Transitive Dep) and make the available in the classpath.
 		
 11- 
-	in some scenario u may need A1.0 & B2.0. but A1.0 need B3.0. maven cannot fetch B with diff versions. so what happend is called -> Dependency Mediation (maven need to chose one)
+	in some scenario u may need A1.0 & B2.0. but A1.0 need B3.0. maven cannot fetch B with diff versions. so what happend is called -> Dependency 
+	Mediation (maven need to chose one)
 		-Nearest definition.
 			(as a graph) fetch one that is closer to ur project.
 		-First declaration
@@ -125,3 +127,5 @@ multi module maven project
 		the lifecycle will be applied to all modules in the order defined in the parent pom.
 --------------------------------------------------------------------------
 there is  an analyze phase in dependency plugin -> to show unused dependencies.
+ mvn dependency:tree generate tree dependencies of the project.
+ mvn install -> set the jar & pom in the local repo

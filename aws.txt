@@ -164,7 +164,7 @@ Encryption
     ---
     Symmetric Encryption: the same key used in both encryption and decryption process.
     Asymmetric Encription:
-      u have public and private key, when someone need to send me a data encrypt it with
+      u have public and private key, when someone need to send me a data, he will encrypt it with
        my pub key and send it. then I use the priv key to decrypt it. used by[SSL, TLS, SSH]
     
     Asymmetric encryption is computationally much more diffcult to do than symmetric. so, 
@@ -172,7 +172,7 @@ Encryption
       then use it in the communication use symmetric encryption.
     
     Another way for using asymmetric keys is [signing]: for ID verification: u sign using ur
-     priv key and send the request the reciver can validate that is you by using the pub key 
+     priv key and send the request the reciever can verify that is you by using the pub key 
      to validate the signed request.
     
     --
@@ -1320,6 +1320,80 @@ VPC : how to design a scalabe network inside VPC.
     . [enableDnsSupport] - enables DNS resolution in VPC
       - whether DNS resolution inside VPC enable or disable. if e [VPC +2 is available]
 
+  Subnets:
+   blue means private subnets, green means public.
+   AZ resilient. 
+   A subnetwork of a VPC - a part of VPC within a particular AZ.
+   1 Subnet => 1 AZ, 1 AZ => 0+ Subnets.
+   IPv4 CIDR is a subset of the VPC CIDR. must be inside the VPC CIDR.
+   Cannot overlap with other subnets.
+   Optional IPv6 CIDR (/64 subset of the /56 VPC - space for 256)
+   Subnets can communicate with other subnets in the VPC.
+  Subnet IP Addressing:
+   . Reserved IP addresses (5 in total).
+   . 10.16.16.0/20 (10.16.16.0=> 10.16.31.255)
+   . first address is a Network address (10.16.16.0)
+   . Network +1 (10.16.16.1) - VPC Router, logical network device
+     which move data between subnets and in/out VPC if it configured 
+     to allow that
+   . `Network +2`  (10.16.16.2) - Reserved (DNS*) <- reserved in every subnet.
+   . `Network +3`  (10.16.16.3) - Reserved Future Use
+   . Broadcast address 10.16.31.255 (Last IP in subnet)
+  VPC has a configuration object  apply to it called a DHCP option set.
+   how computing device recieve ip address automatically. 1 DHCP option set 
+   apply to VPC at one time and this configuration flows through to subnets
+    it control things like DNS service, Ntp services... cannot be updated
+     u can create new one and change VPC allocation to this new one.
+  2 options u [Auto assign public IPv4, IPv6 ]   
+  ---
+  bASTION hOST[JumpBox] 
+    . an instacne in a public subnet.
+    . used to manage incoming management connection.
+    . then access internal VPC resource.
+    . used as management point or entry point for private only VPC.
+    . often the only way IN to a highly secure VPC.
+    . can be configured to only accept connection from 
+       certain IP addresses. to authenticate with ssh.
+         or to integrate with our own on premises identity server.
+
+  ---
+  VPC Router
+    . Every VPC has a VPC Router - highly available.
+      [move traffic from somewhere to somewhere else]
+      Runs in all AZs the VPC uses,
+    . In every subnet .. `network+1` address.
+    . the default config : Routes traffic between subnets in that VPC.
+    . Controlled by `route table` each subnet has one.
+      - specify what to do with traffic when it leave the subnet.
+    . A VPC has a Main route table - subnet default.
+    . VPC can only have one Route table, but Route table can associated with many VPC
+    . 
+  IGW 
+    .[Region Resilient] gateway attached to a VPC.
+    . 1 VPC = 0 or 1 IGW, 1 IGW = 0 or 1 VPC.
+    . Runs from within the AWS public Zone.
+    . GW traffic between the VPC and the Internet or AWS 
+      public Zone (S3..SQS...SNS..etc)
+    . Managed - Aws handles performance. it simply works!
+    . when attached to VPC we use it as a target in the route table.
+    -
+    1 Create IGW 
+    2 Attach IGW to VPC
+    3 Create Custom RT 
+    4 Associate RT
+    5 Default Routes [0.0.0.0/0 & ::/0] IGW
+    6 Subnet allocate IPv4
+    no if there is no security limitation any services in subnet with public ip 
+      can communicate with internet and vice versa.
+    --
+    IPv4 Addresses with a IGW
+     - IGW maintain a recorde mapping [private:public]
+     - os configured with the private ipv4  in the EC2. ****
+     - ipv6 is natively public
+     - IGW manage the translation of the ip dest/src private <-> public.
+  ----
+  Stateless vs Stateful Firewall.
+       
 
 
 
@@ -1332,8 +1406,203 @@ VPC : how to design a scalabe network inside VPC.
 
 
 
+----------
+CloudFormation
+  - Physical and Logical Resources:
+    . begin with a template [JSON|YAML].
+    . .. contains logical resources - the "what" [declarative definiation].
+    . Templates are used to creae Stacks.
+    . .. 1 stack, 100 stacks, 20 .. stacks in each region.      
+    . template work in any account and any region can be reffered to as portable template.
+    . .. stack create [phuysical resources] from the (logical).
+    . if a stacks template is changed - physical resources are changed.
+    . if a stack is delted, normally, the physical resources are deleted.
+
+    Resources.Instance.Type
+                      .Properties[ImageId, KeyName, InstanceType...]
+
+    . once logical resource moves to (create_complete) meaning the physical resource is active
+      it can be queried for attributes of the physical resource within the template
+       [!Ref physical machine id for ec2].
+
+  - Template and Pseudo Parameters
+    . (Template Parameters) accept input - console/CLI/API
+     .. when stack is created or updated (ex: size or env[test|dev|prod])
+    . (Parameters) defined inside the template. their values can be refrenced inside the
+      template which allow them to influence the configs of the phyiscal resoures when
+      the template is used to create a stack to provision the resources.
+    . can be configured with Defaults, AllowedValues, Min and Max length & AllowedPatterns,
+      NoEcho[make the value when be typed not visible (password)] & 
+      Type(String|Int| aws specific which allow u to select vpc from a list or subnet from a list).
 
 
+    Parameters.Name.[TYPE, Default, AllowedValue, Description..]     
+
+    Pesudo Prameters injected by aws to the stack.
+     AWS::Region region the stack created in.
+     AWS::StackName
+     AWS::StackId
+     AWS::AccountId
+     populated by AWS based on the environment when creating the stack.
+
+     - Pseudo and Parameters
+        there are useful and ensuring the tempate is portable and can adjust based on 
+         the person or the process that creating the stack.
   
+  
+  - Intrinsic Function:       
+    . allow us to gain access to data at the runtime, ur template can take actions
+      based on how  things are when the template is used to create the stack.
+
+    . Ref & Fn::GetAtt  
+      - reference a value from one logical resource or Parameter on another one.
+        -- if u create a VPC in a template and u want to make sure another resource 
+           such as subnet goes inside that VPC then u can reference the VPC within
+           other logical resources.
+      - !Ref return The physical ID of the resource or the value of the parameter. 
+      - !GetAtt logicalNameOfResource.attributeName 
+        return The attribute value.
+
+    . Fn::Join & Fn::Split  
+      - WordpressURL.Value: !Join ['', ['http://', !GetAtt  Instance.DNSName]]  
+    . Fn:GetAZs & Fn::Select  
+      - GetAzs is environmental awareness function
+        !GetAZs region . return list of AZs in the explicit region, or the current.
+          --> return AZs which the default VPC has subnet in.
+       . get a list of az in a given region. 
+           . select allow us to select element from that list.
+           ecample : Instance.Properties.AvailabilityZone: !Select [0, !GetAZs '']
+    . Conditions(Fn::IF, And, Equals, Not & Or)    
+    . Fn::Base64 & Fn::Sub 
+        sub allow us to substitue thing within text based on runtime information. 
+          ${parameter} ${LogicalResource} ${LogicalResource.AttributeName}
+           cannot reference itself
+    . Fn::Cidr
+        build cidr blocks automatically
+    . Later .. Fn::ImportValue, FnLLFindInMap, Fn::Transform  
+
+  - Mappings:
+    . template can contain a Mapping object.  
+    .. which can contain many Mapping.  
+    .. which map keys to values, allowing lookup.
+    . can have one key, or Top & Second Level.
+    . Mappings use the !FindMap intrinsic Function  
+    . Common use ... retrieve AMI for given region & architecture.
+    . improve template portability.
+  - outputs
+    . optional, useful for providing  status information or showing how to access svcs which 
+      created by the cloudformation stack.
+    ... visible as output when using CLI/console UI
+    ... accessible from a parent stack when using nesting.
+    ... can be exported, allowing cross-stack references.  
+  
+  - Conditions [optional ]
+    . allows the stack to react to a certain conditions, and change infrastructure which is
+      deployed or  specific configuration for that infrastructure based on those conditions.
+    . ..Processed before resoueces are created.
+    . Use other intrinsic functions AND, EQUALS, IF, NOT, OR.
+    . ..associated with logical resources to control if they are created or not.
+    . e.g.. based on parameters: ONEAZ,TWOAZ,THREEAZ - how many AZs to create resource in.
+    . PROD,DEV - control the size of instances created within a stack.
+  - DependOn 
+    . cfn tries to be effiecient.
+    ..does things in parallel (create , update & delete)
+    ...tries to determine a dependency order (VPC => subnet => EC2)
+    .. (references or functions create these) if a ref b then create b first.
+    . DependOn lets u explicitly define these
+    ..If Resources B and C denpend on A 
+    ..both for A to complete before starting.
+
+  - Cloudformation provisioning
+    . after the physical resource report that it is created -> Create_COMPLETE?
+     what if fail in the bootstraping 
+     - wait conditions & cfn_signal provide a way to get around that limitation
+       . Signal 
+         included in aws-cfn-bootstrap package.
+         . configure cfn to hold, wait for 'x' #of success signals.
+         . wait for Timeout H:M:S for those signals (12 hrs max).
+         . If success signals recieved before the timeout.. CREAE_COMPLETE .
+         . If failure signal recieved .. creation fails.
+         . If timeout is reached .. creation fails.
+         . .. CreationPolicy[EC2, autoscaling group] or WaitCondition[integrated with external ]
+         .  when needing additional functionality ; pass data back to cfn, 
+           put general wait state in the template which can be passed until the
+           signal is recieved;  use [WaitCondition: specific logical resource 
+             not defined in other resource can depend on other and vs]
+             .
+             .
+             .
+             .
+  - Nested Stacks:
+  AWS::CloudFormation::Stack Properties.TemplateURL
+         --any parameters without default val should provided in the parent
+  whole templates can be reused in other stack.       
+    * single isolated Stack:
+       . Resources in a single stack share the same lifecycle.
+       . Stack resource limits (500) 
+       . can't easily reuse resource e.g. A VPC  
+         . u can ref resources from the same stack 
+       .        
+    * Multi-stack architecture:
+      . nested stack . cross stack referencing    
+
+    - Root Stack [created first manually]& Parent Stack 
+       [a parent of any stack it immediately create; any stack has nested one]
+    - nestStack Outputs  can be referenced in the parent stack nestedName.Outputs.[xxx]
+    - nested stack can make dependencies on each other within the same parent.
+    - outputs of nestedStack can be injected as parameters to another nested one.
+    - Use nested stack when the stacks form part of one solution - lifecycle linked. 
+      . when resources will not be existed without the other,  
+         all created together operate together, deleted together. 
+    - Overcome the 500 Resource Limit of one Stack
+    - Module templates ... code reuse.     
+    - Make the installation process easier
+      . root stack orchestrate the creation of the nested one.
+    - USE ONLY WHEN EVERYTHING IS LIFECYCLE LINKED [created, deleted, updated together]  
+      . if u want to use the actual stack not the template between other stacks -> Cross-stack
+    - CFN stacks are designed to be isolated and self-contained  [by default cannot reference 
+       resource in another stack]
+  - CF Cross-Stack Reference:
+    . Outputs are normally not visible from other stacks.
+    . Nested stack can reference them...
+    . Outputs can be exported .. making them visible from other stacks
+    . Exports must have [unique name] in the region
+    . Fn::ImportValue can be used instead of Ref.
+    that's how to use values from one stack to another.
+    . cross stack referencing work when they are in the same region via exported vals.
+    ...different lifecycle resources. implement soa. stack reuse.
+  - StackSet
+    . feature of cfn which allow u to create, update, or delete infrastructure across
+      many regions in many AWS accounts.    
+    . deploy cfn across many accounts & regions.  rather having to authenticate
+      to each account individually and switch to each region u will let cfn to do it.
+    . StackSets are containers in an admin account[distinguish where stackset 
+       is applied from the accounts where resources is created]....  
+      .  contain [stack instances; ref to actual running stack in aws region in account] .. 
+         which [reference stacks].
+    . Stack instances & stack are in 'target accounts'     
+    . Each stack = 1 region in 1 account.
+    . Security = self-managed or service-managed.
+    . Term: Concurrent Accounts 
+      - option can be set when creating a StackSet, define how many individual aws accounts
+        can  be used at the same time. 2 val for 10 acc u will do 5 set.
+    . Term: failure Tolerance 
+      -  amount of individual deployments to fail to mark the whole stackset as failed.
+    . Term: Retain Stacks,
+      - remove stack instacne from a stackset  and by default it will delete 
+        any of the stacks that are in the target accounts, but you can set it
+        so that you can remove stack instances from different AWS accounts and
+        different OUs in different regions, and it will retain any of the
+        CloudFormation stacks within those regions, within those accounts.
+        So by default, it will delete the actual stacks, but you can set it to
+        retain them. 
+    . Scenario: Enable AWS config
+    . Scenario: create AWS Config Rules - MFA, EIPS, EBS Encryption.
+    . Scenario: Create IAM Roles for cross-account access.. 
+      you might want to use StackSets to create IAM roles that are used 
+      for cross account access at scale. So instead of having to create 
+      them in individual accounts one by one, you can define a CloudFormation 
+      template to create an IAM Role and then deploy it as part of a StackSet.
+
 
 

@@ -117,3 +117,58 @@ Distributed computing:
       . shuffling can use hash partitioning, i.e. to get value of common 
         key together.
         key is assigned to reduce # = hash(key)%number of reduce  
+        
+---------
+negative acknowledgment NAKs
+  The recipient sends it to the sender when the sent data packet isn’t 
+  delivered properly. This can be due to different reasons like incomplete 
+  or corrupted data, checksum failure, invalid headers, or wrong data formats.
+
+multicast vs broadcast
+ broadcast send to all nodes in the network.
+ multicast send to a specific group of nodes.
+
+  - group of nodes want to inform all other nodes.
+    . most of them are application level protocol.
+    . simplest implementation:
+       loop over lst of the nodes and send to all of them using TCP/UDP.
+         . overhead on the sender rlate to num of reciever.
+         . if sender fail the rest of reciever will not recieve
+   . Tree-Based -> build a spanning tree.
+     . IPmulticast[network level protocol], [Application level protocol] SRM, RMTP, TRAM, TMTP.
+     . low latency. less overhead.
+     . problems ? how to setup and maintain the tree, detect failure.?    
+     
+     --
+     . build a spanning tree among the processes of the multicast group
+     . use spanning tree to dissements (ACKs) or (NAKs) to repair multicasts not recieved
+     . SRM (Scalable Reloable Multicast)
+       . Uses NAKs
+       . if the reciever not get a message send a repair NAK up to the root 
+       . but adds random delays, and uses exponential backoff to avoid NAK storm.
+     . RMTP (Reliable Multicast Transport Protocol)
+       . Uses ACKs - use post ACK . receiver send a collection of ack for all multicast msgs
+       . But ACKs only sent to designated recievers, which then re-transmit missing multicasts.
+     . these protocols still cause an O(N) ACK/NAK overhead.  
+     ---
+   Gossip protocol [Push]
+     . Periodically, transmit to b [fanout] Random target. Gossip message [UDP]
+     . Other Nodes do same after receiving multicast
+     . nodes are not in sync but in analysis we assume it.
+     . node can receive messages more than once.
+     . Protocol rounds (local clock) b random per round.
+     . ...
+     . once u have a multicast msgs, u start gossiping about it,
+     . multiple msgs> Gossip a  random subset of them, or recently-received onces, 
+       or higher priority once.
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     

@@ -41,3 +41,57 @@
     . 1 -> STDOUT
     . 2 -> STDERR
   - to list all pid-> ls /proc. to list fd used by specific proc -> ls /proc/pid/fd 
+
+---
+SysAdmin
+-
+1 Boot loader
+  - small piece of software usually at the very begining of large format 
+    like a disk that contain enough code to launch the OS.
+  - located on the Master Boot Record (MBR) or GUID Partition Table (GPT)  
+  - Firmware[Embded swf in the embeded chip of the computer] (BIOS or UEFI) provides
+    a list of boot devices to choose from (DVD, USB, Hard disk, network via PXE protocol)
+  - BIOS reads and executes the boot loader from the begining of the boot device
+2 Kernel Initialization
+    - Boot loader opens and initializes the kernel
+      . Compressed kernel image is decompressed.
+      . kernel detects amount of RAM available and create its internal Data structure 
+      . Kernel memory is unavailable to user spaace programs.
+3 Device detection
+  Detect and configure devices:
+    - Kernel begins probing devices to inventory attached hardware,
+      such as processors, I/O subsystems, storage devices.
+    - Compressed initial RAM disk 'initrd' is decompressed and mounted
+    - Essential drivers such as RAID, LVM[enable disk to shrink and grows], encrypted filesystems loaded 
+      efore initrd is unmounted and memory is freed.  
+4 Process creation        
+  . Kernel processes such as kjournald, kswapd, khubd
+  . The Upstart init daemon, the "paremt of all processes",
+    spawns as PID 1
+  . Upstart emits an event called "startup" which triggers system startup.
+  . Local, virtual, and swap filesystems are  mounted.
+5 Service startup
+  . init runs jobs and scripts to load system services such as power management,
+    hardware clock, network interfaces, and network daemons.
+  . System V init [historical reasons] vs Upstart.
+  . SysV scripts are in /etc/init.d or /etc/rc.d/init.d
+  . Upstart jobs in /etc/init
+  . Links in each runlevel directory (/etc/rc?.d)      
+6 Runlevels  
+  . Numbering sys to classify boot state.
+    . 0 represents system shutdown
+    . 1 and s or S represents single-user mode. <- no network access
+    . 2  - 5 for networking.
+    . 6 used for reboot. 
+    . still implemented just for compatibility purpose.
+--
+vagrant is a virtual machine that use virtual box to execute and run vm.
+--
+ we can interupt the booting process start in grub mode press e 
+  and we now can edit how the kernel start [rbgb (start all svc by default)
+     confirm(useful in troubleshooting problem), single(can start other runlevel-> 
+       init 3[usermode and networking support])]
+  
+  ps auxw | egrep '\[' <- KERNEL PROCESSES.
+
+  kernel modules are located in /lib/modules
