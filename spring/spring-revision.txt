@@ -23,6 +23,19 @@ Core:
 		    - cache control
 		      - Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 		        - add this header to respones from authenticated endpoint. we can disable it or add our owm. 
+            - to prevent caching the content of secured content. when someone use back in the browser after 
+               the user logged out the content will not be loaded because it's not cached
+        - X-Content-Type-Option: nosniff
+           . tell the browser not to guess the Content-Type because certain browsers ignore 
+             the Content-Type header and try to guess it.      
+           why? in certain situation u can upload a polyblack  file(image) and it can be a valid JS as well,
+            then u can execute a cross-site scriptting attack by uploading an image.
+        - CSRF
+          . this attack is taking advantages of that a browser will send any cookies associated with 
+            a certain domain to that domain  .
+             - we have session cookie for bank.com, when another website[attacker.com] send a req from
+               ur browser to bank.com the browser will send the cookie [session associated with bank.com]
+                with the request
 		    - Https
 		      - to make spring redirect any request for HTTP to HTTPS .requiresChannel()
 		            .requestMatchers(r -> [match requests in production for example. 
@@ -179,7 +192,22 @@ TEST
         "spring.jpa.hibernate.ddl-auto=validate"
     })
 -----------------------
-Data
+Data:
+  RowMapper: When each row of a ResultSet maps to a domain Object, 
+   can be implemented as private inner class.
+
+  RowCallbackHandler: When no value is being returned from callback 
+    method for each row, e.g. writing row to a file, converting rows 
+    to a XML, Filtering rows before adding to collection. Very efficient 
+    as ResultSet to Object mapping is not done here.
+ 
+  ResultSetExtractor: When multiple rows of ResultSet map to a single Object.
+   Like when doing complex joins in a query one may need to have access to entire 
+   ResultSet instead of single row of rs to build complex Object and you want to take 
+   full control of ResultSet. Like Mapping the rows returned from the join of TABLE1 and TABLE2 
+   to an fully-reconstituted TABLE aggregate.
+
+  ParameterizedRowMapper is used to create complex objects
 ---------------
 Boot:
   @SpringBootApplication annotated with:
@@ -234,3 +262,35 @@ Boot:
 
    to get what match and what don't, run in --debug, or if u enable actuator:
      /autoconfig endpoint will give u the report for that.
+-----
+profiles: 
+
+application-{profile name}.yml
+
+@Profile({"!prod", "!qa"})
+@Configuration
+public class
+
+Note that the spring.profiles.active property name contains the plural word pro-
+files. This means you can specify more than one active profile.
+spring:
+  profiles:
+    active:
+     - prod
+     - audit
+     - ha    
+
+@Profile("dev")
+
+
+It involves placing profile-specific properties alongside nonprofiled properties in
+application.yml, separated by three hyphens and the spring.profiles property to
+name the profile.
+---
+spring:
+  profiles: prod
+------------
+
+  the @RestController annotation tells Spring that all handler methods in the 
+  controller should have their return value written directly to the body of 
+  the response, rather than being carried in the model to a view for rendering.

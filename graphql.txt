@@ -1,0 +1,30 @@
+Query : entrypoint
+Mutation:
+Nesting
+Subscription
+---
+GET req maximum chars 2048
+Schema <- client make a GET req to get the schema.
+
+--
+Pros:
+  - Flexibility
+  - Efficient Response(u only get what u ask for)
+  - No roundtrips(happen in the backend)
+  - Single endpoint
+  - Self documenting
+Cons:
+  - Complexity(need to define schema)
+  - No Http caching(POST only).
+  - No standard Errors(facebook choice to make it transport agnostic not tied to http.
+  - Expensive queries backend (
+
+
+Graphql over REST :
+  - Public ad-hoc API that u can't predict how it will be used.
+  - Enterprise API (a lot of entities will interact each will need different data)
+  - Well defined schema
+
+REST over Graphql:
+  - specific and well-design use cases API
+  - Simple API that serves one client (webpage)

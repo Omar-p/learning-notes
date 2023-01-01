@@ -35,12 +35,32 @@ sharing data in the stack between different goroutines so any shared data
 moved to the heap memory 
 [go compiler use escape analysis to figure out which data need to be sotred in the heap]
 https://en.wikipedia.org/wiki/Escape_analysis
+-------------------------------
+Go struct:
+  - compiler perform alignment
+  - in named type compiler don't perform implicit conversion,
+    in literal type(in case of compatibility) will do.
+  -  
+Constants:
+  - other lang, constansts are read-only var.
+    In go, there are not variable and only available at the compile time.
+    constant [kind of [at least 256 bits], type of same as their type]
+  - kind of implicitly converted when used in expression. literals are kind of constant
+  - iota , constants initially start with zero and each time increment by 1.
+Garabage collector [non-generational, non-compacting, concurrent, sweep]
+  memory on the heap is not moving, once allocation happened in the heap it's fixed 
+    for the lifetime of the allocation. 
+    priorites:
+     1- maximize throughputs during collection, 
+     2- memory resource usage.
 _______________________________________________________________________________-
 What is actually involved in a context switch depends on the architectures, operating systems, and the number of resources shared (threads that belong to the same process share many resources compared to unrelated non-cooperating processes). For example, in the Linux kernel, context switching involves switching registers, stack pointer (it's typical stack-pointer register), program counter, flushing the translation lookaside buffer (TLB) and loading the page table of the next process to run (unless the old process shares the memory with the new)s
 ----------------------------------------------------------------------------------------------
 https://en.wikipedia.org/wiki/Green_threads
 -----------------------------------------------------------------------------------------
-
+type declaration vs aliasing:
+  declaration copy the fields of the object.
+  aliasing copy the fields and the method sets
 =====
 TESTING
 -- 

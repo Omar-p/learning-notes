@@ -129,3 +129,23 @@ multi module maven project
 there is  an analyze phase in dependency plugin -> to show unused dependencies.
  mvn dependency:tree generate tree dependencies of the project.
  mvn install -> set the jar & pom in the local repo
+
+
+	compile: It is used during the compilation process. This is the default scope unless provided. 
+	  This ensures that the dependency is available on classpath for building the project and used
+	    in sub-modules of the project.
+
+	runtime: It is used when we need that dependency during the execution of the project 
+	  and not during the compilation process.
+
+	test: It is used when we need that dependency during test runs.
+
+	provided: It is used when we need the dependency that should be provided by JDK at runtime.
+
+	system: It is used when we want to specify the dependency path within our workspace.
+
+	import: It is used when we want to override all dependencies which are effectively declared in pom.xml
+
+	<exclusions>: The <exclusions> tag is used within a dependency to exclude the specified dependency from the dependency. 
+	  can be used to replace tomcat by jetty in starter-web
+

@@ -172,3 +172,52 @@ multicast vs broadcast
      
      
      
+------------
+Peer To Peer System:
+  . first distributed system that seriously focused on scalability
+    with respect to number of nodes.
+  . P2P techniques in cloud computing system
+      . Key-value stores(e.g., Cassandra, Riak, Voldemort, DynamoDb) use Chord p2p hashing.
+
+  - Widely-deployed P2P Systems
+    1. Napster
+    2. Gnutella
+    3. Fasttrack (Kazaa, Kazaalite, Grokster)
+    4. BitTorrent
+    P2P System with provable properties
+    1. Chord
+    2. Pastry
+    3. Kelips
+  ----
+  Napster
+   Server:
+     Store a directory, i.e, filenames with peer pointers
+     . maintain directory information using (ternary tree algorithm)
+   Client:
+     . Connect to a Napster Server 
+       . Upload list of music files that you want to share.
+       . Server maintain list of <filename, ip_address, portnu> tuples.
+         Server Store no files.
+     . Search
+       . Send Server keywords to search with
+       . (Server search its list with the keywords)
+       . Server returns a list of hosts - <ip_address, portnum> tuples - to_client
+       . Client ping each host in the list to find transfer rates.
+       . Client Fetches file from best host.
+     . All communications uses TCP   
+
+     . Joining A P2P system
+       . can be used for any p2p system
+         . Send an http request to well-known url for that
+           P2P service - http://www.myp2pservice.com
+         . message routed (after lookup in DNS=Domain Name Sydtem) to 
+           introducer, a well known server that keeps track of some recently 
+           joined nodes in p2p system.
+         . Introducer initializes new peers' neighbor table.         
+     . Problems:
+       . Centralized server a source of congestion. can be overwhlmed with search queries.
+       . Centralized server single point of failure.
+       . No Security: Plaintext messages and passwds.
+       . napster.com declared to be responsible for users' 
+         copyright violation=> "indirect infringement"     
+       

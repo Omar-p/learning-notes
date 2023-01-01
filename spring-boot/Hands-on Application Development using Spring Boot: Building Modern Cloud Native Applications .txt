@@ -1,0 +1,107 @@
+The 12-factor app:
+  -  Codebase: a single repository for a functional module that can be managed 
+     by Source Code Management Tool (SCM) like GitHub and BitBucket
+     for managing the versions of the source code. Once the source 
+     code is committed, it can be deployed using any CI/CD tool like 
+     Jenkins.
+
+ -  Dependencies: Explicitly declare and isolate dependencies. [pom.xml]
+ -  Config: Store config in the environment.
+ -  Backing services: 
+    Treat backing services as attached resources.
+    Your application may use the external resources like database, network firewalls, 
+    and caching tools like Redis. Spring Boot ensures that these services are managed 
+    with the correct set of configurations required so that it would be just a matter 
+    of configuration, if the application migrated from one geographical location to 
+    other geographical location. It may also happen that the application is transitioned 
+    between data centers.
+ -  Build, release, run: Strictly separate build and run stages.
+ -  Processes: Execute the app as one or more stateless processes.
+
+ -  Port binding: Export services via port binding.
+ -  Concurrency: Scale out via the process model.
+    The applications can also be scaled up and scaled down depending on the 
+    users hitting the environment. When applications are deployed into the 
+    cloud environment, their auto-scale services can be used so that the metrics 
+    like CPU, memory, and HTTP throughput, when crosses a certain threshold, 
+    the applications can be scaled up and down. The distributed services used in 
+    the applications should be defined in such a way that scaling up and down 
+    does not affect the functionality.
+
+ -  Disposability: Maximize robustness with fast startup and graceful shutdown.
+    The Spring Boot applications have the minimum startup time ranging from 8 secs
+    to few minutes. When the application is integrated with the web server, that is,
+    using embedded servers like Tomcat, it allows the application to be shut down 
+    gracefully so that any request that comes in during the shutdown process may 
+    be fulfilled successfully.
+
+ -  Dev/prod parity: Keep developing, staging, and production as similar as possible.
+    It is essential to have the similar states of the environment on which the applications
+    are running. This helps us to identify the errors coming to the lower environments and 
+    fix them before promoting the applications to the production environment. 
+    The developers use the development environment; staging used by the UAT testers;
+    sometimes clients, and production is exposed to the customers or users who would be 
+    using your application.
+
+ -  Logs: Treat logs as event streams. The application logs can be sent out as the stream 
+    to the log aggregator tools like Splunk, which indexes the logs based on the applications.
+    This helps the team to go through the logs in case of any issues. Various patterns like total
+    time taken for making external calls to the other applications and accessing the database can
+    be drawn out for analysis. This proactive approach can be followed so that it would be easier 
+    for a developer to rectify an issue, be it business related or the deviation of the workflow.
+
+ - Admin processes: Run admin/management tasks as one-off processes.
+----------
+    maven:
+    The dependencies may be scalar or composite. The scalar dependency has the single dependency in its project.
+    The scalar dependency has no external dependency; whereas, the composite dependency like any of the starter 
+    packs of Spring has a combination of multiple dependencies. Composite dependency follows the nested dependencies 
+    architecture. These nested dependencies can be called transitive dependencies as they are placed into the parent
+    dependency.
+
+-----------
+@SpringBootApplication:
+	@SpringBootConfiguration
+	@EnableAutoConfiguration
+	@ComponentScan
+
+	SpringApplication.run(MainClass.class, args);
+	 return an appContext we can use to access beans and envirnoment values.
+
+----
+spring-boot-starter
+  is the core component of the Spring Boot framework. It is used for the [core] support 
+  which also includes [auto-configuration support], [logging events], and [YAML].
+---
+To prevent the warning message “[WARNING] Using platform encoding (Cp1252 actually) to 
+copy filtered resources, i.e. build is platform dependent!” or such kind of warning messages,
+ you need to set <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> in the Maven
+  project properties. This is auto-handled in spring-boot-starter-parent pom. The same is the case
+   for the output encoding for the reporting purposes <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    when added, and then it will handle special characters in the site folder of the target.
+----
+
+how spring boot access properties in src/main/resources 
+  <build>
+  	<resources>
+		<resource>
+			<directory>${basedir}/src/main/resources</directory>
+			<filtering>true</filtering>
+			<includes>
+				<include>**/application*.yml</include>
+				<include>**/application*.yaml</include>
+				<include>**/application*.properties</include>
+			</includes>
+----
+	spring-boot-starter-web starter pack is well constructed to build a web application, 
+	including RESTful services, applications using Spring MVC. It also uses Tomcat as the 
+	default embedded container. [spring-web [spring-webmvc, starter-[tomcat|json],]
+	-----
+ spring-boot-starter-data-jpa:
+   starter-[aop, jdbc] spring-[aspect, data-jpa] hibernate, jta, jpa.
+---
+spring-boot-starter-cache
+This starter pack is provided for using Spring Framework’s caching support.
+ Caching is a temporary part of RAM where the data is stored so that it can 
+ be accessed faster as compared with secondary memory. It is recommended to 
+ store static data or frequently used data.

@@ -150,29 +150,29 @@ generally, YAML is only used for CloudFormation. Json is used for both CloudForm
 Encryption
   Encryption At Rest:
     to protect aganist physical theft and physical tampering. [user with encrepted laptop]
-     common when only one party is involved. one person one the encryption and decreption key
+     common when only one party is involved. one person ;one encryption and decreption key
   Encryption In Transit:
     protecting data while it's being transferred between two places.
       used when multiple system is involved.
   
   Concepts:
-    plaintext: data[image, file, app] u can immediately load into an application and 
-    read that data.
-    Algorithms: Blowfish, aes, rc4..
-    Key: password to encrypt for example
-    Ciphertext: encrypted data.
+    . plaintext: data[image, file, app] u can immediately load into an application and 
+      read that data.
+    . Algorithms: Blowfish, aes, rc4, RSA..
+    . Key: password to encrypt 
+    . Ciphertext: encrypted data.
     ---
     Symmetric Encryption: the same key used in both encryption and decryption process.
-    Asymmetric Encription:
+    Asymmetric Encryption:
       u have public and private key, when someone need to send me a data, he will encrypt it with
-       my pub key and send it. then I use the priv key to decrypt it. used by[SSL, TLS, SSH]
+       my pub key and send it. then I use the private key to decrypt it. used by[SSL, TLS, SSH]
     
     Asymmetric encryption is computationally much more diffcult to do than symmetric. so, 
-     many processes use a asymmentric to initially agree and communicate a symmetric key and 
-      then use it in the communication use symmetric encryption.
+     many processes use asymmentric to initially agree and exchange a symmetric key and 
+      then use it in the communication, use symmetric encryption.
     
-    Another way for using asymmetric keys is [signing]: for ID verification: u sign using ur
-     priv key and send the request the reciever can verify that is you by using the pub key 
+    Another way for using asymmetric keys is [signing]: for ID verification: u sign using your
+     Private key and send the request the receiver can verify that is you by using the public key 
      to validate the signed request.
     
     --
@@ -1392,20 +1392,270 @@ VPC : how to design a scalabe network inside VPC.
      - ipv6 is natively public
      - IGW manage the translation of the ip dest/src private <-> public.
   ----
+  Every `connection` has two parts - Request(initiation) and Response.
+    1 - The client picks a temporary(ephemeral) source port,
+        1024-65535(Depends On Os)
+    2 - The Client 'Bobs Labptop' initiates a connection to the server on
+        a well-know Destination port HTTPS tcp/443
+    3 - The server responds using source port of tcp/443 and the Destination
+        ephemeral port picked by the client.        
+
+  Directionality...Inbound or outbound depends on perspective.      
   Stateless vs Stateful Firewall.
+    - stateless firewalls:
+      . see the two part of the connection [Request/Response] each as 
+        a separate connection. allowing or denying them need 2 RULES.
+          - one for each [INBOUND/OUTBOUND]
+          - with stateless firewalls remember the RESPONSE EPHEMERAL PORTS ..
+            it's NOT THE WELL KNOWN APP PORT. so we have to allow the full 
+            range of ephemeral ports to any destinations. 
+    - stateful firewalls:
+      . stateful means lower admin overhead.
+      . A Stateful firewall is Intelligent enough to identitfy the 
+        REQUEST and RESPONSE components of a connection as being
+        related.
+      . ALLOWING the REQUEST (INBOUND or OUTBOUND), means the RESPONSE 
+        is AUTOMATICALLY allowed.
+      . no need to allow the full range of ephemeral ports.    
+  ----
+  NETWORK ACCESS CONTROL LISTs (NACL)
+    . can be though of as a traditional firewall available within AWS VPC.
+    . Every subnet has an associated NACL, filter traffic crossing the subnet
+      boundary INBOUND or OUTBOUND. 
+    . connections within a subnet aren't impacted by NACLs.
+    . contain a #of rules [Inbound/Outbound] rules. Inbound rules match traffic
+      ENTERING the subnet, Outbound rules match traffic LEAVING the subnet.
+    . NACLs are stateless doesn't matter if it's req/res. what is important is
+      the direction.
+    . Rules are proccessed in order, lowest rule number first. Once a match occurs,
+      Processing stops. * is an implicit DENY if nothing else matches.  
+    . Because NACLs are stateless each communication needs 1 REQUEST rule
+      and 1 RESPONSE rule.
+     . These rule-pairs (app port & ephemeral ports) are needed on each NACL
+       for each communication type which occurs 1) within a VPC, 2) TO a VPC
+                      3) FROM a VPC       
+  Default NACL
+   . A VPC is created with a Default NACL
+   . INBOUND and OUTBOUND rules have the implicit deny(*) and an ALLOW ALL 
+     rules.  <- reduce admin overhead.
+
+  Custom NACLs 
+   . can be created for a specific VPC and are initially associated with NO 
+     subnets. 
+   . They only have 1 INBOUND  rule the implicit (*) DENY.
+   . They only have 1 OUTBOUND rule the implicit (*) DENY. 
+   ** ALL traffic is DENIED.  
+  RECAP
+    . [NACL] stateless - REQUEST and RESPONSE seen as different.
+    . Only impacts DATA CROSSING SUBNET BOUNDARY.
+    . NACLs can EXPLICTLY ALLOW and DENY.
+    . Deals with IPs/CIDR, Ports & Protocols - no logical resources.
+    . NACLs cannot be assigned to AWS resources - only subnet.
+    . Use together with Security Group[allow] to add explicit DENY (Bad IPs/Nets)
+    . Each subnet have one NACL (Default or Custom).
+    . A NACL can be associated with MANY Subnets.      
+  -----------
+  VPC Security Groups (SG)
+    . STATEFUL - detect response traffic automatically.
+    . Allowed (IN or OUT) request = allowed respone.
+    . LIMITATION: NO EXPLICIT DENY .. Only ALLOW or implicit DENY.    
+    ... cannot block specific bad actors.
+    . Supports IP/CIDR ... and logical resources.
+       .. including other security groups AND ITESELF.
+    . Attached to ENI's[Elastic netowrk interface] not instacnes 
+       (even if UI shows it this way).
+  (SG) Logical Reference:
+    . we have WEB[instances] and APP[instances].
+       . we allow all inbound traffic in SG of WEB.
+       . WEB need to access APP in [tcp:1337] to allow that in SG of APP?
+         - add the ip of web instances ? add the whole subnet ? both are not
+           taking advantages of (SG) Logical References.
+         * we can reference to allow inbound traffic on port 1337 from any 
+           resources the WEB-SG assigned to it.
+           and even when we scale WEB instances the new one can access.       
+
+    Self-References:
+      . // private subnet in VPC with changing number of resources.     
+  ------
+  NAT and NAT gateway[giving a private resource a outgoing access to internet]:
+    - A set of processes -remapping SRC or DST IPs.          
+    - (IP Masquerading) - hiding CIDR Blocks behind one IP [many private to one public]
+     - Give private CIDR range [outgoing] internet* access.  
+        
+
+
+
+
+
+
+
+
+
+
+---------------
+====
+EC2
+====
+AWS NITRO
+---------
+Virtualization 101: 
+  - Running more than one OS on one physical machine.
+  TYPES:
+   . Emulated Virtualization[SWF]:
+     . host OS/Hypervisor manage the [unmodified]guest OS.
+     . each privilage call from guest kernel using Binary Translation (on the fly)
+       translated to be made by the Hypervisor.
+     . inefficient because hardware doesn't aware of it.
+   . Para-Virtualization:
+     . each vm run a modified OS for a specific Hypervisor.
+     . these modified part instead of making a privilaged call, 
+       make a [hyper-call]. 
+     . more efficient than Emulated OS because now the host OS aware of it.
+   . Hardware assisted V:
+     . hardware aware Virtualization, cpu provide a special intructions for
+       Hypervisor to manage VM. 
+     . need to manage access to the devices, not effiecient in case of I/O intensive
+       workload.  
+
+     * SR-IOV virtualization aware on the devices level [Network interfaces..], 
+       now, even in intensive I/O the VM will perform well.
+       * EC2 enhanced networking.
+  -----
+  EC2 Architecture:
+    . EC2s are VM (OS+Resources) 
+    . EC2 instances run on EC2 Hosts.
+    . [Shared Host] or [Dedicated Host], 
+       u don't pay for instances on Dedicated. u pay for entire host.
+    . AZ Resilience.
+    . can connect to EBS [elastic block store] in the same AZ
+    . No cross sharing to instances in different AZ.
+  EC2 [Store, Storage Network, Data Network]:
+    primary Elastic Network interface in subnet in the same AZ 
+     mapped to physical hardware of EC2
+    EC2 can have different Network Interface even in different subnets.[SAME AZ].
+
+  . EC2 instance run on the same host unless, host fails [maintainance/failure..]
+      instance stopped the started again. --> will started in the same AZ but 
+       in different host.
+  . What's EC2 Good for ?
+    - traditional OS+Application compute need.
+    - Long Running Compute. 
+    - Monolithic Application Stack.
+    - Server Style Applciation.
+    - Migirated app workload or Disaster Recovery.
+    - either [burst] or [steady-state] load.
+
+  Launch Configurations[LC] & Launch Templates[LT] Recommanded.:
+    - AutoScaling group utilize them .
+    - perform the same task
+    - allow the configurations of ec2 instance to be defined in ADVANCE
+    - documents let us configure : AMI, Instance Type, Storage & KeyPair
+    - Networking configuration and sG the instances use.
+    - Userdata & IAM ROLE
+    - Both are not editable - defined once. LT has versions.
+    - LT provide newer features - including T2/T3 Unlimited, Placement Groups,
+      Capacity Reservations, Elastice Graphics.
+    
+    * LC has one use as part of autoscaling groups. LC provide configurations of ec2 instances.
+      - LT can do the same and can use the same configs to launch ec2 instacnes from cli/console.
+
+  ----
+  AutoScaling group
+    used with ELB, LT to deliver elastic architecture
+    - automatic scaling & self-healing for EC2.
+    - Use configs defined in LT to know that to provision.
+    - Has a [MINIMUM], [DESIRED] and [MAXIMUM] size e.g 1:2:4.
+    - Keep running instances at the DESIRED capacity by provisioning 
+      or terminating instances.
+    - SCALING POLICIES automate based on metrics.  
+  Scaling Policies:
+    - MANUAL scaling - Manually adjust the desired capacity.
+      . in testing & urgent env. or in more cost control env.
+    - SCHEDULED scaling - Time based  adjustment - e.g. Sales.. [known high traffic time]
+    - Dynamic Scaling
+      . SIMPLE - "Cpu above 50%+1", "CPU blow 50-1" <- may need cloudwatch agent.
+      . STEPPED Scaling - Bigger +/- based on instance change in traffic.
+        - from 50%:60% do a specific action from 60:70 another ..etc
+        - take more control than simple scaling.
+        - adjust different load changing
+      . TARGET TRACKING - desired aggregate CPU = 40% .. ASG handle it. [#of req for ELB, IN/OUt NEtwork]
+      . Scaling Based on SQS - ApproximateNumberOfMessagesVisible.
+    - Cooldown Period in seconds..   how long to wait for scaling action before doing the next one.
+
+
+   * Trick [ec2 ASG]
+    . if u create a LT which can automatically build an instacne 
+      then create ASG using this LT.  set ASG to use multiple subnets
+      in different AZs. the set ASG 1:1:1 then u have a simple instance recovery.
+       cheap, simple, effective HA
+
+  ---
+  ASG + LBs
+    - ASG can use LB healthchecks rather than EC2 status checks [Applciation AWARENESS]     
+      . Be careful when u setting the HealthCheck of the app. don't depend on DB or static content.
+  Scaling Process[functions performed by asg]:
+   - LANUCH and TERMINATE - vals ->[SUSPEND: asg cannot launch/terminate and RESUME].
+   - AddToLoadBalancer - add to LB on Launch
+   - AlarmNotification - accept notification from CW alarms.
+   - AZRebalance - balances instances evenly across all of the AZs.
+   - HealthCheck - instance health checks on/off
+   - ReplaceUnhealthy - Terminate unhealthy and replace.
+   - ScheduledActions - Scheduled on/off.
+   - StandBy - use this for instances `Inservice vs StandBy`
+     allow to suspend any of activities of ASG on a specific instance, useful
+      when u want to perform a maintainance on a specific EC2 instacne [set TO standBY]
+  --
+  Final Points:
+    . ASGs are free.
+    . Only the resources created are billed. 
+    . use cooldown to avoid rapid scaling
+    . THink about more, smaller instances - granularity.
+      - may 2 large instance to scale to 3 will cost more than 20 small instacnes to 21.
+    . Use with ALB's for elasticity - abstraction.
+    . ASG defines WHEN and WHERE, LT define WHAT.
+  --  
+  ASG Scaling Policies:
+    ASGs don't need scaling policies - they can have none   
+ ---   
+  
+
+
+  USer Data: 
+   a script or other configurations run when the instance is launched.
+   . bootstraping is a process exist outside EC2,  general term -> allowing system 
+     to self configure or perform self configuration steps.  
+  - EC2 Bootstraping
+    . Bootstraping allows ec2 build automation.
+    . User data - Accessed via the meta-data IP.
+    . http://169.254.169.254/latest/user-data
+    . anything in USer Data executed by the instance OS.
+    . ONLY one time on LAUNCH.
+    . EC2 doesn't interpret, the OS needs to understand the User Data.
+    . if user data executed incorrectly we now have a Bad configured Instance.
+  - USer Data Key Points
+    . It's OPAQUE to EC2 ..its just a block of data.
+    . It's Not secure - don't use it for password or long term credentials.
+    . user data is limited to 16KB in size.
+    . Can be modified when instance stopped.
+    . But only executed once at launch. [post launch configuration].
+  - Boot-Time-To-Service-Time
+    . how long it takes from allocating the instance, and setup configurations.
+    . u can bake the bootstraping with AMI to reduce post launch time.
+      . after aws provision the instance it will be able to be used immediately.
+    /var/log/cloud-init.log /var/log/cloud-init-output.log
+      log for execution of user-data.  
+  - EC2 Instance Roles
+    . IAM ROLE allows EC2 Service to assume it. but we need to make the app inside the instacne
+      to assume that ROLE as well.
+    . InstanceProfile  : wrapper around IAM ROLE, allow permissions to get inside the instance.
+    . when u create an instance role in the console an instanceProfile will be created  with the 
+      same name. but if u create it using cfn/cli u need to create them separately.
+    . inside ec2, Temp Credentials delivered instance via meta-data.  
+      . credentials available inside the meta-data will be always valid. sts & ec2 work together
+        to renew it before its expiration.
+    . any commands run on CLI tool into the instance will make use of ROLE credentials automatically.     
+
        
-
-
-
-
-
-
-
-
-
-
-
-
 ----------
 CloudFormation
   - Physical and Logical Resources:
@@ -1606,3 +1856,42 @@ CloudFormation
 
 
 
+-------
+udacity temp:
+  - why allocation of IP is important ? why not to let the NATG to pick any ?
+    . because any aws resource is disposable, if we let NAT choose random IP,
+      and for any reason the resource restart it will pick another IP and 
+       any resources depend on the IP will break. so to make sure that the IP
+       will remain the same we need EIP.
+
+  Resources:
+    NatGateway1EIP:
+        Type: AWS::EC2::EIP
+        DependsOn: InternetGatewayAttachment
+        Properties: 
+            Domain: vpc
+    NatGateway1: 
+      Type: AWS::EC2::NatGateway
+      Properties: 
+          AllocationId: !GetAtt NatGateway1EIP.AllocationId
+          SubnetId: !Ref PublicSubnet1       
+  ---
+  Type: AWS::EC2::SubnetRouteTableAssociation
+  Properties: 
+    RouteTableId: String
+    SubnetId: String         
+   ---------
+ Security groups - Security group specify firewall rules. 
+    We will create two of them, one for a load-balancer and another for a web server.
+
+ AutoScaling group - An autoscaling group ensures that a desired 
+    number of servers (EC2 instances) are always up and running. If an instance goes 
+    down due to any reason, such as bad health, a substitute instance with a similar configuration will spin up automatically.
+
+ Launch configuration - The configuration of the EC2 instance that 
+    spins up automatically, if required, as a part of autoscaling group resides 
+    in a launch configuration.
+
+ Load balancer - A load balancer distributes the incoming traffic 
+    uniformly across multiple servers (target group) within the same or different AZs. 
+    We will also create a listener and target group for the load balancer.    

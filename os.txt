@@ -25,7 +25,7 @@ Process vs Thread
       * share address space
       * easier to communicate
       * cheaper context switching comparing to processes.
-  Process: Code, Data, Files, Heap, Stack, etc   
+  Process: Code, Data, Files, Heap, etc   
 ----
              User Thread                          vs                 kernel managed threads
 management: process create threads kernel is not   |   -       In kernel space        
@@ -46,7 +46,8 @@ Mapping of user threads to kernal threads:
   ManyToOne --> multiple threads in one process mapped to one kernel thread
   manyToMany --> rare
 single-program-sys: new -> running -> finish states only. most of the time the cpu will be idle.
-  multi-tasking : a multi-programming system where time sharing is used to allocate processor to  different processes. each process has a slice to make use of cpu then become waiting. and the next process take place.
+  multi-tasking : a multi-programming system where time sharing is used to allocate processor to 
+   different processes. each process has a slice to make use of cpu then become waiting. and the next process take place.
 
   multiprogramming: allow multiple processes to exist in memory and running them in interleaved fashion interchangeable.    
 process states in multi-programming system:

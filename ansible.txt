@@ -1,0 +1,102 @@
+1.1
+ansible : managing configurations on servers.
+  before it: adminstrator access server manually and configure it.
+  with increasing #of servers this approach is not practical.
+
+  - we create groups of servers and other assets in our it env
+    according to sprcific properties and needs.
+
+    and ansible taking care of them using scripts (playbooks)
+  - alternative to ansible [ puppet: was important before redHat acquire Ansible,
+                             saltstack, 
+                             chef..]
+---------
+1.2
+  if we using bash to manage groups of servers:
+   connect?
+   idempotent [comparing current state with desired state]
+     if not how we change?
+  
+  so it's hard to use bash script. and we will use Ansible.
+---------
+1.3 
+ Ansible is using modules:
+  - written in python.
+  - can manage:
+    . [linux, windows, Aix, network, cloud..]
+      theoritcally: u can write module to manage ur coffe machine as long as
+                   it is an IoT coffe machine and it has all required components 
+                   to be managable.
+ idempotent 
+ Playbook in yaml 
+ ANsible Tower: web interface allow to manage ansible in enterprise env (AWX)
+   . schedule multiple jobs, can work with multiple user accounts each of 
+       them has his roles.
+-----
+2.1 course env
+  
+  control node:
+     - user-sudo
+     - ansible
+     - ssh
+     - python
+  node1/2: 
+    - python
+    - user-sudo
+-----
+2.2 
+  . Inventory file: contains name of managable hosts, can contain groups [hostGroup]
+  ansible [hosts to apply on] -i [inventoryFilePath]
+  . master inventory file : /etc/ansible/hosts
+--- 
+2.3
+  . /etc/ansible/ansible.cfg recommended to create one in ur project dir.
+     . can define how connection can be made:
+        . remote_user on managable host
+        . host_key_checking
+        - privilege_escalation
+          . how to be a privilaged user.
+----
+2.4 dynamic inventory :
+  . in big environment u won't provide each managable host, dynamic inventory
+     allows us to find hosts in a specific env.
+   [ https://docs.ansible.com/ansible/latest/inventory_guide/intro_dynamic_inventory.html ] 
+   useful in public cloud env
+---
+3.1
+  - ad Hoc commands
+    . ansible using [modules] get a python script to be executed on the managable hosts
+      and the result returned to the ansible-controller.
+  - playbook
+    . list of modules generate py script ... but run using ansible-playbook command
+-----
+3.2
+  - modules: provide the intelligence about the assets that u want to manage with Ansible
+   ansible-doc -l
+   
+   most of the modules start with the name of the device they manage[aws/azure..
+   
+   modules provided by ansible core team and external vendor.
+   
+   ansible module can be very specialized, and if u have very specialized module,
+    the recommended way of working with ansible is to use that.
+-----
+3.3
+  to get info about modules
+   ansible-doc [moduleName]
+   ex using user module:
+    ansible ansibletarget1 -m user -a "name=linda shell=/bin/bash"
+---
+3.4
+  common modules
+    command, package[interfacing software management system on the managed host], shell
+    
+---
+fact gathering: 
+     for every host ansible do fact gathering to get the properties of the host.
+     
+for undoing playbook, u need to create another playbook. so if u design one may require
+  undoing u need to think deeply how u will write the undoing playbook
+  
+to get more info path -v up to -vvvv [ verbosity] of the output. for most purpose -vv is enough
+         

@@ -50,7 +50,7 @@ Roles:
 ---
 
 User Consent:
-. the screen that interupt the authorization flow.
+. the screen that interrupt the authorization flow.
 
 what happen if we don't have it ?
 . using password grant, also known as resource owner password flow.
@@ -139,7 +139,7 @@ know that the thing redeeming the code is who started the flow preventing author
 from being redeeming by other app if it stolen. but that don't prove the app identity ..
 some attack may impersonate the client-app and get the access token.
 
-without a client secret, The OAuth flow is performed with information taht's entirely public.
+without a client secret, The OAuth flow is performed with information that's entirely public.
 so if someone really wanted to, they could start an OAuth flow with the public client of
 some other app. and then can exchange auth code withe access token.
 
@@ -183,7 +183,7 @@ Registering an Application:
   and then have users sent back to attackers website.
 
   server prevent u from registers urls with wildcard, because taht's
-  another vector that attackers have to try to trick users into getting sent
+  another fector that attackers have to try to trick users into getting sent
   to the attacker's website. <-> wildcard or partial matching of redirect urls is
   a great way to open urself up to open redirect attack.
 
@@ -204,7 +204,7 @@ Authorization Code flow for web application:
 - user login [do multi factor auth if required] and then server ask them to confirm
   if he really are trying to log into the client-app.
 - if user confirm, server will response to the user with the authorization code.
-  [take the app's redirect url, adds the authorization code int the query string and
+  [take the app's redirect url, adds the authorization code in the query string and
   and send the user's browser there to deliver that back to the client-app].
 - authorization code sent in front channel so the server don't sure if it will be recieved
   by client-app. so its expiration under 1min and one time used.

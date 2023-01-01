@@ -1,0 +1,9 @@
+alt +  1 -> project menu
+alt + f1 -> list all tools to choose from. alt + [1-9] shortcuts
+sh  + esc -> close the current opened tool.
+alt + insert in project menu -> create new
+alt + insert depend on where u use it has an output
+--
+search for live templates[sout, souv, serr, fori, itco ...]
+
+ALT + LEFT|RIGHT move between opend files
