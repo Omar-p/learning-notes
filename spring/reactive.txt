@@ -1,0 +1,62 @@
+Reactive System.
+  . using reactive lib or style doesn't make sys reactive
+    to make system reactive:
+     . Responsive [Resilient, Scalable]  
+     . Messages [vs events. msg go to explicit destination].
+Reactive Programming.
+  . Event driven and focus on Data flow
+    Events propagate changes, forming a stream of data that is
+     propagated to everyone listening to those changes. 
+  . Non-blocking , Asynchronous, Functional/Declarative.
+  -----
+
+Reactive Web App adopt non-blocking servers, generally based 
+  on the event loop model.
+
+things that limit servers from working like that is
+ Servlet API because it's a blocking API. there 's an non-blocking
+ one started form version +3.1.
+
+Asynchronous Programming in java using callback may reach us
+ to callback hell when u nest more than 2 callbacks and ur code start
+ to be repeatitive and hard to read.
+
+ u may use ThreadPool, Fork/Join, CompletableFuture
+  but using CompletableFuture in wrong way may lead to 
+  blocking code. 
+
+ we use publisher/subscriber model.
+
+ JavaStreamAPI vs ReactiveStream
+  1- connect to a source and pull value from it and can be used only once.
+  2- value pushed to pipeline of operators when u subscribe to the publisher. [backpressure]
+---
+spring mvc 
+  . servlet api, blocking api, synchronous, one request per thread.
+spring webflux
+  . Reactive stream, Non-Blocking API (servlet 3.1+), Asynchronous,
+      use event model where many concurrent connections use a few #of threads
+----
+Reactive Streams 
+ provide a contract for [Asynchronous, backpressure, Non-Blocking]
+   only concerned with the stream of data , it doesn't specify how the data can be manipulated or transformed.
+
+  to simulate try-catch we have onErrorResume we can return a default mono
+. Publisher
+. Subscriber.
+. Subscription
+. Processor
+when subscriber sub to pub a Subscription obj is created and it's passed to onSubscribe method
+  ---
+  Flux.from[Iterable, Array, List]
+
+  Flux.interval generate num in another thread so if u don't wait program will exit
+
+  Flux.concat start publishing the firest until it is finished then start publishing the second
+  Flux.merge interleaving them
+    both work on different thread.
+  zip wait for all sources to emit one element and combine them until any of the sources complete.
+----------
+For the report Drragon feature, we will be using AWS step functions, AWS Lambda, and Amazon Simple Notification Service or SNS to create an asynchronous Dragon reporting system. This reporting process is asynchronous because we need to do some backend data validation that could take some time, and we don't want people waiting on an immediate response. Instead, we alert the user when the process has completed. This is a good example to show you how to set up a workflow that would kick off want to request hits your API. Then your backend would do whatever work needs to be done and return the response when it's ready via SMS. This is known as request off loading. And it allows you to respond to your client without the entire process having finished yet.
+
+AWS step functions. 

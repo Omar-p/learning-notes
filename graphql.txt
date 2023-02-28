@@ -1,3 +1,73 @@
+Graphql is a query lang for our API. The GraphQL service is transport agnostic but is 
+typically served over HTTP.
+
+The query is nested, and when it is executed, can traverse related objects.
+ This allows us to make one HTTP request for two types of data. We don’t need 
+ to make several round trips to drill down into multiple objects.
+
+query is validated against a type system. Every GraphQL service defines types
+ in a GraphQL schema.
+
+
+Design Principles of Graphql
+ Hierarchical
+    Fields are nested within other fields and the query is 
+     shaped like the data that it returns.
+  Product centric
+    driven by the data needs of the client and the language 
+     and runtime that support the client.
+  Strong typing
+  Client-specified queries
+  Introspective
+    The GraphQL language is able to query the GraphQL server’s type system.
+  ---
+History of Data Transport
+  - RPC
+  - Simple Object Access Protocol[SOAP] 
+     used XML to encode a message and HTTP as a transport. 
+       SOAP also used a type system and introduced the concept of resource-oriented
+        calls for data. SOAP offered fairly predictable results but caused frustration
+         because SOAP implementations were fairly complicated.
+  - REST
+     Drawbacks:
+      . overfetching
+        we’re getting a lot of data back that we don’t need.
+      . underfetching
+         The result is a slower user experience, and users with slower network
+           speeds or slower devices might not be able to view the content at all.
+      . Another common complaint about REST APIs is the lack of flexibility. 
+         As the needs on the client change, you usually have to create new endpoints, 
+         and those endpoints can begin to multiply quickly. To paraphrase Oprah, 
+         “You get a route! You get a route! Every! Body! Gets! A! Route!”   .
+         Larger apps typically utilize custom endpoints to minimize HTTP requests. 
+
+----
+GraphQL clients handle tasks like network requests, data caching,
+ and injecting data into the user interface.
+ [leaders in the space are Relay and Apollo.]-
+ ---
+ graph theory concepts: 
+
+ The parentheses mean that these edge definitions are ordered pairs. 
+  Whenever the edges are ordered pairs, we have a directed graph or digraph.
+
+  The degree of a node is equal to the number of edges that are attached to that node.
+  . Because each of the nodes had odd degrees, Euler found that crossing each bridge
+     without recrossing was impossible.
+  . Eulerian cycle. In this case, the starting node is the same as the ending node.
+     Each edge is visited only once, but the start and end node is repeated
+  
+
+  
+
+
+
+
+
+
+
+--video--
+
 Query : entrypoint
 Mutation:
 Nesting
@@ -28,3 +98,12 @@ Graphql over REST :
 REST over Graphql:
   - specific and well-design use cases API
   - Simple API that serves one client (webpage)
+
+
+spec: A spec describes the capabilities and characteristics of a language.
+  We benefit from language specifications because they supply a common vocabulary and 
+   best practices for the community’s use of the language.
+
+  The spec describes the language and grammar you should use when writing queries. 
+   It also sets up a type system plus the execution and validation engines of that 
+   type system.  

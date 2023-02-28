@@ -850,3 +850,13 @@ helm:
 labels are limited in size, annotations have no limit
   labels can be used in selectors, annotations cannot.
       
+----
+KubeVirt technology addresses the needs of development 
+  teams that have adopted or want to adopt Kubernetes but 
+  possess existing Virtual Machine-based workloads that cannot 
+  be easily containerized. More specifically, the technology provides 
+  a unified development platform where developers can build, modify, 
+  and deploy applications residing in both Application Containers 
+  as well as Virtual Machines in a common, shared environment.
+other use case for vm over container: high security app where the security 
+  of hypervisor and certification are important.

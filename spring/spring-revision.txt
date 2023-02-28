@@ -14,98 +14,7 @@ Core:
   Servlet Filter:
     - implements javax.servlet.Filter
     -----------------------------------------------------------------------------
-	Security:
-		- out of the box:
-		  - content negoatiation
-		  - login / logout page
-		  - user
-		  - protection aganist common attacks [csrf , cors ...
-		    - cache control
-		      - Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-		        - add this header to respones from authenticated endpoint. we can disable it or add our owm. 
-            - to prevent caching the content of secured content. when someone use back in the browser after 
-               the user logged out the content will not be loaded because it's not cached
-        - X-Content-Type-Option: nosniff
-           . tell the browser not to guess the Content-Type because certain browsers ignore 
-             the Content-Type header and try to guess it.      
-           why? in certain situation u can upload a polyblack  file(image) and it can be a valid JS as well,
-            then u can execute a cross-site scriptting attack by uploading an image.
-        - CSRF
-          . this attack is taking advantages of that a browser will send any cookies associated with 
-            a certain domain to that domain  .
-             - we have session cookie for bank.com, when another website[attacker.com] send a req from
-               ur browser to bank.com the browser will send the cookie [session associated with bank.com]
-                with the request
-		    - Https
-		      - to make spring redirect any request for HTTP to HTTPS .requiresChannel()
-		            .requestMatchers(r -> [match requests in production for example. 
-		            because development with http is easier])  hsts headers will included by default, u can disable or configure it.
-		  - getPrinciple -> access to currently logged in user.
-		  - ..
-		- FilterChainProxy -> composing other filters into a single filter.
-		  - entry point of all web based security.
-		- spring scurity focus on application security
-		  - Authentication | Authorization | protection aganist common attack.
-		  - separation between authentication and authorization because of authentication is one time thing. 
-		     authorization spread through the entire application.
-		
-		- antMatchers vs mvcMatchers:
-		  - use antMatchers when u use spring security without spring [strut for example]
-		  - when u use spring use mvcMatchers /foo -> willmatch -> /foo.json /foo.php ..
-		    - keep order in ur mind most restrictive endpoints in the top.
-		    .access('spEl')
-		    .access("@beanName.predicateMethod(param1, param..)")
-		    .mvcMatchers("/users/{name}").access("#name == principal?.username") <- the user only can access his data only.
-		  - map (RequestMatcher, Collection<ConfigAttribute>) FilterInvocationSecurityMetadataSource --> 
-		     SecurityMetadataSource[default impl -> ExpressionBasedFilterInvocationSecurityMetadataSource]. 
-		    - AccessDecisionManager[route of all things access in spring security] 3 impl 
-		       [default: AffirmativeBased (1 yes -> access), ConsensusBased (majority yes -> access), UnanimousBased (all say yes)]
-		    - PasswordEncoderFactories.createDelegatingPasswordEncoder
-		      - new DelegatingPasswordEncoder(id, encoders[id -> endcoder])
-		      - when u want to migrate password to use another encoder , implement UserDetailsPasswordService and override 
-		        updatePassword and sprind will call it automatically.
-		    - WebExpressionVoter -> AccessDecisionVoter<FilterInvocation>
-		    	FilterInvocation:
-		    	  - curr req, curr response, context[all configAttributes]
-	 		- all these work after [AbstractSecurityInterceptor 2 impls (1: FilterSecurityInterceptor, 2: MethodSecurityInterceptor)]
-			FilterWriter
-			
-			
-			- Oauth is a framework that allows people to grant limited access to protected resources on the web. 
-			    the term access implies that oauth is about authorization, and this is true. however, 
-			     open Id connect [OIDC], formalizes a way to authenticate with oauth as well.
-	    - CommonOAuth2Provider -> contains info about well-known oauth2 providers.
-	    - ClientRegistrationRepository[InMemoryClientRegistrationRepository] ->
-	    - to initiate login flow OAuth2AuthorizationRequestRedirectFilter [if resolve the req then] redirect to OAuth endpoint itself.
-	    - to get the authorization code and exchange it for a valid user -> [OAuth2LoginAuthenticationFilter] -> 
-	       pass it to AuthenticationManager that delegat it to [OAuth2LoginAuthenticationProvider] that get 
-	         a response using the access token response client. 
-	    - from accessToken we need to get the user information for login using OAuth2UserService
-	      --> in this case we're just accessing a URI with the access token that was provided. And then create a user from that.
-	      - if u were using JWT, we could create it from id token itself.
-   
-   Authentication#getName()
-     - formLogin
-        . return username field
-     - openid
-        . subject
-     - Non-openid
-        . vary depending on the custom impl[]FB/geithub claim -> id]
-	----
-	DelegatingFilterProxy  -delegate Regquest To -> FilterChainProxy --assign the req to the appropriate SecurityFilterChain
-	  securityFilterChain are simply collection of filter that perform security check on the req.
-	    .. we can define different securityfilterChain to different endpoint with different authentication method.
-	      ..the only passed requests reach to the ServletRequest.
-	  for oauth2 2filters to handle the OAUTH2 authorization code grant flow:
-	    OAutg2AuthorizationRequestRedirectFilter
-	    OAuth2LoginAuthenticationFilter
-	     --> /oauth2/authorization/<registrationID>  <-- will intercepted by OAutg2AuthorizationRequestRedirectFilter
-	      which will generate redirect uri for authorization server.
-	      - after user agree on consent screen, IDP redirect with auth_code and state_token to protect against CSRF to
-	        REDIRECT_URL/login/oauth2/code/<registrationID>/?code=&state=
-	        which delegated to OAuth2LoginAuthenticationFilter then delegate to AuthenticationManager to perform 
-	          actual authentication --authenticate<Authentication Provider>--> [OidcAuthorizationCodeAuthenticationProvider|
-	            OAuth2LoginAuthenticationProvider..] --> exchange auth_code with access_token..
+
 	        
   -------------------------------------------------------		
 Data:
@@ -118,28 +27,7 @@ Data:
       -Declarative: separate transaction managemnt from business code.
       - LEVELS [DEFAULT(underlying DBMS), READ_UNCOMMITED, READ_COMMITED, REPEATABLE_READ, SERIALIZABLE]
   - when we add @Repository to any bean, spring automatically translate all JDBC exceptions to Spring Specific Exception    
-------------
-AOP
-  joinpoint: where aspect will be applied.
-  advice: what will be applied at particular joinpoint
-  chain of advices: multiple aspect for a single joincut
-  pointcut: predicate expression that match join point.
-  
-  -Target object: object that advised by one or more aspect. 
-    spring aop will a create a runtime proxy for the target 
-    object in order to add the aspects to the execution.
-  -Introduction: declare additional methods or fields for a given class.
-    spring aop allow that adviced object recieves new interface to implement.
-     [adding additional behavior to a class at runtime] 
-  -Proxy: created by aop to add aspect in the execution
-   2 ways:
-     standard mechanism:
-       - JDK Dynamic proxy
-     CGLIB
-       - code generation library proxy.
-  -weaving: the operation of program transformation that applies the aspect to  
-    the target object in order to create the advised object.
-    - Spring Aop prefer weaving at runtime
+
 -----
 Integration:
   endpoints pass messages[header+payload] via channels:
@@ -286,6 +174,11 @@ spring:
 It involves placing profile-specific properties alongside nonprofiled properties in
 application.yml, separated by three hyphens and the spring.profiles property to
 name the profile.
+
+properties fileName specified by properties [spring.config.name]
+
+we can separate yaml properties file into section for different profiles:
+  spring: config: activate: on-profile: [profile-name]
 ---
 spring:
   profiles: prod

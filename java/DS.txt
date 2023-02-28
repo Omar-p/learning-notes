@@ -1,0 +1,19 @@
+ Primitive Array: 
+   Object:
+     // obj headers 12 bytes 64-bit, compressedOops, length[4-bytes], [values size].
+
+   -array is allocation large contiguous bytes.
+   cost of access linked structure-> swapping objs from different pages into the cache
+-----
+List:
+  * retainAll(Collecton) -> intersection
+  * Arrays.asList  list [cannot add or remove but can modify the existing elements]
+  * List.of immutable list cannot add, remove, or modify.
+     List.of 0,1 or 2 elements are stored in direct fields in List* extends AbstractImmutableList
+         use less memory than array.
+  * collections implements RandomAccess interface their elements can be accessed in O(1)
+----
+System.err is flushed quicker than System.out
+----
+Reading: 
+  https://www.baeldung.com/jvm-compressed-oops

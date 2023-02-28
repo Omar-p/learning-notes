@@ -7,3 +7,18 @@ alt + insert depend on where u use it has an output
 search for live templates[sout, souv, serr, fori, itco ...]
 
 ALT + LEFT|RIGHT move between opend files
+
+shift + enter -> start newline
+ctrl + alt + t -alt+t-> surround selected code with liveTemplates
+
+ctrl+shift + up|down -> move selected code up|down
+
+ctrl + w -> increasingly select code block --unselect--> shift+ctrl+w 
+
+f2 -> go through code errors/warning
+
+alt + ctrl + l -> reformat code
+ctrl +shift + space -> useful suggestion for code completion
+
+ctrl + d -> duplicate line
+ctrl + y -> delete line

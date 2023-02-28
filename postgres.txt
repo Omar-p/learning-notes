@@ -122,6 +122,8 @@ FETCH is a SQL standard, LIMIT is not.
     OFFSET can be confusing to a human reader.
   * SELECT film_id, title FROM film ORDER BY title OFFSET 5 ROWS FETCH FIRST 5 ROW ONLY; *   
 ---
+  % many
+  _ one
   PostgreSQL supports the ILIKE operator that works like the LIKE operator. 
   In addition, the ILIKE operator matches value case-insensitively.
   
@@ -144,3 +146,14 @@ Inner Join:
  Data Types:
    Big Serial is backed by a sequence.
     
+--frontendmasters---
+
+INSERT 0 0
+  first zero it used to be an identifier for an objectId,
+    which the don't use it anymore but it there because backward compatibility 
+
+problem with the offset:
+  - if one user paginate the rows and in the some time some user delete row from the same page,
+    the first row in the next page will not be appeared to the first user when he go to the next page.
+  -- better approach is to page paginate them over a key, and instead using offset use WHERE with LIMIT
+     that also is has more performance than OFFSET with LIMIT

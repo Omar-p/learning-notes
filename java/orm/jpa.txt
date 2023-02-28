@@ -153,7 +153,7 @@ JdbcTemplate -> if u have a mismatch in the name of table cols and class attribu
 The unidirectional @OneToMany association does not perform very well, so you should avoid it.
 You are better off using the bidirectional @OneToMany which is more efficient.
 
-If MappedBy parameter were to be deleted, then Hibernate would actually create TWO join tables! Why? Because there is a symmetry in many-to-many relationships and Hibernate has no rationale for selecting one direction over the other.
+If MappedBy parameter were to be deleted, then Hibernate would actually create TWO join tables! Why? Because there is a symmetry in many-to-many relationships and Hibernate has no rational for selecting one direction over the other.
 We therefore use MappedBy to tell Hibernate, we have chosen the other entity to dictate the mapping of the relationship between the two entities.
 --------------------
 

@@ -220,4 +220,30 @@ Peer To Peer System:
        . No Security: Plaintext messages and passwds.
        . napster.com declared to be responsible for users' 
          copyright violation=> "indirect infringement"     
+  -----
+  Gnutella
+   - arguably the first fully distributed p2p system.
+   Eliminate the servers [used in napster].
+   clients machines search and retrieve amongest themselves [call them servents = server + client]
+   -  peers
+   connected in an overlay[because it's overlayed on top of the Internet] graph:
+    peer store their own files and connected to neighbours peers.
+  Gnutella has 5 main messages types:
+    - Query(search)
+    - QueryHit(response to query)
+    - Ping (to update peer list)
+    - Pong (reply ping)
+    = Push (initiate file transfer)
+
+    all fields in msg except IP ADDR are in a little-endian format. 
+    message fields:
+      Descriptor Id : unique for each msg.
+      Payload descriptor: define msg type.
+      TTL
+      Hops -> some don't use it. incr in each hop.
+      PayloadLength
+      Payload
+      -----
+      Query's forwarded only once. each p keep track of recent descriptorID
+
        

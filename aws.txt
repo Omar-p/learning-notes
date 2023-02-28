@@ -138,19 +138,34 @@ make use of identity federation -->[take identities u have[fb account] and use i
     
     
 -------------------SECTION 4-------------------------------
-Yaml Yaml ain't markup lang
+Yaml Yaml ain't markup lang [identation matters]
     human readable data serialization language
-      list [] or 
+      list: [] or  <- inline format.
       list:
       	- item1
       	- item2
+    supporting val types:
+      numbers, floating point, boolean, null.    
+    vals can be enclosed in "", ``, or not.  but enclosing are more precise.
+
+    . we can have value formed by multiple attrs[key/vals pairs]:
+      adrianscats:
+        name: nn
+        color: white
+
     	
-generally, YAML is only used for CloudFormation. Json is used for both CloudFormation and other things(identity policy doc..)
+generally, YAML is only used for CloudFormation.
+   Json is used for both CloudFormation and other things(identity policy doc..)
+----
+JSON
+  vals types: [string, object, number, array, boolean, null]
+
 -------------------------------------------------------
 Encryption
   Encryption At Rest:
     to protect aganist physical theft and physical tampering. [user with encrepted laptop]
      common when only one party is involved. one person ;one encryption and decreption key
+     common when one entity involoved.
   Encryption In Transit:
     protecting data while it's being transferred between two places.
       used when multiple system is involved.
@@ -163,6 +178,9 @@ Encryption
     . Ciphertext: encrypted data.
     ---
     Symmetric Encryption: the same key used in both encryption and decryption process.
+      limitation -> how we will transfer the key between two peer [getting complex very quickly]?
+        because of that limitation, symmetric encryption is great in  local file encryption or disk encryption.
+          but not so useful when data is moved between 2 parties. 
     Asymmetric Encryption:
       u have public and private key, when someone need to send me a data, he will encrypt it with
        my pub key and send it. then I use the private key to decrypt it. used by[SSL, TLS, SSH]
@@ -176,7 +194,8 @@ Encryption
      to validate the signed request.
     
     --
-    Steganography: hiding that you are encrypt a data, by hiding the encrypted data in another file. using a certain key, a number or a pattern.
+    Steganography: hiding that you are encrypt a data, by hiding the encrypted data in another file. 
+      using a certain key, a number or a pattern[hide data in an image, by changing some pixels' val].
 ------------------------------------------------------------------------------------
 Networking:
 
@@ -1895,3 +1914,24 @@ udacity temp:
  Load balancer - A load balancer distributes the incoming traffic 
     uniformly across multiple servers (target group) within the same or different AZs. 
     We will also create a listener and target group for the load balancer.    
+  -----------
+  Coursera
+   
+  gui(management) vs cli
+  . gui is not the best choice when u want to repeat a task[for example: create same resource in different regions]
+  aws cli go through python sdk to the api
+  vs SDK
+
+  all of them use the API.
+
+  by default aws credentials stored in ~/.aws/credentials 
+   region and output format[json(default) | yaml | text | ASCII formatted table] stored in ~/.aws/config  
+
+   A names profile is a collection of settings and credentials that you can apply to a command which enables you 
+    to run its varying sets of configuration variables. It's not uncommon to have multiple types of credentials 
+    you may be dealing with, whether it's working with different environments, different accounts, 
+    or just managing very granular access levels. 
+
+  aws --region us-east-1 s3 mb s3://coursera_demo_webapp
+                            make bucket
+                        

@@ -53,7 +53,25 @@ a way to design ur app:
   
   [Configuration management] live public : when u update the code or config [web hooks]and need to reflect it
     at ur app. u need something has to reach into ur env from the internet to update the app.
-  
+
+ public facing:    
+   - things user hit directly
+   * LB: it need to terminate the communications directly from the client. so it needs 
+     to have an public IP to accept incoming traffic.
+   * Bastion host:  SSH jump, where u SSH to from ur network
+     to access the private network.
+   * VPN: cross data center traffic, VPN connection will be terminated in the public 
+     section [DMZ]
+   * Configuration management|Build systems servers: may need hooks into from outside
+     -u make a commit the ur app in the private area need to be updated.
+ private :
+   - things that only are needed internally for app operations and 
+      do not need to be exposed to internet.
+  * DNS Server 
+    . to access ur internal service, so it need to be private 
+ reasons for that is security u want to limit ur exposure to the internet 
+  and have most thing running  behind a carefully controlled firewall.
+
   public facing             | private side
   ----------------------------------------------------------------
   Load Balancer             | Application logic
@@ -83,15 +101,16 @@ a way to design ur app:
       store credentials in the repository.
   Improve Application Availability
     . Instrument all layers of the stack
-    . single source if truth for monitoringm graphing. [grafana]
+    . single source of truth for monitoringm graphing. [grafana]
   Broad Security Considerations
     . Apply the principle of least privilege.
     . Reduce the attack surface [expose to internet, the public service only]
     . Embrace strong authentication
-    . Carefully control credientials [don't store them in configuration files as plain texxt]
+    . Carefully control credientials [don't store them in configuration files as plain text]
     . Keep software up-todate.
     . Encryprt data by default. [make sure the hardware can handle the overhead]
     . Limit exposure from user devices.
 ------------
-
+  1.6 Charles Proxy : u can use it to intercept all traffic from machine, 
+    set breakpoint for certain patterns, modify the request. it is useful for debugging.
   

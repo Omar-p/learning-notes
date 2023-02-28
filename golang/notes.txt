@@ -1,3 +1,77 @@
+Practical GO:
+  - Built for modern times:
+    . goroutines, channels, [C10K problem], production Ready HTTP server (TLS, HTTP 2)
+  - go use git to fetch external packages.
+  - all files in the same folder must have the same package.
+  - go env GOARCH GOOS -> architecture & os which the compiler is build the executable for.
+     . u can modify it -> GOOS=darwin go build <- to build for mac.
+  - main function don't accept args as java or C.  
+     but there are package os and flag that can be used in building cli app. 
+  - string is a struct [pointer, len int] ,  "Strings behave like arrays of bytes
+    but are immutable: once created, it is impossible to change the contents of a string".
+    . A string is a struct that has a length and a pointer to a byte array. 
+      When you pass a string to another function, it copies the length and 
+      the pointer. As a consequence, the new copied string points to the 
+      same underlying data.
+  - code point = rune(int32) ~= unicode  character.
+  - utf-8 var-len encoding . char can be 1~4 bytes.
+  - len(str) <- return #of bytes in the str not the length len("G☺") -> 4
+    . string in go is bunch of byte(uint8) and rune 
+    . accessing str using [] will deal with it as bytes.
+      accessing range str as rune.
+    . u have option to decode from utf-16 to utf-8  
+    . 
+  - in debugging/logging use %#v not %v
+  - Go for http Headers don't use a map data structure
+     use a special type called Header -> 
+       because headers are case insensitive and can be repeated 
+         which can't be work in a regular map.
+  - some server depending on User-Agent header in the request
+     return a compact[machine] version on the response or uncompact[user]
+  - seralization/marshaling : taking a structure in ur pl converting it into seq of bytes. 
+  - demarshaling json to go struct by default 
+     (number -> float64, array -> []any ([]interface{}), object -> map[string]any| struct)
+  - json <---> Go
+    . there are a lot of types in go that are not represented in json. 
+       for ex: time u have to encode time to int represent num of seconds or a string 
+    . JSON -> io.Reader -> Go: json.Decoder
+    . JSON -> []bytes -> Go: json.Unmarshal
+    . Go -> io.Writer -> JSON: json.Encoder
+    . Go -> []byte -> JSON: json.Marshal
+  - if u just use a truct in one place don't define it's type as global
+    define it as anonymous struct in the scope u use it.
+    ex: consuming api, testing.
+  - url.PathEscape(str) escape the string to be used safely in url.  
+  - defer only happen when the function exit.
+    . function level not a scope level.
+    . several defer in the same function will be called in reverse order.
+    . idiom: acquire a resource, check for error, defer release.
+  - string in go cannot be null, for db there is a way to deal with null in db.
+  - io.Copy(writer, reader)
+  - slice
+    . type slice struct { array unsafe.Pointer, len cap int}
+    . slicing operation :
+      . it works on the same underlying array.
+      . the capacity of the new slice will be 
+         the cap of original one - the first index we slice from.
+      . go panic if the slicing exceed the capacity not the length.
+         . accessing element will panic if u exceed the length
+      . go copy by value but slice has a pointer inside so 
+         u should be careful [specially when u pass it between funcs].   
+  - const 
+    . in go their type is decided depending on where u use them.
+      const n = 2
+        var f float64 = 5 ; f = f / n <- n is a float64   
+        var i int64 = 5 ; i = i / n <- n is a int64   
+  - copy(dst, src) int -> copy as much as it can and return the num of copied.    
+
+  - idiom 
+    . if there is a possiblity of panic we additionally return an error 
+       and check for that in the beginning of the func.
+  -  interface in go said what we need not what we provide
+  - Rule of thumb : Accept interfaces, return a types[u have no idea what the caller will do with it ].
+  - embed struct can b multiple level in case of conflict u should specify the parent when u access.
+
 Ultimate GO:
 
 Code Reviews:
@@ -58,6 +132,7 @@ What is actually involved in a context switch depends on the architectures, oper
 ----------------------------------------------------------------------------------------------
 https://en.wikipedia.org/wiki/Green_threads
 -----------------------------------------------------------------------------------------
+byte alise for uint8, rune -> int32
 type declaration vs aliasing:
   declaration copy the fields of the object.
   aliasing copy the fields and the method sets
@@ -77,6 +152,12 @@ TESTING
           - set result in `got`
           - u can name the args of the called func `arg`
   - Signal:
+  - t.Errof("package.func(%v) err = %v; want %v")
+  if u pass a struct just log what fields u interest in, because the struct may have many fields.
+  writing useful failing message.
+    log what make u getting what go wrong in test fast. [and how to repeat it(printing seed if using random)]
+  got, want
+  - t.Logf t.Log only print ifthe test fail
     - There are 2 basic ways to signal that a test failed:
       - Fail = fail, but keep running.
       - FailNow = fail now stop test.
@@ -85,5 +166,23 @@ TESTING
     - Errorf = Logf + Fail
     - Fatal = Log + FailNow
     - Fatalf = Logf + FailNow
-    
+    * if keeping the testing runner will give some useful info. use Error|f.
+
     - If not using subtests, Fatal will prevent other test in that func from running.
+ 
+ - httptest.NewRecorder() // fake response writer can be passed to the handler and use it to see if the handler work correctly
+   . changing header[w.Header.Set(,)] after calling [w].WriteHeader will have no effect.
+
+ - example as a test.
+   . godoc use that in generated docs.
+   . example for package level name function : Example
+   . nameing: 
+     . Example[FuncNameUTest]
+     . for func that is for a type
+        . Example[TypeName_FuncName]
+     . to name a specific example for a func use lowercase after _
+       ExampleFunc_specificname,
+   . output order:
+     . in case of testing map or channel, each run will be in different order.
+        instead of useing // Output: use // Unordered output:    
+   

@@ -86,6 +86,8 @@ mvn(local machine) ---talk to online repo--> (repo1.maven.apache.org) contains t
 	- Dep with SNAPSHOT -> maven wait for a day to pull the dependency from the remote repo again.
 	
 if u want to overwrite how maven work. we can do it in ~/.m2/settings.xml
+                                                       ${maven.home}/conf/settings.xml
+  include where is the local rep location, alternate remote repo server, and authentication information.
 ---------------------------------------------------------------------------------
 14-Maven Architecture in the enterprise.
 	- company build a company maven repo. that contains its internal artifacts and

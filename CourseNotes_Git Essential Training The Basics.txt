@@ -189,3 +189,11 @@ each command ask 2Q:
 git rm --cached file
   remove new file from stagging area. [make them untracked]
 git rm -f file
+------HEAD FIRST GIT--------
+
+why we need version control:
+  - keep src files safe.
+  - retain a history of changes.
+  - treat and attribute credit (or blame!)
+  - allow for seamless collaboration between multiple team members.
+  
