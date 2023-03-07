@@ -13,6 +13,55 @@ List:
          use less memory than array.
   * collections implements RandomAccess interface their elements can be accessed in O(1)
 ----
+ArrayList:
+  . grows but never shrink.
+  . remove() shift next elements of removed element to left.
+  . grows factor = 1.5 .
+  . removeIf(predicate) remove all elements matching.
+  . trimToSize() <- premature Optimization. if u use it alot then u choose wrong collection.
+     - wrong use case: when u use it as a queue grow right shrink left.
+  . people estimate the cost of new object wrong:
+     in most cases creating a new ArrayList() is cheaper than existArrList.clear()
+  . clear() iterate over the under the hood array setting all to null. O(n)
+---------
+Iteration:
+  . based on iterator design pattern.
+  . Before it we had Enumeration which was not throwing exception when
+     do write to the collection we iterate over it. and that may cause wrong results.
+  . throwing ConcurrentModificationException when do write op to the collection we iterate
+     over. to deal with that we copy the collection do the write ops on it while we iterate,
+       then it will end with the desired result. or use -> CopyOnWriteArrayList[be careful(expensive)]
+  . abstract away from collections, it doesn't matter if it set/list/q
+     it get all the elements in some defined order whatever the order is.
+------------------
+CopyOnWriteArrayList
+  . creating a copy internally whenever we are modifying it.
+  . when u modify it during iterating it create internal copy of the array,
+     and the iterator keep iterate in the old one. [called a snapshot iterator].
+     . each modification create new array.
+----------------------------
+LinkedList:
+  . cost of one element = 12b[obj header] + [4prev + 4next] + elem[4byte] = 24 bytes
+      vs arr = 4b 
+  . no random access .
+  . don't use it alot. 
+------------------
+Vector
+  . shouldn't be used [historical]
+  . thread safe -use->Collections.synchronizedList() instead.
+     Collections.synchronizedList(new ArrayList<>()) 
+     wrap ur arraylist with another one object confind : u got npn-thread safe collection wrapped with thread-safe one [google]
+       so u get thread safety automatically.
+  . slow because of synchronization.
+  . quiet expensive if u serialize it will take large space.
+  . grow factor x2.
+-------
+stack
+  . Stack extends Vector [thread safe].
+  . historical
+  . if u want thread-safety use ConcurrentLinkedDeque instead.
+
+-------------------------------------
 System.err is flushed quicker than System.out
 ----
 Reading: 
