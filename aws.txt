@@ -1934,4 +1934,155 @@ udacity temp:
 
   aws --region us-east-1 s3 mb s3://coursera_demo_webapp
                             make bucket
-                        
+
+  with S3 select, you can just submit a sequel query and S3 will only return 
+  the relevant data. This is both cheaper and faster than downloading the entire 
+  object, when you may only need a subset. All of the processing is on the S3 side, 
+  not on the application side. So you don't have to code for that filtering through 
+  an entire object
+
+   AWS Systems Manager Parameter Store. Parameter Store lets you store user-defined 
+    key-value pairs. We're going to use this service to store our S3 bucket name, 
+    whether Dragon data is located, as well as the filename or what we call the key. 
+    This way, if the bucket or the filename ever changes, we won't need to go back 
+    in and change the code. Instead, the parameter can be updated in parameter store.
+    Then the code will always pull the latest information every time it is run.
+  
+  To make a request to Amazon Web Services, you first create service client objects for this 
+   specific AWS service you are trying to interact with. The recommended way to do this is to 
+   use the Service Client Builder. Each AGBS service has a service interfaced with methods 
+   for each action on that service API.
+
+  
+  default client method on each builder. This method creates a service client with the default 
+   configuration, using what is called the default provider chain to load credentials, as well as 
+   other configurations like what AWS region are you trying to submit your API call to? The default 
+   credential chain, checks a few different places for your AWS credentials. First, it checks the 
+   environment variables. If it can't find the credentials or region, it then checks the Java system 
+   properties. After that, it checks the default credentials profile. If there was not a file configured, 
+   then it checks to see if you are running inside of a container using Amazon Elastic Container Service or 
+   ECS. If so, it will use the credential supplied by ECS. Finally, if it can't find credentials in any of
+   those places, it will check the instance profile credentials. Essentially seeing if there is a role 
+   associated with the instance that the code is running on, like an EC2 instance, for example.
+   1- ENV VAR
+   2- Java System Properties.
+   3- Default credentials Profile.
+   4- if u're running inside of a container using Amazon ECS, if so it use credentials supplied by ecs.
+   5- check instacne profile credentials(IAM ROLE), role associated with the instance code run on.
+
+
+   AWS SDK for Java uses unchecked exceptions:
+     1- There are two main categories of exceptions to be aware of. 
+         First, you have the AmazonServiceException or one of its subclasses.
+     2- An AmazonClientException indicates that a problem occurred inside the Java client code,
+         either while trying to send a request to AWS or while trying to parse a response from AWS.
+  
+  Temporary Credentials in AWS Cloud9
+    rotated every 5 mins, can do all actions instead of some of them iam:createuser cloud9:..
+     to be able to perform action it must be allowed in what temp credentials can do and IAM Role of the user who run the cloud9
+   
+   u can disable it and configure credentials using -> aws configure
+    or assume Role that is set to the EC2 instance that run the cloud9
+    --------
+  . AWS SAM provides a local environment that is similar to the AWS Lambda environment
+   to use as a Docker container. You can use this container to build, test and debug
+    your serverless applications
+  
+  . An interface essentially defines how you can interact with a resource. An interface has defined actions, 
+    defined inputs and defined outputs.
+   . Interfaces allow you flexibility when it comes to programming. You can define how you want your clients or 
+    consumers to interact with your service. You define the actions, inputs and outputs. 
+
+   . Once you're APIs are defined and shared with clients, it's important that you do what you can to maintain
+      backwards compatibility with changes.
+   . API driven development, where the first artifact created out of building a new service is the API. Once the 
+     API is created, the front end or clients using the API and the actual implementation of the API can be built 
+      in parallel. 
+  
+  Websocket APIs operate using lower level protocols based on sockets imports and requires the use of IP addresses 
+    and port information. It is bidirectional, stateful, vertically scalable and as ideally used for real time scenarios 
+    such as a chat application is part of a game. HTTP APIs enable you to create restful APIs with lower latency and lower 
+    costs than rest APIs. You can use these to send requests to AWS Lambda functions or to any routable HTTP endpoint. 
+    This could be used when creating an HTTP API that integrates with a Lambda function on the back end. When the client 
+    calls the API, API gateway sends the request to the Lambda function and returns the functions response to the client.
+
+  Other features provided by API Gateway are :
+    1- Canary release deployments for safety, rolling out changes.
+    2- logging and monitoring through AWS Cloud Trail, and Amazon CloudWatch. 
+    3- Support for custom domain names, throttling of requests: 
+        (API throttling is the process of limiting the number of API requests a user can make in a certain period).
+    4- direct integration with other AWS services including AWS WAF, AWs X-Ray, and AWS Lambda.
+  
+   API Gateway provides multiple endpoint types that you can utilize. An API endpoint type refers to the host name of the API. 
+     It can be [edge optimized], [regional] or [private] depending on where the majority of your API traffic originates.
+     . Edge-optimized API endpoints are best for geographically distributed clients. Requests are routed to the nearest 
+         Amazon cloudfront point of presence. This is the default type for API gateway rest APIs.
+     . A regional API endpoint is intended for clients in the same region. When a client running in Amazon EC2 instance 
+        calls an API in the same region or when an API is intended to serve a small number of clients with high demands, 
+         original API endpoint reduces connection overhead.
+     . private API endpoints are a great way to provide a client secure access to resources inside of an Amazon virtual private cloud. 
+         Private APIs are isolated from the public Internet, and they're only accessed using VPC endpoints for API Gateway that have
+          been granted access
+    
+    1- an HTTP API. This is designed to offer REST-based HTTP APIs at low latency and low cost. HTTP APIs
+        are used to proxy back-end resources and are supposed to be simple and fast. This is great for when
+        you want API gateway to simply taken in request, authorize it and pass it on to the back-end resource,
+         like a lambda function or an HTTP end-point.
+
+    2- WebSockets, unlike HTTP, is a stateful communications' protocol. WebSocket APIs allow for support for 
+       applications that need real-time data or real-time communication. 
+
+    3- REST APIs with API Gateway uses HTTPS and is stateless. This is very similar to HTTP APIs, but it offers
+       some different functionality. REST APIs allow you to have full control over the response and requests between
+        your client and API gateway. You can apply what are called models and mappings to validate and transform 
+        requests and responses.
+    
+    4- a Private REST API. This is the same thing as a normal REST API, but it allows to set up an API that can 
+       only be accessed from a VPC, creating a private API. This is useful for internal APIs that you do not want 
+       to expose to outside clients.
+
+    request hit:
+      [method request], which is the first step for API gateway to accept a request. This is where you can apply
+       authorization and data payload validation
+      Next, it is passed to the [integration request]. This is where you configure what back-end service you are 
+       fronting with API gateway, as well as applying any data transformations that you may require.
+      [backend svc]
+      An [integration response] is an HTTP response encapsulating the back-end response. You can configure how 
+       your back-end service responses map to HTTP responses and apply data transformations at this step as well.
+      Method responses are similar to method requests. They are responsible for validating and fitting responses to models. 
+       The only real difference is that they're applying this data validation to the response not to the client.
+    
+    API Gateway REST APIs provide a way to validate incoming requests against models and data can be transformed 
+     in shape by using API Gateway mappings. API gateway supports multiple types of APIs, like HTTP APIs and web sockets.
+
+    using API Gateway as just a proxy for your back-end, and you won't need to do any data validation or transformation at all. 
+     You could easily use API Gateway, HTTP APIs for that use case. 
+
+    Models can be applied to both method requests and method responses. You have API Gateway checking the structure 
+      of the data on the way in and on the way out. It's also important to note that each method for resource like, 
+       get, post, etc, could have different models. So these get applied at the method level, not at the resource level.
+
+    Mappings are applied to the integration request and integration response of your API. They're used for REST HTTP 
+     integrations, not proxy integrations, which just take the data as is and passes it to the back-end service without 
+     transformation. These mappings, like models, are also applied at the method level, and each method under a resource
+      can have its own mappings. 
+
+      Mappings are written in Velocity Template Language or VTL.
+
+      If you already have defined a model for the method, API Gateway can generate a VTL blueprint for the mapping, 
+       which you can then modify. A mapping template assumes the data coming in as a JSON object by default.
+
+      Mapping support conditional statements, can inject new parameters into the payload, can hard-code values, which 
+       is needed for mocking, map data in complex structures, and can even reference data made available at run-time, 
+       such as context and stage variables
+      
+     what is this dollar input? API gateway provides variables that start with a dollar sign that give you access to payload, 
+     and context information in your mappings. In this case the dollar input variable is giving the mapping access to the 
+     request payload and parameters. - similar to this dollar input, like dollar context, dollar util, and dollar stage variable.
+
+     . API Gateway is validating the incoming request against the model. 
+--------
+serverless:
+  . a cloud computing execution model in which the cloud provider allocates machine Resources
+    on demand. taking care of the servers on behalf of their customers.
+  . No more servers u think about. 

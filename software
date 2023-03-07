@@ -306,3 +306,14 @@ Incremental OO software:
       distinguishing between the tested functionality, the supporting infrastructure,
       and the object structure.
     
+----NeetCode----
+  simple view:
+    dev -> build&deploy code ->> server -> storage.
+      .servers -> 3rd-svc and logging & metrices svc.
+      .dev access logging svc to see how requests go on the server
+      .dev access metrices svc to see the health of the resources on the server
+      .metrices is a timeseries chart so we can feed that data to Alerts svc
+        to  notify us when the metrices exceed some threshold.
+    user -> LB -> one of our servers.
+
+    DNS:

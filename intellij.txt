@@ -22,3 +22,22 @@ ctrl +shift + space -> useful suggestion for code completion
 
 ctrl + d -> duplicate line
 ctrl + y -> delete line
+
+ctrl + o -> override method from parent
+ctrl + i --> list method in implemented interface to override.
+
+
+@Override in java5 can only be set on methods come from classes
+ java6+ u can write on the methods from interfaces too.
+
+
+shift+f6 -> 
+   rename: be careful when u refactor because u may refactor other not related part
+
+f6 -> to move selected method to other class, selected class to other package.
+----
+when refactoring u should have good unit test because things break.
+---
+alt + ctrl + v -> extract local var.
+  . can used after ctrl+w
+alt + ctrl + m -> extract method.
