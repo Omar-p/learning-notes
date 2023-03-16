@@ -96,6 +96,85 @@ Data:
    to an fully-reconstituted TABLE aggregate.
 
   ParameterizedRowMapper is used to create complex objects
+
+  #show bin value:
+    logging.level.org.hibernate.orm.jdbc.bind=trace
+  #
+   spring.jpa.properties.jakarta.persistence. 
+   spring.jpa.properties.jakarta.persistence.schema-generation.scripts.action=drop-and-create 
+   #spring.jpa.properties.jakarta.persistence.schema-generation.scripts.create-source=metadata
+   #spring.jpa.properties.jakarta.persistence.schema-generation.scripts.drop-target=drop-and-create.sql
+   #spring.jpa.properties.jakarta.persistence.schema-generation.scripts.create-target=drop-and-create.sql
+  
+   a file named import.sql in the root of the classpath is executed on startup if Hibernate creates 
+     the schema from scratch (that is, if the ddl-auto property is set to create or create-drop)
+
+  Spring Boot processes the schema-${platform}.sql and data-${platform}.sql files (if present),
+    where platform is the value of spring.datasource.platform. This allows you to switch to
+     database-specific scripts if necessary. For example, you might choose to set it to the vendor
+      name of the database (hsqldb, h2, oracle, mysql, postgresql, and so on).
+  
+  PageRequest describe the desired page of data.
+     . zero based
+     . Sort describe how to sort req data.
+  Page<> - an interface describing the result of a paged query 
+    . content, num, size, sort info.
+    . util methods to get previous and next.
+
+  spring data rest /collectionName/search/methodNameInRestRepo?param=
+
+-----
+Transaction: a unit of works
+  . ACID
+Save Point: programatic point u can set, which allow u to rollback to (ir rollback part of a transaction).
+
+Database Locks:
+  . the db will lock records, (in some cases whole table or db) to prevent other processes from changing data.
+    . ACID compliance
+  . Within a transaction the following DML statements will lock records of the  affected rows:
+     . SELECT FOR UPDATE; UPDATE; DELETE.
+  . During the transactions other sessions attempting to modify locked records will by default
+     wait for the lock to be released. (ie interactively it will seem like things are hanging)
+  . Deadlock - occur where two transactions lock each other and can never complete.
+     . Both fail and roll  back
+  JPA LOCKING:
+    . Pessimistic LOCKING[used if the data is frequently updated]
+       . Database mechanism are used to lock records for updates
+       . Capabilities vary widely depending on db and version of JDBC driver used.
+       . Simplest version is "SELECT FOR Update.." Locks ro or rows until commit or rollback is issued.
+    . Optimistic Locking 
+      . Done by checking a version attribute of the entitiy.
+
+  Multi-Request Conversations:
+    . Occurs in web [form] app, or possibly RESTful too, where the update logic is over 
+      one or more requests, thus leaving a larger window of time.
+        . Pessimistic Locking is very fast, milliseconds. Will only protect against conflicts at write time.
+        . Optimistic Locking provides a mechanism to detect stale data over a longer period of time (ie - multiple requests)
+
+  • Pessimistic Lock Modes
+    • PESSIMISTIC_READ - uses shared lock, prevents data from being updated or deleted
+    • PESSIMISTIC_WRITE - uses exclusive lock, prevents data from being read (in some
+       isolation levels), updated or deleted
+    • PESSIMISTIC_FORCE_INCREMENT - uses exclusive lock, increments version property
+       of entity
+    • Most databases will support PESSIMISTIC_WRITE, this is the option you will typically use
+       • Use PESSIMISTIC_FORCE_INCREMENT if entity has version property
+       • Uses a version property, which is incremented with each update
+       • Can be int, Integer, long, Long, short, Short, or java.sql.Timestamp
+          • Most common to use is Integer
+       • Prior to an update, Hibernate will read the corresponding database record. If the version
+            does not match, an exception is thrown
+    • Downsides:
+       • Updates outside of JPA/Hibernate which do not update the version property will break this
+      • Performance - read before each update
+
+    JPA Optimistic Lock Modes
+      • OPTIMISTIC - Obtains optimistic read lock for all entities with version attribute
+      • OPTIMISTIC_FORCE_INCREMENT - Same at OPTIMISTIC, but in increments the version
+         value
+      • READ - JPA 1.x, same as OPTIMISTIC
+      • WRITE - JPA 1.x, same as OPTIMISTIC_FORCE_INCREMENT
+
 ---------------
 Boot:
   @SpringBootApplication annotated with:
@@ -187,3 +266,22 @@ spring:
   the @RestController annotation tells Spring that all handler methods in the 
   controller should have their return value written directly to the body of 
   the response, rather than being carried in the model to a view for rendering.
+-----
+DB connection pool:
+  - default HikariCP
+    . default pool size = 10
+    . properties to configure
+      spring.datasource.hikari.
+      spring.datasource.hikari.data-source-properties[cachePrepStmts]
+
+flyway migration
+  - it's important to have a unique way to reproduce the database state [structre]
+     because u may have different environment u want to run ur app in.
+     . development and CI/CD db are easy, just rebuild each time.
+     . QA,UAT,Production are permanent DB. considerations:
+        .what state are they in?
+        .Has a script been applied?
+        .How to create a new database to a release?
+  - store : version, checksum to the file, ...
+  - properites:
+     spring.flyway

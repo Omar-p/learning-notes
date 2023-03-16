@@ -60,3 +60,39 @@ when subscriber sub to pub a Subscription obj is created and it's passed to onSu
 For the report Drragon feature, we will be using AWS step functions, AWS Lambda, and Amazon Simple Notification Service or SNS to create an asynchronous Dragon reporting system. This reporting process is asynchronous because we need to do some backend data validation that could take some time, and we don't want people waiting on an immediate response. Instead, we alert the user when the process has completed. This is a good example to show you how to set up a workflow that would kick off want to request hits your API. Then your backend would do whatever work needs to be done and return the response when it's ready via SMS. This is known as request off loading. And it allows you to respond to your client without the entire process having finished yet.
 
 AWS step functions. 
+-------------------
+ServerWebExchange: 
+ . container for http req and res, req and session attributes, and other related properties ..
+   . ServerHttpRequest . ServerHttpResponse. reactive version of res and req.
+
+     Method arguments with reactive support:
+       . WebSession
+       . Principal
+       . @RequestBody
+       . HttpEntity -> access request headers
+       . @RequestPart to access part in a multipart/form-data request.
+----
+then()
+ allow the first pub to complete 
+    and then execute the pub it receive.
+  then(no or mono), thenMany(no or mono or flux)
+
+----
+no subscribe in controller spring will call it  for u at the right time.
+---
+Handler Function 
+  . take arg of ServerRequest and return Mono<T extends ServerResponse>
+Router function
+  . delegate handling of request to handler func .
+  . most cases we don't write it we use : RouterFunctions.route(RequestPredicate, HandlerFunction)
+    RequestPredicate : match against [Content-type|Method|pattern]
+    . evaluated in order.
+    . set more specific route before more general one.
+----
+WebTestClient:
+  . bindToController
+  . bindToRouterFunction
+  . bindToApplicationContext
+  . bindToServer
+  exchange() not retrieve() to access to the whole response not the body only.
+  if response has no body u can make sure exchange().expectBody(Void.class); or .isEmpty()

@@ -20,3 +20,9 @@ Class.forName(Driver);
   
   there is an option to preparedStatement -> Statement.RETURN_GENERATED_KEYS
     accessed by pst.getGeneratedKeys() return resultset
+
+Collector<T, A, R>
+ T, input elem type.
+ A, mutable accumulation type of the reduction operation, (often hidden as impl details[obj|collection]).
+ R, result of reduction.
+

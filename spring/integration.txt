@@ -98,7 +98,51 @@ Easiest way in spring integration to publish msg to a channel is by using
   @MessagingGateway and provide the default request message channel.
 
 @MessageEndpoint is to define that svc is able to serve/accept/receive a msg, has a @ServiceActivator on a method.
+---------------------------------------------------
+- Request-Reply Message [equiavlent to making a rpc ]
+  . A Request-Reply Message is used to facilitate a two-way
+    conversation via messaging. 
+  . sender send through channel , spring integration automatically 
+     a temp reply channel and adds it to the msg header.
+     and create errorChannel if the svcActivator method throws an exception,
+       then the service activator publishes the exception to the error channel.
+    receiver reply through a reply channel.
+  . advantages over normal rpc:
+    - > Receiver can change over time without requiring 
+         a change to the sender. - we send/receive from a broker. no need to know about the other system.
+
+  I think : it's sysnchronized/blocking
 -------------------------------------------------
+ - Event Messages:
+  An app publishes events when its internal state has changed.
+   other applications can integrate with that application 
+   by listening to its events.
+
+. High scalable : a system can integrate with other systems asynchronously
+. Loosely Coupled : A system need to know about the other systems with which it is integerating.
+
+. cons: data is eventually consistent, take some times until all components have 
+   the same representation of the data.
+
+  
+---
+Heavyweight and lightweight event:
+  Heavyweight  : contains a full payload with all  the info about the event.
+  lightweight: contains the ID of the record that changed, as well as any other 
+    info needed to make a callback[observer need to call the subject].
+  . Expiration Date header is a good way to tell 
+     consumers how long a message is good for. 
+------------------------------------------
+RabbitMQ:
+  . producer send msg land inside exchange -based on routing pattern forward to a paradigm q [binding]
+        => 
+  . Exchange Type -- --  -- Default pre-declared names:
+    .Direct                 (empty string) and amq.direct
+    .Fanout                 amq.fanout
+    .Topic                  amq.topic
+    .Header exchange        amq.match(and amq.headers in RabbitMQ)
+    .Default: nameless      routing key = q name 
+------------------------------
 docs
 #Overview
   Spring Integration’s primary goal is to provide a simple model for building 
@@ -153,8 +197,15 @@ docs
     . A message channel may follow either 
       1. point-to-point[ex: Queue]
          [no more than one consumer can receive each message sent to the channel.] 
+         . default to a blocking queue.
+         . receiver[poller]:
+            trigger: fixedDelay[delay + processingTime], fixedRate [count processing from waiting time],
+              cronJob defines when channel is polled. @ServiceActivator(inputChannel, poller = @Poller())
+               allows consumer to throttle incoming messages.
       2. publish-subscribe semantics[ex: Event notifications]
-         [attempt to broadcast each message to all subscribers on the channel.]
+         [attempt to broadcast each message to all active subscribers on the channel.]
+        - if subscribers come and go and want access to historical msgs, 
+          integrate with broker and configure persistence there;
     .  another important consideration: Should the channel buffer messages? 
       - pollable channels are capable of buffering Messages within a queue. 
         The advantage of buffering is that it allows for throttling the inbound 

@@ -1,3 +1,4 @@
+ minikube image load [image-from-local-registry]
 ch 02:
   2.4:
     create deployment.
@@ -226,6 +227,23 @@ ch 06:
   
   . Docker has a built-in DNS server that can enable containers in the same network to find each other using the container
     name rather than a hostname or an IP address
+
+  A JAR artifact is a compressed archive containing all the dependencies, 
+  classes, and resources used by the application.
+  - Putting uber-JARs inside a container image has never been efficient[any change in app will cause rebuild the entire image
+     without taking advantages of layered cache].
+    . standard since spring-boot 2.4 layered-jar :
+      . dependencies
+      . spring-boot-loader
+      . snapshot-dependencies
+      . application
+    RUN java -Djarmode=layertools -jar catalog-service.jar extract
+  
+  - to override paketo-buildpack config in grade.build
+    bootBuildImage {
+      imageName = "${project.name}"
+      environment = ["BP_JVM_VERSION" : "17.*"]
+    }
 ------
 pluralsight[microservices with spring cloud]:
   . 

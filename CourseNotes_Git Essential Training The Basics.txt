@@ -183,7 +183,7 @@ git diff --cached [different between staging area and committed]
 git diff HEAD [different between working area and committed ]
 --
 each command ask 2Q:
-  - how does this command move info across the 4 Areas?
+  - how does this command move info across the 4 Areas[stash, working area, Index, Repository]?
   - how does this command change the Repository?
 --
 git rm --cached file
@@ -197,3 +197,4 @@ why we need version control:
   - treat and attribute credit (or blame!)
   - allow for seamless collaboration between multiple team members.
   
+-------------------------------------

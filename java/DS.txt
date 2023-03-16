@@ -60,9 +60,34 @@ stack
   . Stack extends Vector [thread safe].
   . historical
   . if u want thread-safety use ConcurrentLinkedDeque instead.
+------------
+Sorting lists.
+  . .sort(null) use natural order, Comparable#compareTo
+       . don't compare int using subtraction -use-> Integer.compare(,)
+  . Cmparator.comparing(extractor)
+    . while chaining comparator, compiler sometimes cannot figuring out the type.  
+       to avoid that don't omit the type in the first comparing lambda .comparing((Student s) ->) instead of (s -> ) .
+       OR use type witness Comparator.<Student>comparing(s ->)
+       OR use method reference.
 
+  . linkedlist -> java copy the entire list to arr and sort it then cp the arr to the linkedlist.
+
+  . java use timSort based on Insertion sort and merge sort, faster than merge sort if the list is already sorted.
+    to use merge sort set: java.util.Arrays.useLegacyMergeSort : jvm property to true.
+
+  . u can use parallelSort over array, [if already sorted will be slower than normal sort]
+
+  . for primitives : java use dual pivot quicksort
+-------------
+Sets
+  . intersection -> retainAll
 -------------------------------------
+treeset
+
+------------------------
 System.err is flushed quicker than System.out
+VM options -> -verbose:gc 
+ 
 ----
 Reading: 
   https://www.baeldung.com/jvm-compressed-oops

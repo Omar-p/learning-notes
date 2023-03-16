@@ -514,3 +514,4 @@ compose:
   - depends_on <- dependeny on the container level, has nothing to do with 
     what happen inside. it meets when the container start.
     
+~/.docker/config.json

@@ -378,7 +378,7 @@ Network Address Translation(NAT):
           assign them to ISPs, ISP allocate them to business or consumer end-users          
         - private address space:
             in range 10.0.0.0 can be used in different places, but can't be routed over the internet.
-            . to givve interbet access to private devices, we need to use NAT.
+            . to give internet access to private devices, we need to use NAT.
   - provide some securitiy benefits          
   - Translate private IPv4 addresses to public
   - Static Nat - 1 private to 1 (fixed) pubic address (IGW) [in NAT table 1:1 private:public]
@@ -2086,3 +2086,49 @@ serverless:
   . a cloud computing execution model in which the cloud provider allocates machine Resources
     on demand. taking care of the servers on behalf of their customers.
   . No more servers u think about. 
+--------
+
+EC2: still requires management and maintenance by its users, like 
+  operating system updates or security patching.
+
+Good Reasons for Choosing EC2 over Serverless
+ 1-Computation-  workloads that require a high level of (parallel) computing power.
+
+ 2-Flexibility & Control- With EC2, you have complete control over the operating system, libraries, 
+     and every software that runs on your instance. 
+
+3- Cost Control , you’ll be billed for your chosen instances that can be a perfect fit 
+    for your needs in regard to instance types and sizes.
+--
+Amazon Machine Images (AMI)
+  AWS-maintained configurations that are required to launch an instance. It contains:
+    . OS  . Architecture . launch permissions . storage 
+
+Elastic Block Storage (EBS):
+  .  block storage volumes that can be mounted to instances. Their persistence is i
+      ndependent of your instance’s lifetime.
+
+Elastic File System (EFS) - scalable file storage that can scale based on workload requirements. 
+  Use it for any workload that can suddenly increase or decrease storage needs. 
+    It can also be used for shared volumes.
+
+depending on the operating system that is running on your EC2 instance, you may have to use another user name. 
+ For example, the user name for Amazon Linux instances is ec2-user while the user name for Ubuntu instances is ubuntu.
+
+you won’t be billed for the instance while it’s stopped, but you’ll still pay for the storage  of any EBS volume.
+
+Hibernate: If supported by the OS, the instance can save its RAM contents to the EBS root volume. 
+
+security Groups - A security group can be viewed as a virtual, stateful firewall for your instances. 
+ It controls the traffic to and from each instance, allowing you to specify which inbound and outbound
+   network traffic is allowed.
+
+Network ACLs - NACLs are another layer of security that allows you to control traffic to and from subnets
+  in your VPC. Contrary to security groups, NACLs are stateless, meaning that you explicitly need to configure 
+   outbound allow rules, for your service to be able to answer requests. The stateful security groups allow such 
+    responses by default, if the requesting (inbound) direction was allowed.
+
+Gateways - There are two important gateway types in AWS: the Internet and the NAT gateway. On the one hand, 
+ the internet gateway allows communication between instances in your public subnet and the internet.
+  A NAT gateway on the other hand enables instances in a private subnet to connect to the internet or other 
+   AWS services but prevents the Internet from initiating connections to those instances.

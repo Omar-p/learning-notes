@@ -100,3 +100,7 @@ for undoing playbook, u need to create another playbook. so if u design one may 
   
 to get more info path -v up to -vvvv [ verbosity] of the output. for most purpose -vv is enough
          
+-----jeff-----
+
+ a snowflake is a server that requires special configuration beyond that covered by automated deployment scripts. 
+   You do the automated deployment, and then you tweak the snowflake system by hand.

@@ -94,6 +94,7 @@ master node is the brain of the cluster where all decisions are made.
 		Stores configuration and state of the entire cluster.
 		Distributed Key/Value data store 
 		Single source of truth[etcd]
+      . etcd is the backend for service discovery and stores cluster state and configuration.
 	Scheduler:
 		Watches for new workload/pods and assigns them to a node based on several scheduling factors[is node healty ?, has enough resources?, port available?, affinity and anti affinity rules, etc]
 	Controller Manager:

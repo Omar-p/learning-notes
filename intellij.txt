@@ -40,4 +40,6 @@ when refactoring u should have good unit test because things break.
 ---
 alt + ctrl + v -> extract local var.
   . can used after ctrl+w
-alt + ctrl + m -> extract method.
+alt + ctrl +  -> extract method.
+
+ctrl + a -> begin of the line
