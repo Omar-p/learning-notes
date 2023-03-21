@@ -140,6 +140,16 @@ filter will extract credientals from req and create approperiate AuthenticationT
         and set the principal to the SecurityContext.
 Header[WWW-Authenticate: Basic realm="Realm"] tell the browser basicAuth was required.       
 -------
+  . adding spring security to the app , u effectivly adding a single filter [[delegating filter proxy]]
+    . this filter passing a request to a collection called a FilterChainProxy -each FilterChain -> handle different request path
+    . adding oauth2Login -adds-> oauth2AuthorizationRequestRedirectFilter and oauth2LoginAuthenticationFilter[handle the exchanges of the authorization code]
+       all this all customizable: . when use sign a request to oauth2 =request redirected to RedirectEndpoint which redirect the user to Authorization server. 
+       which redirect to the authorization endpoint with the authorization code. authorization endpoint call token endpoint with auth-code, client-id|secret, state.
+       . when u register new user from oauth2/oidc u must u use a unique immutable claim from the token 
+          to make sure that is never change. in oidc sub is unique. don't use for example the email if the
+            auth-server allow users to change their email. <- check the doc if the auth server don't support oidc.
+            onAuthenticationSuccess(req, response, Authentication) -> the impl of Authentication is depending on how the
+              user authenticate so u need to check its type[UsernamePasswordAuthenticationToken, OAuth2AuthenticationToken[nameAttributeKey: represent the unique id for this user],]
 DelegatingFilterProxy  -delegate Regquest To -> FilterChainProxy --assign the req to the appropriate SecurityFilterChain
     securityFilterChain are simply collection of filter that perform security check on the req.
     .. we can define different securityfilterChain to different endpoint with different authentication method.
@@ -154,3 +164,31 @@ DelegatingFilterProxy  -delegate Regquest To -> FilterChainProxy --assign the re
         which delegated to OAuth2LoginAuthenticationFilter then delegate to AuthenticationManager to perform 
             actual authentication --authenticate<Authentication Provider>--> [OidcAuthorizationCodeAuthenticationProvider|
             OAuth2LoginAuthenticationProvider..] --> exchange auth_code with access_token.. 
+---
+ 
+   . delegation of authorization, specs mention authentication should happen but not specify how. [OIDC]
+  . we can centralize user registration in authorization server instead of
+    writing it to each service we have. 
+     . adding all what we need in one place like multi-factor authentication...
+ . OAuth2 in spring
+   . in the past, oauth2 support scattered between a number of projects.
+   . 5.2+ spring team decide to unify JWT, JOSE, OAuth2 and OIDC support under spring security.
+   . --
+   . spring app(client) redirect owner to authorization server  
+      for authentication. [spring configure that url for popular authorization server(CommonOAuth2Provider(FB|GOOGLE|OKTA)). if u don't use one of them u need to configure it.()]
+       . auth server redirect to redirect-url that only registered from the client.
+       . u as a client take that code that sent to the redirect-url in frontChannel and exchange with auth server via tokenUri.
+        to debug it [OAuth2AuthorizationCodeAuthenticationProvider]
+    . OIDC :
+      . provides an identity layer on top of the OAuth 2.0 protocol.
+      . Clients can verify the identity of an end-user based on the 
+         authentication performed by an authorization server.
+      . Gives clients access to basic profile information about the 
+         end user via REST.
+         redirect url: urDomain/login/oauth2/code/google
+         all oidc orovider must use the same path ex:
+           [issuer-uri => accounts.google.com]/.well-known/openid-configuration
+      id-token: intended to be used for authentication, has a strict standards -> u don't have to worry about changes to the token format.   
+---
+https://developer.okta.com/blog/2021/05/05/client-credentials-spring-security
+https://github.com/springframeworkguru/spring-6-resttemplate/tree/32-oauth-mock-manager

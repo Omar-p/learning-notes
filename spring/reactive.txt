@@ -80,6 +80,22 @@ then()
 ----
 no subscribe in controller spring will call it  for u at the right time.
 ---
+- Functional Web Endpoints:
+  WebMvc.fn 5.2
+  WebFlux.fn 5.0
+    . if mono -> flatMap Mono to ServerResponse
+    . if flux -> set it to body.
+    route()
+      .GET("products")
+      .POST("products") we have a duplication so u can go for
+        route()
+        .Path("products", Builder)  <- like @RequestMapping() on controller and then append to it on method level.
+  
+  Router Function Builder:
+    . Nesting . Resources . Router function built using builder.
+  Predicates:
+    . METHOD, HEADERS, ACCEPT, PATH, QUERY PARAMETER, Composition(or and )
+  Exception handler: onError()
 Handler Function 
   . take arg of ServerRequest and return Mono<T extends ServerResponse>
 Router function

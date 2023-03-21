@@ -114,3 +114,28 @@ a way to design ur app:
   1.6 Charles Proxy : u can use it to intercept all traffic from machine, 
     set breakpoint for certain patterns, modify the request. it is useful for debugging.
   
+----
+Process Monitoring:
+  . As some point you'll likely find yourself writing a script which needs to run all the time - a 
+    "long running script". These are scripts that shouldn't fail if there's an error, or ones that 
+     should restart when the system reboots.
+  - supervisord
+    /etc/supervisor/config.d
+    [name]
+    command= 
+    directory=  <- where the wd of the command
+    autostart=
+    autorestart=
+    startretries= how many times trt to restart before putting it in failing state.
+    stderr_logfile= log file for err
+    stdout_logfile= log normal output
+    user=omar
+    environment=SECRET_PASSWORD='this is secret',SECRET_TWO='another secret'
+r
+    sudo supervisorctl reread  / reload /  status
+    supervisorctl stop|stop nodebook
+    . web interface
+    /etc/supervisord.conf, add this:
+    port = 9001
+    username = user # Basic auth username
+    password = pass # Basic auth password

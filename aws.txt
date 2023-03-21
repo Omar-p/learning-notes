@@ -2132,3 +2132,71 @@ Gateways - There are two important gateway types in AWS: the Internet and the NA
  the internet gateway allows communication between instances in your public subnet and the internet.
   A NAT gateway on the other hand enables instances in a private subnet to connect to the internet or other 
    AWS services but prevents the Internet from initiating connections to those instances.
+
+EC2 is the key service for applications that require a high level of customization and control, 
+ while serverless services like Lambda are a good choice for applications that need to run code
+ in response to specific events or triggers. 
+
+----
+With a growing application and therefore a growing number of containers, you’ll be facing operating challenges regarding 
+ the management and orchestration of your container landscape: deployments, scheduling, and scaling of your
+  containers, and many more. [[ECS]] was built to help with that tedious task by offering a management plane that simplifies 
+  all those tasks so that developers can focus more on application development.
+
+Task, Task Definition, service:
+  . Task Definition: The Blueprint to Run Your Containers
+    - Launch type - which service do you want to use to execute your tasks, either EC2,
+       Fargate, or External?
+    - Roles - you’ll need to have two dedicated roles for ECS.  [permissions to pull image, read secrets, svcs u want to access]
+    - Container image
+    - CPU & memory allocation
+    - Environment variables -
+    - Secrets - you can securely inject sensitive data from AWS Secrets Manager 
+       or Systems Manager Parameter Store. 
+    - Logging configuration - define the log driver you want to use and the destination 
+       where ECS should send your logs. The available log drivers are also dependent 
+       on your launch type, e.g. Fargate only supports awslogs, splunk, and awsfirelens 
+       while EC2 additionally offers fluentd or json-file.
+    - Exposed ports
+  . Task - A Containerized Application That Is Deployed to Run on EC2 or Fargate
+    - an actual execution of a task definition. They consist of a set of containers that 
+       are run together on the same host.
+    -  Tasks are defined using the Docker Compose file format
+  . Service - Managing a Group of Tasks
+    . make sure a desired #of running tasks is also running.
+  . A cluster is a logical grouping of tasks or services. Tasks and services run 
+    on infrastructure that is registered to a cluster, either provided by AWS Fargate,
+     EC2 instances managed by yourself or on-premise servers, or virtual machines that 
+     are remotely managed.
+  . Launch Types - The Way in Which Tasks Are Run and Managed[EC2, Fargate, External]
+    EC2:
+      . It’s a good launch type choice for workloads that require consistently high CPU and
+         memory, workloads that are optimized for pricing, or applications with persistent 
+         storage requirements
+    Fargate: Run Tasks without Having to Manage the Underlying Infrastructure
+      . It’s the recommended launch type for tiny to large workloads that may require 
+        low overhead and experience occasional bursts. If you’re not perfectly certain 
+        about your full requirements, always go for the Fargate launch type to minimize 
+        operations and liabilities.
+  ECS provides different scheduling capabilities, including a service 
+    scheduler or manually running tasks
+  
+  The lifecycle of a task:
+    . Provisioning - Preconditions are in progress, e.g. attaching 
+      the Elastic Network Interface (ENI) if the task resides in a VPC.
+    . Pending - Waiting until the required resources for the task are available
+    . Activating - Final steps that takes place before moving to the running state, 
+      e.g. if attached to load balancing, ECS takes care of registering the task to the target groups
+    . Running - The task is successfully running.
+    . Deactivating - Necessary steps to take place before stopping the task, e.g. detaching
+       from target groups if the task is part of a load balancer.
+    . Stopping - Gracefully shutting down the containers via SIGTERM signals. If a container does 
+       not stop within the configured timeout, there will be a forceful shutdown via SIGKILL.
+    . Deprovisioning - Final steps before transitioning to the stopped state, e.g. 
+       detaching the ENI if the task resides in a VPC.
+    . Stopped - The task has been successfully stopped.
+    
+
+
+
+
