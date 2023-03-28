@@ -50,17 +50,35 @@ Spring Integration: Getting Started.
   DirectChannel:
     . call one of its subscriber when the msg is sent on the same thread.
   ExectuorChannel:
-    . call msg handler using executor, doesn't need to block the sender.
+    . p2p that delegates to an instance of TaskExecutor to perform msg dispatching,
+      shouldn't be used for transactions that span channel calls doesn't need to block the sender.
+    
   
   Pollabl Channel:
-    . Polling Consumer, Pull, Buffering.
+    . Polling Consumer create a separate thread and periodically poll the channel for msgs, Pull, Buffering.
     - QueueChannel
       default: usie linked blocking queue with unbounded capacity. [u can configure type or capacity]
         if q is empty thee receiver block until the sender send msg or timeout.
     -RendezvousChannel
       ZeroCapacity Queue channel,   Block until sender and receiver meet.
+      . Backed by SynchronizeQueue
+      . p2p, synchronize sender and receiver[check availability of something], best use for the request-reply pattern.
     - PriorityQueue
-      Default oredering by "priority" header, can be overrided .
+      Default oredering by "priority" header, can be overrided[by definig ur own Comparator] .
+        . pollable and buffered 
+        . stored message in PriorityBlockingQueue
+        . Potential to starve message with low priority. 
+  DirectChannel
+    . p2p subscribable that enables a single thread to perform operations on both sides of the channel.
+      . when the pub invokes its send method, it forwards the msg in that same thread to its msg
+        dispatcher, which invokes the subscriber's handleMsg method. when sub completes, the the
+          response is returned to the pub. -> supporting transaction.
+          - Motivation: Transaction Integrity:
+              . support transactions that must span across the channel while still benefiting from the abstraction
+                and loose coupling that channel provides.
+    . sender block on the send() until receiver complete msg processing  .
+    . best choice for transactional calls that span across a channel, while retaining loose coupling.
+
 3 
   . to send msg to mq we need to convert it to suitable format 
      - java serialization drawbacks:
@@ -78,7 +96,15 @@ Spring Integration: Getting Started.
        adapter: a glue between spring integration msg channels and other compnents 
          and systems.
          - spring has many impl to it, allowing spring to connect easily with different systems.
-
+4
+  Errors in Asynchronous Applications:
+    . an error occurred in the receiver, what does receiver do with the msg?
+    . in request-reply pattern > standards exception handling.
+      . Direct channel 
+      . RendezvousChannel 
+        - execute gateway in try-block. spring make it easy: u can handle error gracefully.
+          . in directChannel u don't have to define return type for gateway. because directChannel use 1 thread to 
+             handle sending/receiving u can just wrap gateway execution with try-catch even if it's void.
 ---------------------------------------------------
 Message Design
   . Command Message.

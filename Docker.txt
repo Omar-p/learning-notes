@@ -515,3 +515,8 @@ compose:
     what happen inside. it meets when the container start.
     
 ~/.docker/config.json
+
+
+sudo amazon-linux-extras install docker
+sudo usermod -a -G docker [user]
+docker images --filter reference=[basedOnName]
