@@ -8,6 +8,36 @@ Reactive Programming.
     Events propagate changes, forming a stream of data that is
      propagated to everyone listening to those changes. 
   . Non-blocking , Asynchronous, Functional/Declarative.
+  . when we have one ubiquitous abstraction, one consistent type, 
+    that's at the core of our code, then we can reuse threads, we get 2 other benefits:
+     - one abstraction to deal with different data, so if we want to pull data [], it just a reactive stream no need for adapters or code glue.
+     - we have single place to introduce supporrt for robust APIs, 
+       [retries, circuit breaking, backpressure] are built in this core-api,
+
+  --------
+   - implied cost of moving to microservices, what the complexities of moving communication to the wire ?
+     . we need now to think more about threads, instead of just spin up more instances, to reduce cost of scaling
+  - RSocket: protocol designed by engs in netflix and then went to meta, a protocol that reifies the concept 
+      of reactive programming on the wire. it make it real so that u can build services that have back pressure 
+        in them as part of the protocol itself, not just an afterthought.
+  - every single ui could result in a cascade of network calls. that u don't have to deal with.
+      before, one ui could easily equal one http call or one svc call.
+  - microservices in netflix way, u extract out or erdicate any svc state
+     so sure u've state, but that svc state is pushed back to a Scalable data tier 
+       as best as possible. netflix use cassandra. and each svc is stateless HTTP service.
+        and just scale out all svc horizontally behind a LB.
+
+        - with reactive we can do better,  
+            using blocking API, threads most of the time is idle waiting for other svc to respond.
+    - when u subscribe, subscription happen in different threads, no gurantee the subscription will be in the same thread
+     . so when u want to do things in some order, use operator then
+
+     . tailable cursors [similar to continous query]: mongodb give u publisher type and as soon as data is available it push it to u.
+       to do that u need to start mongo in replicated set mode,
+
+       @Tailable
+       methodInRepo 
+     https://www.baeldung.com/spring-data-mongodb-tailable-cursors#tailable-cursors
   -----
 
 Reactive Web App adopt non-blocking servers, generally based 
@@ -112,3 +142,6 @@ WebTestClient:
   . bindToServer
   exchange() not retrieve() to access to the whole response not the body only.
   if response has no body u can make sure exchange().expectBody(Void.class); or .isEmpty()
+
+--
+if I not use flatMp i will get a stream of stream
