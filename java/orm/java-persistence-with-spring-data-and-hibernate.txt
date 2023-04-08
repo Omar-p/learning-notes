@@ -1,0 +1,295 @@
+ch01:
+    Object persistence means individual objects can outlive the application process; 
+    they can be saved to a data store and be re-created at a later point in time.
+
+    a database system providing only an SQL data language interface isn’t 
+    really relational, and in many ways it isn’t even close to the original concept.
+
+    data independence in the book "Relational DBMSs aren’t specific to Java, nor is an SQL 
+    database specific to a particular application; data usually lives longer than an application does."
+    IN DBMS: https://www.guru99.com/dbms-data-independence.html
+
+    schema evolution: When your business requirements change, you’ll have to modify the database schema
+     again with DDL statements after data has been stored;
+
+    relational database management systems are the only proven generic data management technology, 
+    and they’re almost always a requirement in Java projects. Note that we aren’t claiming that relational 
+    technology is always the best solution. FOR EX: internet-scale distributed systems 
+    (web search engines, content distribution networks, peer-to-peer sharing, instant messaging)
+     have to deal with exceptional transaction volumes. Many of these systems don’t require 
+     that after a data update completes, all processes see the same updated data 
+     (strong transactional consistency). Users might be happy with weak consistency; 
+     after an update, there might be a window of inconsistency before all processes see the updated data.
+     In contrast, some scientific applications work with enormous but very specialized datasets. 
+     Such systems and their unique challenges typically require equally unique and often custom-made 
+     persistence solutions.
+
+    A system may guarantee that all nodes will see the same data at the same time and
+    that data read and write requests are always answered. But when a part of the sys-
+    tem fails due to a host, network, or data center problem, you must either give up
+    strong consistency or 100% availability. In practice, this means you need a strategy
+    that detects partition failures and restores either consistency or availability to a cer-
+    tain degree (for example, by making some part of the system temporarily unavailable
+    so data synchronization can occur in the background). Often, the data, the user, or
+    the operation will determine whether strong consistency is necessary.
+
+    Application with trivial business logic that doesn't need a domain model that need to execute 
+    procedures that modify large sets of data, close to the data. You might also implement some 
+    reporting functionality with plain SQL queries and render the results directly onscreen. 
+    SQL and the JDBC API are perfectly serviceable for dealing with tabular data representations, 
+    and the JDBC RowSet makes CRUD operations even easier. Working with such a representation of
+    persistent data is straightforward and well understood.
+
+    A composition is the type of association where an object (BillingDetails in our case) cannot 
+    conceptually exist without the container (User in our case). You can navigate the relationship 
+    between the classes in both directions; this means you can iterate through collections or 
+    call methods to get to the “other” side of the relationship.
+    
+    mismatch: we need to store address of user, we may store it as a string but in most system 
+     we will need to access street name or zipcode. if we store them as a separate columns in user
+     and some other classes need to contains the address we will duplicate the same column again.
+
+     an aggregation, indicated by the empty diamond. Should we also add an ADDRESS table? Not necessarily; 
+     it’s common to keep address information in the USERS table, in individual columns. This design is likely 
+     to perform better because a table join isn’t needed if you want to retrieve the user and address 
+     in a single query.
+
+     ** The nicest solution may be to create a new SQL data type to represent addresses and to add 
+        a single column of that new type in the USERS table, instead of adding several new columns.
+
+        A new Address type (class) in Java and a new ADDRESS SQL data type should guarantee interoperability.
+         But you’ll find various problems if you check on the support for user-defined data types (UDTs) 
+         in today’s SQL database management systems.
+         UDT support is one of several so-called object/relational extensions to traditional SQL. 
+         This term alone is confusing, because it means the database management system has 
+         (or is supposed to support) a sophisticated data type system.
+         . SQL standard supports user-defined data types, but poorly.
+
+         most engineers accept that SQL products have limited type systems. 
+         Even with a sophisticated UDT system in your SQL DBMS, you would still likely duplicate the type declarations,
+          writing the new type in Java and again in SQL.
+    
+    inheritance: 
+    As soon as we introduce inheritance into the model, we have the possibility of polymorphism. 
+    The User class has a polymorphic association with the BillingDetails superclass.
+    SQL databases lack an obvious way (or at least a standardized way) to represent a polymorphic association.
+     A foreign key constraint refers to exactly one target table; it isn’t straightforward to define a foreign 
+     key that refers to multiple tables.
+    
+    identity:
+     Java defines two different notions of sameness:
+      Instance identity (ref ==)
+      Instance equality (impl of equals() (also called equality by value))
+     SQL:
+      same primary key && same table.
+    
+    neither equals() nor == is always equivalent to a comparison of primary key values.
+     It’s common for several non-identical instances in Java to simultaneously represent 
+     the same row of a database, such as in concurrently running application threads.
+
+    A surrogate key column is a primary key column with no meaning to the application userin other words, 
+     a key that isn’t presented to the application user. Its only purpose is to identify data inside the application.
+
+    In the context of persistence, identity is closely related to how the system handles caching and transactions
+
+    Association:
+    Object-oriented languages represent associations using object references, but in the
+    relational world, a foreign key–constrained column represents an association with copies
+    of key values.
+    If an association between instances should be navigable in both directions, you must 
+    define the association twice, once in each of the associated classes.
+
+    Navigation in a particular direction has no meaning for a relational data model
+    because you can create data associations with join and projection operators.
+
+    If you wish to represent a many-to-many association in an SQL database, you must
+    introduce a new table, usually called a link table. In most cases, this table doesn’t
+    appear anywhere in the domain model
+
+    **the problems we’ve considered are mainly structural: you can see them by
+      considering a purely static view of the system. Perhaps the most difficult problem in
+      object persistence is a dynamic problem: how data is accessed at runtime.
+    
+    1.2.5The problem of data navigation:
+    the most natural way to access object-oriented data is [walking the object network]: 
+     You navigate from one instance to another, even iterating collections, following prepared pointers between classes.
+
+    this isn’t an efficient way to retrieve data from an SQL database. The single most important thing you can do 
+    to improve the performance of data access code is to minimize the number of requests to the database.
+
+    you need to know what portion of the object network you plan to access before you start navigating the object network!
+
+    lazy loading:
+    retrieving data only on demand. This piecemeal style of data access is fundamentally
+    inefficient in the context of an SQL database, because it requires executing one state-
+    ment for each node or collection of the object network that is accessed. This is the
+    dreaded n+1 selects problem. In our example, you will need one select to retrieve a User
+    and then n selects for each of the n associated BillingDetails instances.
+    Avoiding the Cartesian product and n+1 selects problems is still a problem for many Java programmers.
+
+    1.3
+    To use Hibernate effectively, you must be able to view and interpret the SQL state-
+    ments it issues and understand their performance implications. To take advantage of
+    the benefits of Spring Data, you must be able to anticipate how the boilerplate code
+    and the generated queries are created.
+
+    JPA specification defines:
+      .A facility for specifying mapping metadata
+      .APIs for performing basic CRUD, ex: EntityManager
+      .A language and APIs for specifying queries that refer to classes and properties of classes[JPQL].
+      .How the persistence engine interacts with transactional instances to perform
+        dirty checking, association fetching, and other optimization functions. The JPA
+        specification covers some basic caching strategies
+    Hibernate:
+      . Productivity
+      . Maintainability
+      . Performance : automated solutions like Hibernate allow the use of many optimizations 
+        at all times. One example is the efficient and easily tunable caching in the application tier
+      . Vendor independence
+    Spring Data:
+      . Shared infrastructure—Spring Data Commons.
+      . Removes DAO implementations —JPA implementations use the data access object (DAO) pattern. This pattern starts with the idea of an abstract interface to a database and maps application calls to the persistence layer while hiding the details of the database.
+      . Automatic class creation: 
+      . Default implementations for methods:
+        Spring Data JPA will generate default implementations for each method 
+        defined by its repository interfaces. Basic CRUD operations do not need to be implemented any longer.
+      . Generated queries: 
+        Spring Data JPA will parse the method name and create a query for it.
+      . Close to the database if needed—Spring Data JDBC can communicate directly with
+        the database and avoid the “magic” of Spring Data JPA. It allows you to interact
+        with the database through JDBC, but it removes the boilerplate code by using
+        the Spring framework facilities.
+    2.0
+    A persistence unit is a pairing of our domain model class mappings with a database connection,
+     plus some other configuration settings. Every application has at least one persistence unit;
+     some applications have several if they’re talking to several (logical or physical) databases.
+    
+    an EntityManagerFactory talk to the database. This API represents the persistence unit, 
+     and most applications have one EntityManagerFactory for one configured persistence unit.
+     Once it starts, the application should create the EntityManagerFactory; the factory is 
+     thread-safe, and all code in the application that accesses the database should share it.
+    
+    HIBERNATE:
+    The native equivalent of the standard JPA EntityManagerFactory is the org.hibernate.SessionFactory.
+    To configure the native Hibernate, we can use a hibernate.properties Java properties 
+     file or a hibernate.cfg.xml XML file.
+    
+    To create a SessionFactory, we first need to create a configuration.
+     A ServiceRegistry hosts and manages services that need access to the SessionFactory. 
+     Services are classes that provide pluggable implementations of different types of functionality to Hibernate.
+    
+    Switching between JPA and Hibernate:
+     entityManagerFactory.unwrap(SessionFactory.class);
+    
+    spring data: [programmatic configuration]
+        new DataSource();
+        new JpaTransactionManager(emf);
+        JpaVendorAdapter: 
+         new HibernateJpaVendorAdapter();
+            jpaVendorAdapter.setDatabase(Database.MYSQL);
+            jpaVendorAdapter.setShowSql(true);
+        new LocalContainerEntityManagerFactoryBean();
+            set vendor adapter, properties
+    4.0
+    JpaRepository offers JPA-related methods, such as flushing the persistence context 
+    and deleting records in a batch. Additionally, JpaRepository overwrites 
+    a few methods from CrudRepository, such as findAll, findAllById, and saveAll 
+    to return List instead of Iterable.
+
+    Using the @TestInstance(TestInstance.Lifecycle.PER_CLASS) annotation, we
+    ask JUnit 5 to create a single instance of the test class and reuse it for all test meth-
+    ods. This will allow us to make the @BeforeAll and @AfterAll annotated methods
+    non-static and to directly use the autowired UserRepository instance field inside
+    them.
+
+    If, however, you prefer to run tests against a real database you can use the 
+    @AutoConfigureTestDatabase annotation, as shown in the following example:
+
+    @DataJpaTest
+    @AutoConfigureTestDatabase(replace = Replace.NONE)
+
+    The first and top keywords (used equivalently) can limit the results of query meth-
+    ods. The top and first keywords may be followed by an optional numeric value to
+    indicate the maximum result size to be returned. If this numeric value is missing, the
+    result size will be 1.
+
+    Additionally, Spring Data supports Streamable. You can concatenate
+    Streamables and directly filter and map over the elements.
+    Streamable<User> findByEmailContaining(String text);
+    
+    
+    @Query("select u.username, LENGTH(u.email) as email_length from
+            #{#entityName} u where u.username like %?1%")
+    #{#entityName} Inserts the entityName of the domain type associated with the given Repository. 
+     The entityName is resolved as follows: If the domain type has set the name property on
+     the @Entity annotation then it will be used. Otherwise the simple class-name of the domain type will be used.
+    
+    If you are using the @Query annotation and the query you wrote is wrong, you will get an
+        error at runtime when executing that method
+
+    JpaSort: 
+    List<Object[]> findByAsArrayAndSort(String text, Sort sort);
+     when we use Sort.by(LENGTH(u.email)) we will get No property LENGTH(u.email) found for type User!
+     JpaSort.unsafe("LENGTH(u.email)"): When Spring Data discovers the unsafe Sort order for a method that uses the @Query annotation, 
+     then it just appends the sort clause to the query — it skips checking whether the property to sort by belongs to the domain model.
+    
+    Projection:
+      . the book create class called Projection and create interfaces and calsses that are used for projection
+         as nested.
+    Projection using interface:
+    - By executing queries at runtime, the execution engine creates proxy instances of the
+        interface for each returned element and forwards the calls to the exposed methods to
+        the target object.
+    closed projection, the query execution can be optimized by Spring Data JPA because all the
+     properties needed by the projection proxy are known from the beginning.
+    Open projection Spring Data JPA will not be able to optimize the query execution,
+     because the SpEL expression is evaluated at runtime and may include any properties
+      or combination of properties of the entity root.
+    
+    A class-based projection requires the creation of a data transfer object (DTO) class
+    that declares the properties to be included in the projection and the getter methods.
+    Using a class-based projection is similar to using interface-based projections. However,
+    Spring Data JPA doesn’t need to create proxy classes for managing projections.
+    Spring Data JPA will instantiate the class that declares the projection, and the properties to be
+    included are determined by the parameter names of the constructor of the class.
+
+    Modifying:
+    @Modifying
+    @Transactional or method will be run from a programmatically managed transaction.
+
+    ex:
+    @Modifying
+    @Transactional
+    @Query("update User u set u.level = ?2 where u.level = ?1")
+    int updateLevel(int oldLevel, int newLevel);
+
+    ** What is the difference between the deleteBy* and deleteBulkBy* ?
+       The first one runs a query, and it will then remove the returned instances one by one.
+        If there are callback methods that control the lifecycle of each instance (for example,
+        a method to be run when a user is removed), they will be executed. The second
+        method will remove the users in bulk, executing a single JPQL query. No User
+        instance (not even the ones that are already loaded in memory) will execute lifecycle
+        callback methods.
+
+    QBE:
+    allows dynamic query creation and consists of three pieces: a probe, an ExampleMatcher, and an Example.
+        The probe is a domain object with already-set properties. The ExampleMatcher
+        provides the rules for matching particular properties. An Example puts the probe and
+        the ExampleMatcher together and generates the query
+    User user = new User();
+    user.setUsername("J");
+    ExampleMatcher matcher = ExampleMatcher.matching()
+        .withIgnorePaths("level", "active")
+        .withStringMatcher(ExampleMatcher.StringMatcher.STARTING)
+        .withIgnoreCase();
+    Example<User> example = Example.of(user, matcher);
+    List<User> users = userRepository.findAll(example);
+
+    use cases: 
+    - When there are frequent changes to the internal structure of the domain
+        objects, and they aren’t propagated to the existing queries.
+    - It only supports starting/ending/containing regex matching for String proper-
+    ties, and exact matching for other types.
+    - It does not support nested or grouped property constraints, such as username =
+        ?0 or (username = ?1 and email = ?2).
+    
