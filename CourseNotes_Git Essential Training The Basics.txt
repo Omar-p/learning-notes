@@ -185,6 +185,17 @@ git diff HEAD [different between working area and committed ]
 each command ask 2Q:
   - how does this command move info across the 4 Areas[stash, working area, Index, Repository]?
   - how does this command change the Repository?
+    . checkout [branch].
+      . move state from that branch in repo to my working area and index. modify HEAD
+    . reset
+      . move to another commit that is belonging to the current branch
+      . options;
+        --mixed(default) copy state of the commit to the index.
+        --hard copy state of the commit to the index and working area.
+        --soft just move to the commit and don't touch wa or index
+      . u made #commits and u realize u don't need them . then reset --hard to the last one u want.
+      . ignore all changes in index and wa : git reset --hard HEAD
+      . unstage: git reset HEAD files. -> make index == last commit
 --
 git rm --cached file
   remove new file from stagging area. [make them untracked]

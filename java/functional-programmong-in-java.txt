@@ -38,3 +38,8 @@ use parallel stream when:
 so just because you parallelize doesn't mean u will always get a better performance. [make sure the answer is correct, the performance is good and u are welling to use so much resources to get the answer]
 
 we can't use method throws checked exception as impl to any java.util.function interface.
+----
+generics :
+  if u don't set generic parameters before method type, compiler will search for them as normal classes
+   static <T> void foo(List<T> l)
+   void foo(List<T> l) <-- compiler will treat T as normal class.

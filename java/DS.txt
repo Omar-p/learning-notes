@@ -82,7 +82,9 @@ Sorting lists.
 Sets
   . intersection -> retainAll
 -------------------------------------
-treeset
+treeset:
+  . red/black tree.
+  . using type !implements Comparable, in RT when inserting to it will throw ClassCastException
 
 ------------------------
 System.err is flushed quicker than System.out

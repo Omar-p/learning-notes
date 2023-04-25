@@ -88,10 +88,11 @@ ORDER BY sort_expresssion [ASC | DESC] [NULLS FIRST | NULLS LAST]
 --
 DISTINCT ON (cols,..) must match the prefix of cols in ORDER BY clause:
   . select first row in each group.
-  cols in ON define the equality rows.
-  Without ORDER BY, will picks any row in each group.
-  SELECT DISTINCT ON (column1) column_alias,  column2 FROM table_name ORDER BY column1, column2; 
-  *SELECT DISTINCT ON (bcolor) bcolor, fcolor FROM distinct_demo ORDER BY bcolor, fcolor; *
+  With DISTINCT ON, you tell PostgreSQL to return a single row for each 
+  distinct group defined by the ON clause. Which row in that group is
+   returned is specified with the ORDER BY clause.
+
+https://www.geekytidbits.com/postgres-distinct-on/
 ---
 WHERE
   . The condition must evaluate to true, false, or unknown. It can be a boolean expression
@@ -157,3 +158,20 @@ problem with the offset:
     the first row in the next page will not be appeared to the first user when he go to the next page.
   -- better approach is to page paginate them over a key, and instead using offset use WHERE with LIMIT
      that also is has more performance than OFFSET with LIMIT
+----
+case 
+  when predicate then
+  else 'default val'
+end
+
+case  colName
+  when val then
+  else 'default val'
+end
+-----
+group by 1 -> 1 refer to first expression in the select clause. 
+  [instead of rewriting it in case of complex expression]
+===
+u can use case expression in aggregate dunction and in group by claus.
+
+-PG: u can use filter function with aggregate: count (*) filter(where rating in ('R', NC-17))

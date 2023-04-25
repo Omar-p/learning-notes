@@ -212,13 +212,18 @@ Deployments
 	Deployment Strategy:
 	  - Recreate -> delete all pods running before creating the new for the next version [dangerous: downtime]
 	  - Rolling Update: [default] forwarding traffic to previous version. until finish creation of the new one.
+    keep in ur mind: when u change the ui, and the old & new pods are available. how will we deal with that?
 	  spec.strategy.type=[Recreate|RollingUpdate]
-	    Recreate
-	      . useful when u cannot run multiple version for the application at the same time
-	         [DB schema]
-	  spec.strategy.rollingUpdate.maxSurge -> extra pods above desired ones.
-	  spec.strategy.rollingUpdate.maxUnavailable -> unavilable pods during update
-	
+    Recreate
+      . useful when u cannot run multiple version for the application at the same time
+          [DB schema]
+	  spec.strategy.minReadySeconds : #seconds new pods should be ready to be considered healthy. default 0
+    spec.strategy.revisionHistoryLimit: default 10
+    spec.strategy.rollingUpdate.maxSurge -> extra pods above desired ones. default 25%
+	  spec.strategy.rollingUpdate.maxUnavailable -> unavilable pods during update. default 25%
+	read: [instructor use --save-config in creating a deploy, and --record]
+    --record : record the command in the deployment revision history.
+    --save-config: save configs in resource's annotations.
 	- when we update a Deployment with a new Pod definition:
 	  . a new Replia Set is created with the new pod definition.
 	  . that new Replica Set is progressively scaled up.
@@ -229,6 +234,17 @@ ReplicaSet always make sure that the desired number of pods is always running.
 
 *to pause rollout
  kubectl rollout pause deployment [name]
+ k set image deploy/frontend simple-webapp=kodekloud/webapp-color:v2
+-
+kubectl rollout history deploy [name]
+
+describe specific one:
+  kubectl rollout history deploy [name] --revision=[]
+
+status of rollout:
+   kubectl rollout status -f 
+   kubectl rollout undo -f 
+   kubectl rollout undo deploy [name] --to-revision=[]
 
 metadata -> allows us to specify labels to access our resources.
 
@@ -268,6 +284,37 @@ ReplicaSet
     - replicasets give full compatibility with previously use replicationcontrollers
   
 ======
+Observability: 
+  . pod status [Pending(when scheduler try to figure out where to place the pod ),
+                ContainerCreating,
+                Running 
+               ]
+        conditions arr of T or F: [PodScheduled, Initialized, ContainerReady, Ready]
+          . Ready : indicate app inside the pod is running and ready to accept traffic.
+          - service rely on pod Ready cond to route traffic.
+          Readiness Probes: in case of web app u can hit an endpoint to check, 
+             in case of db u can check if a particular port is listening,
+             using exec to run script inside a container to exist successfully if the app is ready.
+             under Containers def> readinessProbe:
+                        tcpSocket    httpGet:             exec:
+                          port: 5432   path: /api/ready     command: 
+                                       port: 8080             - cat
+                                                              - /app/is_rea
+            . U CAN set an initial time to wait initialDelaySeconds:, periodSeconds, failureThreshold[3]
+          Liveness Probes: same as readiness but to check if the app inside the container remain healthy.
+
+    Monitoring:minikube addons enable metrics-server
+    kubectl top node: This provides the CPU and memory consumption of each of the nodes.
+    kubectl top pod: view performance metrics of pods in Kubernetes.
+======
+
+
+  - node level metrics[#nodes in cluster, resource consumption]
+  - pod level metrics [#pods, resource consumption]
+  Metrics Server: save in-mem. 
+    kubelet contains cAdvisor, cAdvisor is responsible for retrieving performance metrics from pods 
+     and exposing them through the kubelet API to meet the metrics available for the metrics server. 
+=====  
 taint and toleration
   taint -> node.
 =======
@@ -346,7 +393,8 @@ Labels:
   . used to facilitate resource management and selection
 ===
 annotations: 
-  Annotations is an unstructured key/value map stored with resource that may be set by external tools to store and retrieve arbitary metadata, they are not querable and should be preserved when modifying objects. [used by external tools]
+  Annotations is an unstructured key/value map stored with resource that may be set by external tools to store 
+  and retrieve arbitary metadata, they are not querable and should be preserved when modifying objects. [used by external tools]
   spec.template.annotations
 ===
 DNS:

@@ -2136,6 +2136,15 @@ Gateways - There are two important gateway types in AWS: the Internet and the NA
 EC2 is the key service for applications that require a high level of customization and control, 
  while serverless services like Lambda are a good choice for applications that need to run code
  in response to specific events or triggers. 
+ 
+ 
+--AuthN & AuthZ-------------- 
+For the REST API type, the mechanisms for API Gateway to do authentication and authorization, 
+ our identity and access management, AWS Authorizers, and Amazon Cognito user pools. There are a few other mechanisms related to access control 
+ around this type of API. Those are the resource policies applied at an API gateway endpoint, endpoint policies for interface VPC endpoint, 
+ Cross Origin Resource Sharing or CORS, AWS WAF, a Web Application Firewall, Client-side SSL certificate, and usage plans with API keys.
+
+ For HTTP API's, the only way to do authentication and authorization is by using JSON Web tokens or JWT that are part of the openID Connect an OAuth2.0 protocols. and aws Cognito user pool.
 
 ----
 With a growing application and therefore a growing number of containers, you’ll be facing operating challenges regarding 
@@ -2200,3 +2209,47 @@ Task, Task Definition, service:
 
 
 
+event, concurrency and trigger. An event is a JSON-formatted document that contains data for a function to process.
+ The Lambda runtime converts the event to an object and passes it to your function code. When you invoke a function,
+  you determine the structure and contents of this event.
+
+if you wanted to use a different language like PHP, for example, you will want to look at an AWS Lambda custom Runtime. 
+ This type of Runtime, you will need to build it yourself. A Runtime is responsible for running the function setup code 
+ and reading the input data of the event from the Lambda runtime API. The runtime passes these events that it receive to
+  the functions main that we call a Handler. Then it posts the response from the Handler back to Lambda, the service, 
+  so it can be sent back to the client. 
+
+You can specify how much RAM you want available to your Lambda function code from 128 megabytes all the way to three gigabytes 
+and 64 megabyte increments. As for the CPU, it's not as setting you control directly, instead, Lambda allocates the CPU power 
+linearly in proportion to the amount of memory that is configured. For example, at 1,792 megabytes, a function has the equivalent 
+of one full virtual CPU. 
+
+It's an important setting to be aware as there are limits in each AWS account for how many Lambda functions can run 
+concurrently per region. This is a setting that you can request to be raised and it starts at 1,000.
+
+
+AWS commonly relies on role based access, where you create a role in IAM that has a policy associated with it. 
+That allows or denies certain AWS API calls to be made. AWS services, applications or identities can then assume 
+the role and gain access to temporary credentials. Which are supplied by AWS security token service and contain 
+the permissions defined in the policy associated with the role.
+
+an execution permission is the role that allows whatever API calls your Lambda function needs to make. 
+Once the Lambda is running, it will assume the role and then it has its executions permissions. 
+
+even if your code isn't reaching out to any AWS services at all. You still probably want the basic 
+ execution rule, so we can post logs and metrics for monitoring and debugging. 
+
+Lambda functions need basic execution permissions as well in order to do things like posting logs to Cloud watsh
+ logs or sending tracing data to AWS X-Ray. AWS has a managed policy used for this called AWSLambdaBasicExecutionRole.
+
+ A trigger is generally another AWS service account or AWS entity that invokes your Lambda function under certain event conditions.
+
+ Each Lambda function has its own resource based policy and it uses the same IAM policy language, roles, and other permissions in AWS use. 
+   You can allow or deny certain entities from interacting with your Lambda function.
+
+
+   The trace allows you to control how you want to acquire a representative sample of the request, that your application serves,
+    through a sampling algorithm to determine which requests get traced. The default sampling rate is fairly conservative,
+     only recording the first request each second, and 5% of any additional requests. While this ensures that you're getting 
+     at least one sample per second, you also have the ability to configure X-Ray to modify the default sampling rule,
+    and configure additional rules that apply sampling based on properties of the service or request. 

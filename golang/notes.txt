@@ -185,4 +185,12 @@ TESTING
    . output order:
      . in case of testing map or channel, each run will be in different order.
         instead of useing // Output: use // Unordered output:    
-   
+----------
+concurrency:
+  . the whole basis of concurrent progeamming in go is founded on [goroutine],
+     but they are not enough to manage a program that's running concurrently . -> [sync package]
+  . WaitGroups allow a supervising goroutines to wait on other several other goroutines[coordinate tasks]
+  . Mutex [mutal exclusion lock]allow sharing memory between goroutines[protect shared memory]
+    - concurrent access to the same memory using different goroutines in the same time will throw an error.
+    go run --race .
+  . channel : we Generate copy of that memory and passing it . 

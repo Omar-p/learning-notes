@@ -517,6 +517,13 @@ compose:
 ~/.docker/config.json
 
 
-sudo amazon-linux-extras install docker
-sudo usermod -a -G docker [user]
+install docker
+sudo usermod -a -G docker $USER
 docker images --filter reference=[basedOnName]
+----------
+using buildkit:
+ we need to set env var: DOCKER_BUILDKIT=1
+  buildkit is built to increase build performance. it parse DOCKERFILE and determine
+   what can be run in parallel. [can parallelize multiple stages at the same time],
+   remove all intermediate image leaving only the final one.
+   - u don't need need docker to use buildkit.

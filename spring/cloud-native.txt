@@ -1,4 +1,53 @@
  minikube image load [image-from-local-registry]
+ch 01:
+  Scalability
+    Cloud native applications are designed to scale, meaning
+    that they can support increasing workloads if provided with
+    additional resources.
+      - Vertical scalability : adding more hardware resources
+      - Horizontal scalability: running more instance of the executable,
+        but the system need to be designed with scalability in mind from start.
+      - elasticity as one of the main characteristics of the cloud: computing 
+         resources can be provisioned and released proactively, depending on the demand.
+  
+  It’s a good design practice to decompose a system into modules (modularization),
+   each of which has minimal dependencies on the other parts (loose coupling) 
+   and to encapsulate code that changes together (high cohesion).
+
+  Resilience is “the capability of a hardware-software network to provide
+   and maintain an acceptable level of service in the face of faults and
+    challenges to normal operation.”
+  
+  Observability is about inferring the internal state of an
+    application from its external outputs. Manageability is about changing
+    the internal state and outputs via external inputs. In both cases, the
+    application artifact is never changed. It’s immutable.
+    [Monitoring, Alerting/visualization, Distributed systems tracing infrastructure,
+      Log aggregation/analytics: Keeping track of the main events 
+         in an application is critical to infer the software’s 
+         behavior and debug it if something goes wrong
+    ]
+  One aspect of manageability is deploying and updating applications while 
+    keeping the overall system up and running. [changing : data source URLs, service credentials, and certificates.]
+
+  infrastructure provisioning and configuration management::
+    with cloud provider api u can provision  a machine with specific hw and os,
+     then using ansible [configurations as code ] u can automate installing jre and
+      opening specific ports from the firewall.
+  
+  By automating all the infrastructure provisioning and configuration 
+    management tasks, we can avoid unstable, unreliable snowflake servers.
+  
+  Continuous delivery (CD) builds on CI and focuses on keeping the mainline
+   always healthy and in a releasable state.
+  
+  Delivering faster and frequently is not only about competition and customer 
+  deadlines. It’s also about making the feedback cycle shorter.
+
+  namespaces for partitioning resources among processes so that each process 
+  (or group of processes) can only see a subset of the resources available on the machine
+
+  cgroups for controlling and limiting the resource usage for a process (or group of processes)
 ch 02:
   2.4:
     create deployment.
@@ -67,6 +116,17 @@ ch 03:
        which is also how many threads are created at startup.
         fine to start with in prod. u can use them to optimize ur local env 50 5.
 ch04:
+  JL 08: 
+    . we should keep config for specific env external from our app and in that env.
+      . we want to be able to promote one binary from one env to another without needing
+        to recompiling it. because if don't do that , it would risk introducing slightly
+         inconsistency.
+    . Spring ConversionService: is an obj that have different strategies for taking text
+      and turning it into types, and vs. 
+    . if u make field under @ConfigurationProperties final u have to annotate the class
+      with @ConstructorBinding(< v3.0.0 ).
+    . Environment abstraction build on top of PropertySource.
+    . PropertySource : we can define our own.
   4.0:
     . Configuration is defined as everything likely to change
       between deployments (as per the 15-Factor methodology),
@@ -111,7 +171,8 @@ ch04:
     . NOTE Your choice of configuration service will depend on your infrastructure and
       requirements.
     . idea of config server:
-      . A data store for configuration data
+      . A data store for configuration data, providing persistence, versioning, 
+         and possibly access control
       . A server sitting on top of the data store to manage configuration data and 
          serve it to multiple applications
       . You can configure which branch the config server should consider by default by
@@ -248,3 +309,4 @@ ch 06:
 pluralsight[microservices with spring cloud]:
   . 
   
+when u run shell script file in github actions. set -e will fail the script and then the build if any command in script goes wrong
