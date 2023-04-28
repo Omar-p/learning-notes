@@ -1,0 +1,7 @@
+---
+- hosts: web1
+  tasks:
+    - name: create user
+      ansible.builtin.user:
+        name: angel
+    

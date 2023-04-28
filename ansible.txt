@@ -93,7 +93,9 @@ ansible : managing configurations on servers.
     
 ---
 fact gathering: 
-     for every host ansible do fact gathering to get the properties of the host.
+     for every host ansible do fact gathering to get the properties of the host[arch, datetime,..].
+     ansible store them in env var = ansible_facts
+     to disale gathering fact in ur playbook -> gather_facts: no
      
 for undoing playbook, u need to create another playbook. so if u design one may require
   undoing u need to think deeply how u will write the undoing playbook
@@ -104,3 +106,12 @@ to get more info path -v up to -vvvv [ verbosity] of the output. for most purpos
 
  a snowflake is a server that requires special configuration beyond that covered by automated deployment scripts. 
    You do the automated deployment, and then you tweak the snowflake system by hand.
+------
+playbook 
+dry run :
+  ansible-playbook playbook.yaml --check
+start from specific task and skip tasks before it:
+  ansible-playbook playbook.yaml --start-at-task "name"
+tag ur task in the playbook then run or skip task with specific tag.
+  ansible-playbook playbook.yaml --tags "tag"
+  ansible-playbook playbook.yaml --skip-tags "tag"

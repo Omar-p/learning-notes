@@ -190,5 +190,12 @@ DelegatingFilterProxy  -delegate Regquest To -> FilterChainProxy --assign the re
            [issuer-uri => accounts.google.com]/.well-known/openid-configuration
       id-token: intended to be used for authentication, has a strict standards -> u don't have to worry about changes to the token format.   
 ---
+ControllerAdvices are designed to assist Controller classes and ExceptionHandlers are for handling exceptions thrown by Controllers.
+ AuthenticationException and AccessDeniedExceptions are usually thrown by AbstractSecurityInterceptor of Spring Security. So, i'm guessing
+  that you won't be able to catch those AuthenticationExceptions using ControllerAdvices, since ExceptionTranslationFilter would already catch
+   them and convert them to appropriate HTTP responses.
+The better approach is to use exceptionHandling in your WebSecurityConfigurerAdapter. Using that, you can configure a AuthenticationEntryPoint
+ and AccessDeniedHandler. Here, i'm returning a 403 Forbidden for access denied cases and a 401 Unauthorized .
+---
 https://developer.okta.com/blog/2021/05/05/client-credentials-spring-security
 https://github.com/springframeworkguru/spring-6-resttemplate/tree/32-oauth-mock-manager

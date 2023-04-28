@@ -38,7 +38,7 @@ k8s node:
  worker 
  
  : 
-  [infrastructure] + [os] + [container runtime] +  [kublet kube-proxy]
+  [infrastructure] + [os] + [container runtime] +  [kubelet kube-proxy]
 kubelet kube-proxy : specific k8s processes 
   kubelet:
     . kubernetes agent run on every node, it's mission is to connect the node
@@ -102,7 +102,7 @@ master node is the brain of the cluster where all decisions are made.
 			-Controller of controllers.
 				[node controller]whenever the current state don't match the desired 
 				state. it react to reach to the desired state.[#of running nodes for 				     example]
-		it has several controllers each one of them is responsible for managing/control part 		     of the system. [replica, endpoint, namepaces, node ...] controller.
+		it has several controllers each one of them is responsible for managing/control part 	 of the system. [replica, endpoint, namepaces, node ...] controller.
 	Cloud controller manager:
 		interact with underlying cloud provider.
 			congigure[load balancer, storage, instance]
@@ -114,15 +114,15 @@ worker node do the work [running the application for example].
 	-provides running environment for the application
 	-contain pod
 	-Components:
-		Kublet container-runtime kube-proxy
+		Kubelet container-runtime kube-proxy
 ------------------------------------------------------------------------
-kublet:
+kubelet:
   Main agent run on every single node.
   Recives pod definitions from api server.
   interacts with container runtime to run containers associated with the pod.
   reports node and pod state to the master node.
 container-runtime:
-  -pull image from container registers[docker hub, ecr, gcr, local registery...] 
+  -pull image from container registries[docker hub, ecr, gcr, local registery...] 
   -starting containers [running container and abstract its management for k8s 
   -stop containers 
   - CRI - container runtime interface
@@ -134,7 +134,7 @@ Kube-proxy:
     Routing network traffic to load balanced services.
 _-----------------------------------
 Pod[abstraction of a server]  is a smallest deployable unit.
-  Pod contain Main-Contaier, may or may not has Init-container[executed before main-container], side-containers[0 to *][support main-container may be as a proxy to main-container], Volumes[share data between container].
+  Pod contain Main-Container, may or may not has Init-container[executed before main-container], side-containers[0 to *][support main-container may be as a proxy to main-container], Volumes[share data between container].
   Pod has unique IP address.
   Pod: 
     -Group of 1 or more container
@@ -418,7 +418,17 @@ kind: ServiceAccount
 metadata:
   name: build-bot
 ----
-
+to use kubectl without providing  the key,cert,ca 
+ u set them in .kube/config file and they will be provided by default for every commands.
+ in config file u define ur clusters, users, context[which user and which cluster]
+ u don't create any new user in config , u add the already existing one
+ 
+ current-context: user@cluster
+  
+  cmd:
+    kubectl config view
+    k config use-context user@cluster -> will update current-context field in the config file.
+    k config -h 
 
 O'relliy
 
@@ -512,6 +522,7 @@ view:
 		Allows read-only access to resources in namespace except Roles, RoleBindings, and Secrets.
 	---
 	kubectl explain [resource] -> show what to define in yaml. keys are case sensitive.
+    explain pods.spec.volumes
 	kubectl explain --recursive [resource] -> option for each keys
 	kubectl apply -f [].yaml -> update mechanism not available for pod. presented to deploy
 s
@@ -558,9 +569,13 @@ securtyContext:
 ---- 
 Managing Jobs
   . Pods normally created within deployment to run forever.
-  . To create a Pod that runs up tp completion, use Jobs instead. 
+  . To create a Pod that runs up to completion, use Jobs instead. 
   . Jobs are useful for one-shot tasks, like [backup, calculation, batch processing and more]
   . Use spec.ttlSecondAfterFinished to clean up completed Jobs automatically.
+  . create one or more Pods and ensures that a specified #pods successfully terminate.
+  -ex: can be configured to run multiple pod in parallel; u need to get data from multiple servers.
+  -ex: retrieve data from dbs and cache it in redis; backup; move data between DBs.
+  . once a job is deleted its pods are removed.
 Jobs Types:
   - 3 differents job types can be started, which 
     is specified by [completions] and [parallelism] parameters:
@@ -575,12 +590,26 @@ Jobs Types:
         when one completes successfully, the job is complete.
           . completions=1
           . parallelism=n
+  spec.template.spec.restartPolicy[Never|OnFailure]
+  spec.completions:
+  spec.parallelism:
+  spec.activeDeadlineSeconds:
 -----
 CronJobs used for task that need to run on regular basis. 
    when running it a job being scheduled. job will start a pod.
-   
+   . names mist be less than 52 because k8s append some extra info.
    kubectl create cronjob every3mins --schedule="*/min hr dd " 
-   
+   cron format: * * * * *
+                min hr (dayOfMonth) mm dayOfWeek(sunday=0..6)
+                run at 22:30 every monday
+                30 22 * * 1
+                additional Cron Formats[non-standard]: @hourly @daily @monthly @yearly @weekly
+                */30 * * * * every 30 mins
+  spec.concurrencyPolicy: [Allow|Forbid|Replace] <== if job is running and the time to run other job pass, are u allow overlapping or not. 
+  spec.schedule
+  spec.jobTemplate
+  .spec.backoffLimit to specify the number of retries before considering a Job as failed.
+  ----------------------
    kubectl create deployment web --image=nginx
      - client send to API Server
      - API Server write to etcd [Depoyment] respond to the user deployment is created.
@@ -736,6 +765,7 @@ Ingress
 Storage:
   container can has a volume[only support pointing to(NFS or local storage)]
   container can has a volume point to any type of storage [..cloud storage, fiber channel, ISCSI]
+  don't use HostPath in pv in prod env.
   
   - we can configure pods with locally configured volumes, but as App developer
     we want to distribute a manifest file and we want the mainfest to be able to
@@ -750,7 +780,7 @@ Storage:
     - StorageClass: no matter which site u're using, any site if it's local cluster or
       an AWS cluster... all of those sites, they have their own specific storage.
    .. StorageClass automatically provisioning the storage for u. if PVC requests access
-      to specific persistence volume and the specific persistence volune is not there, 
+      to specific persistence volume and the specific persistence volume is not there, 
       it can request storageClass and SC will create a persistence volume on demand.
     * now, u don't need a site admin anymore. the only thing we do need is a site-soecific
       storage, being allocated by a provisioner. so storage provisioner need to be available.
@@ -909,3 +939,119 @@ KubeVirt technology addresses the needs of development
   as well as Virtual Machines in a common, shared environment.
 other use case for vm over container: high security app where the security 
   of hypervisor and certification are important.
+
+
+Some other resources, such as namespaces, nodes, and PersistentVolumes,
+ do not belong to namespaces and should have unique cluster-wide names.
+
+ Service belongs to a namespace and gets a corresponding Domain Name Service (DNS) 
+ record that has the namespace in the form of <service-name>.<namespace-name>.svc.cluster.local. 
+
+ ResourceQuotas provide constraints that limit the aggregated resource consumption per namespace:
+   ADMIN CAN  control the number of objects per type that are allowed in a namespace.[#SVC, #DEPLOY,..]
+   ResourceQuotas can also limit the total sum of computing resources we can request in a given namespace. 
+
+it is best to have enough labels to describe all important aspects of the Pods. For example, having labels to 
+indicate the logical group of an application, the business characteristics and criticality, 
+the specific runtime platform dependencies such as hardware architecture, or location preferences are all useful.
+
+
+The information on the annotations is not intended for querying and matching objects. Instead, it is 
+ intended for attaching additional metadata to objects from various tools and libraries we want to use.
+  while labels are used primarily for query matching and performing actions on the matching resources, 
+   annotations are used to attach metadata that can be consumed by a machine.
+
+Predictable Demands pattern indicates how you should declare application requirements,
+ whether they are hard runtime dependencies or resource requirements.  Declaring your 
+ requirements is essential for Kubernetes to find the right place for your application within the cluster.
+
+resource requirements, application runtimes also have dependencies on platform-managed capabilities
+  like data storage or application configuration.
+
+Volumes are an example of a runtime dependency that affects what kind of infrastructure 
+ a Pod can run and whether the Pod can be scheduled at all.
+
+The usage of a hostPort creates another runtime dependency on the nodes and limits where a Pod can be scheduled.
+ hostPort reserves the port on each node in the cluster and is limited to a maximum of one Pod scheduled per node.
+
+Configurations introduces a runtime dependency of your container to the named ConfigMaps. If not all of the expected ConfigMaps 
+ are created, the containers are scheduled on a node, but they do not start up.
+
+ Some of these dependencies limit where a Pod gets scheduled (if anywhere at all), 
+  and other dependencies may prevent the Pod from starting up.
+
+When designing your containerized applications with such dependencies, 
+ always consider the runtime constraints they will create later.
+
+Resources [compressible[cpu, bandwidth], incompressible[mem]]
+
+(we define heap size for a Java application by using the -Xms and -Xmx command-line options.)
+
+The requests amount (but not limits) is used by the scheduler when placing Pods to nodes. For a given Pod, the scheduler considers
+ only nodes that still have enough capacity to accommodate the Pod and all of its containers by summing up the requested resource amounts.
+ containers[].resources.requests : Initial resource request for CPU and memory.
+ containers[].resources.limits : Upper limit until we want our application to grow at max. We don’t specify CPU limits by intention.
+
+ memory:
+   . This type is for the heap memory demands of your application, including volumes 
+      of type emptyDir with the configuration medium: Memory.
+      - containers that exceed their configured memory limit will trigger the Pod to be evicted;
+ cpu:  it is highly recommended that you set requests for the CPU resource but no limits so that 
+   they can benefit from all excess CPU resources     
+ [hugepage-<size>, ephemeral-storage(emptyDir)]
+
+Recommendations:
+  For memory, always set requests equal to limits.
+  For CPU, set requests but no limits
+
+Depending on whether you specify the requests, the limits, or both, the platform offers three types of Quality of Service (QoS):
+  Best-Effort[no req or limits, pods with no limits and req are the first pods killed when the node where the Pod is placed runs out of incompressible resources.]
+  Burstable[req < limits: pods killed after Best-effort] 
+  Guaranteed[req = limits: highest-priority Pods and are guaranteed not to be killed before Best-Effort and Burstable Pods. This QoS mode is the best option 
+    for your application’s memory resources, as it entails the least surprise and avoids out-of-memory triggered evictions.] 
+
+    So the resource characteristics you define or omit for the containers have a direct impact on its QoS and define 
+    the relative importance of the Pod in the event of resource starvation. 
+https://home.robusta.dev/blog/stop-using-cpu-limits
+https://home.robusta.dev/blog/kubernetes-memory-limit
+-- priority
+ Pod priority affects the order in which the scheduler places Pods on nodes. 
+  First, the priority admission controller uses the priorityClassName field to 
+  populate the priority value for new Pods. When multiple Pods are waiting to be placed,
+   the scheduler sorts the queue of pending Pods by highest priority first. 
+
+   If there are no nodes with enough capacity to place a Pod, the scheduler can preempt (remove) 
+   lower-priority Pods from nodes to free up resources and place Pods with higher priority.
+    As a result, the higher-priority Pod might be scheduled sooner than Pods with a lower priority 
+    if all other scheduling requirements are met. 
+  
+  Suppose you want your Pod to be scheduled with a particular priority but don’t want to evict any existing Pods.
+   In that case, you can mark a PriorityClass with the field preemptionPolicy: Never
+  
+
+  --
+  QoS is used primarily by the Kubelet to preserve node stability when available compute resources are low. 
+   The Kubelet first considers QoS and then the PriorityClass of Pods before eviction. On the other hand, 
+   the scheduler eviction logic ignores the QoS of Pods entirely when choosing preemption targets. 
+   The scheduler attempts to pick a set of Pods with the lowest priority possible that satisfies the needs 
+   of higher-priority Pods waiting to be placed.
+
+  
+
+  When Pods have a priority specified, it can have an undesired effect on other Pods that are evicted. 
+   For example, while a Pod’s graceful termination policies are respected, the PodDisruptionBudget 
+    is not guaranteed, which could break a lower-priority    clustered application that relies on a quorum of Pods.
+
+  --
+  Project Resources[ResourceQuota, LimitRange]
+    working in a shared multitenanted platform also requires the presence of
+     specific boundaries and control units to prevent some users from consuming all the platform’s resources
+  LimitRanges help control the container resource profiles so that no containers require more resources than a cluster node
+   can provide. LimitRanges can also prevent cluster users from creating containers that consume many resources, making the
+    nodes not allocatable for other containers. 
+     maxLimitRequestRatio: Maximum ratio limit/request, used to specify the allowed overcommit level. Here, the memory limit must not be
+       larger than twice the memory request, and the CPU limit can be as high as four times the CPU request.
+  --capacity planning
+  it is evident that capacity planning for a multipurpose environment is not straightforward.
+  Keep in mind that in the different environments, there are different numbers of containers, and you may even need
+   to leave some room for autoscaling, build jobs, infrastructure containers, and more. 

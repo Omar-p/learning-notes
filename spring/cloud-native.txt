@@ -306,6 +306,40 @@ ch 06:
       environment = ["BP_JVM_VERSION" : "17.*"]
     }
 ------
+JL:
+  - monitoring:
+    . java can be very confusing to the outside observer because it does thing
+      that don't quite line up with what u expect for ex:
+        - when u give maximum amount of mem, it might only be using a fraction of that
+          but it's still gonna malloc the whole thing. so from the outside, it looks it's taking
+          the whole ram u specified as the upper bound. in fact it's not.
+          -  it's useful to ask the APP itself, what is doing. [actuator do that]
+    . /health
+      . gives an enumeration of the different subsystems in your application,
+        if one of the them is fail, it will affect the overall health of your service.  
+    . /beans  
+    /info using git-commit-id-maven-plugin u can show the commit 
+      info so if some don't work correctly u can know the commit id that is on prod.
+    /conditions /configprops
+    /metrics
+    /actuator/health/liveness
+    /actuator/health/readiness set them in 
+      deployment.yaml file for liveness/readiness of app in the containers.
+      . poweredby micrometer which a vendor neutral applciation metrics facade
+          that allows u to talk to any #different time series db[prometheus, netflix atlas, Wavefront[visualize metric and trace data using the same tool]
+           ...]. u can configure it. count how many people went through checkout process? ..
+    /mappings tell u all web endpoint ur app is support.
+    /heapdump download heapdump, u can put in profiler
+  ---
+  SIG-TERM
+  grace period is configurable in k8s and spring boot.
+  ---
+  spring boot admin:
+    . using service discovery . can get it info from ur other services using their management endpoints,
+       and visualize the information.
+    . if u don't use service discovery u can add spring boot admin client to ur service and configure where is the server.
+    . support notifications, it can send u a msg or event on failure of any service.   
+---- 
 pluralsight[microservices with spring cloud]:
   . 
   
