@@ -84,9 +84,33 @@ Sets
 -------------------------------------
 treeset:
   . red/black tree.
-  . using type !implements Comparable, in RT when inserting to it will throw ClassCastException
-
+  . using type !implements Comparable, in RT when inserting to it will throw ClassCastException.
+  . identity determined based on compareTo
+----------
+ConcurrentSkipListSet
+  . thread safe.
+  . it is similar to TreeSet with an added feature of being concurrent.
+  . The implementation is based on ConcurrentSkipListMap.
+  . It should be preferred over implementing Set interface when concurrent modification of set is required.
+  https://stackoverflow.com/a/1904598/14840351
 ------------------------
+CopyOnWriteArraySet
+  . identity determined by equal method.
+  . it is a Set that uses an internal CopyOnWriteArrayList for all of its operations. 
+  . Multiple Threads are able to perform update operations simultaneously but for every 
+    update operation, a separate cloned copy is created. As for every update a new cloned 
+    copy will be created which is costly. Hence if multiple update operations are required 
+    then it is not recommended to use CopyOnWriteArraySet.
+  . An Iterator of CopyOnWriteArraySet class can perform only read-only and should not perform the 
+     deletion, otherwise, we will get Run-time exception UnsupportedOperationException.
+  . Use CopyOnWriteArraySet in applications in which set sizes generally stay small, read-only 
+    operations vastly outnumber mutative operations, and you need to prevent interference among
+    threads during traversal.
+
+-------
+StringBuilder vs StringBuffer:
+  . builder: unsynchronized form of buffer
+   arrayList<Char> vs Vector<Char>.
 System.err is flushed quicker than System.out
 VM options -> -verbose:gc 
  

@@ -127,6 +127,10 @@ ch04:
       with @ConstructorBinding(< v3.0.0 ).
     . Environment abstraction build on top of PropertySource.
     . PropertySource : we can define our own.
+       u need to register it with spring. SPI, environment post processor   because 
+         it need to be available in early phase of initializing the app.
+     . there is a random PropertySource if u ask for property [random.[int|long|uuid]] 
+    
   4.0:
     . Configuration is defined as everything likely to change
       between deployments (as per the 15-Factor methodology),
@@ -223,6 +227,11 @@ ch04:
       You can use the @RefreshScope annotation on any bean you’d like
       to be reloaded whenever a refresh is triggered. @ConfigurationProperties
        listen to @ConfigurationProperties by default.
+    
+    u can divide the yaml/properties file into different parts ---  #--- activate the part based on
+      spring.config.activate.on-cloud-platform=kubernetes
+      ex:
+       if u mount cm as a volume [config tree] spring.config.import=configuree:${user.home}/Desktop/config/ <- don't forget the last /
 ch 05:
   . CHALLENGES WITH DATA SERVICES
     . Scalability
@@ -344,3 +353,6 @@ pluralsight[microservices with spring cloud]:
   . 
   
 when u run shell script file in github actions. set -e will fail the script and then the build if any command in script goes wrong
+
+
+

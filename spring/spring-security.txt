@@ -14,8 +14,12 @@ Security:
       - X-Content-Type-Option: nosniff
           . tell the browser not to guess the Content-Type because certain browsers ignore 
               the Content-Type header and try to guess it.      
-          why? in certain situation u can upload a polyblack  file(image) and it can be a valid JS as well,
+          why? in certain situation u can upload a polyblack  file(image|gif) and it can be a valid JS as well,
           then u can execute a cross-site scriptting attack by uploading an image.
+          . other consideration - if user will upload a file u don't let him choose the filename because 
+              it might impact the content-type , we don't want to serve the file from the same domain because if
+              we serve it from a separate domain, then we're enabling same origin policy to protect us.
+
       - X-Frame-Options: DENY    
           Disabling Framing -> prevent user from clicking on our site without being aware of it[Clickjacking].
           - done by overlaying a malicious site on the top of the target site, the malicious site can load the target
@@ -30,8 +34,16 @@ Security:
           Reflective XSS attack is when content is submitted or injected[malicious code] into ur web app and executed
             by the client browser against our app.
           
+        1 - stored
+          . hacker can execute malicious script in ur app, can steal ur cookies, sessions
+          . how ? u recieve an input fron the user and u didn't encode it well. -> hacker can execute any js code.
+        2 - Reflicted
+          . parse request param and hacker provide a script in it. chrome protect aganist this by default.
+        3 - Down base attack[]
+        4 - mutation XSS , content of page that returned from the server is modified by the browser before it is rendered in the browser.
 
-
+        how to prevent XSS Attack? in server side we make sure we provide context sensitive encoding . 
+          in client side u make sure u use safe js api.
       - CSRF
       [only use the CSRF token for state changing ops such as POST, PUT, DELETE, PATCH]
           . this attack is taking advantages of that a browser will send any cookies associated with 
@@ -51,6 +63,19 @@ Security:
             ## Browser restrict JS to only access the cookies for their domain.
           . if u use stateless basic or digest authentication u still need CSRF protection as the Browser
             will include the basic and digest Authorization header by default
+        . csrf token [synchronized token pattern]. every request  that change the state of ur application 
+           needs to have a CSRF token in it. and then spring security will validate that . if it's invalid -> forbidden
+            . CsrfFilter -> a token repository is in charge of loading the default csrf token, that token is, 
+              by default stored into the HTTP session, u can customize it to be placed in a cookie which is not quit as secure
+              but it make sense in SPA. which the JS looks for the csrf token to be included automatically in a cookie.
+        - if u use thymleaf _csrf token will be included by default. if not the csrf token is included in the request
+          attributes as a attribute name as _csrf.
+        - one special case is multi-part upload or file upload. data is not transferred all at once,
+         instead it's transferred in segments, for that reason we may not be able to read the csrf token<
+           TO get around this is to include the token in the action instead of as a parameter for the request .
+            alternatively u can include Spring's multipart request filter ahead of spring security but this means a malicious
+             user could upload files before we able to validate the csrf token. it's better to include it in the action.
+        <form mthod="post" encrypt="multipart/form-data" th:action="@{/upload(_csrf=${_csrf.token})}">
     - CSP
       to access contentSecurityPolicy HttpSecurity.headers.contentSecurityPolicy("value")        
     - Https 
@@ -108,6 +133,8 @@ Authentication#getName()
     . subject
     - Non-openid
     . vary depending on the custom impl[]FB/geithub claim -> id]
+    ------
+    FilterChainProxy composing other filters into a single filter
 ----
 1-req from the client hit servlet container.
 2-servlet container look up filter in web.xml

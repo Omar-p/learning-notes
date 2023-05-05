@@ -804,6 +804,9 @@ Storage:
   . A PVC bind is exclusive: after successfully binding to a PV, the PV cannot
     be used by other PVC anymore  
   ..StorageClass
+  - provide a way for an admins to describe a class of storage, useful when u 
+     are in an env with diff type of storage are available 
+    . some cloud provide default StorageClass if u create a PVC without specifing StorageClass ur platform will set pvc storageClass to default
     . every cluster env]s have their own specific storage type .
     . kubernetes StorageClass allows for automatic provisioning of PVs when a 
       PVC request for storage comes in.
@@ -913,6 +916,8 @@ Secret is a special type of configMap that add encoding
        kubectl create secret generic my-ssh-key --from-file=ssh-private-key=.ssh/id_rsa
      . to sensitive files which would be mounted in the app with root access only:
        kubectl create secret generic my-secret-file --from-file=/my/secret
+https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/
+https://kubernetes.io/docs/concepts/configuration/secret/#risks
        
 ----------
 kustomize: 

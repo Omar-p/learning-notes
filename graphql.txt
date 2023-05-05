@@ -1,3 +1,36 @@
+JL
+
+  . needed a way to give the clients the data they need 
+    when they need it rather than calling multiple svcs and 
+    integrate that data in their way, in redundant fashion 
+    across all different clients.
+  . API became future-proof because the build api providing all data
+    and if the client didn't need all that, they didn't get all of that.
+  . Edge service: intermediary service between client and down stream service.
+     - . correlated to a client . so u have a clent specific edge svc for ios,
+          another for android, another for Roku...
+       . these edge services exist to transform data, to make them more accessible 
+           to the use cases for a particular client.
+       . from performance perspective do u want ur client to go to different mss and do 
+         the composition and do the scatter gather service orchestration in the client 
+         memory?
+  Grapgql was designed to support 3 main use cases:
+    . read[query] . update[mutation] . subscription(read data over long period) 
+    - this technology gives u the means u need to be able to ask for a particular
+      set of data and get only that data this critical in removing the cycle or breaking
+      the cycle of constantly standing up new edge services to adapt downstream service 
+       to particular client.
+    - graphql layer is a great place to integrate down stream services with clients
+      and because u've got one Graphql endpoint,  it also great place to put other things 
+      like security
+    - WORKS WITH SCHEMA AND THAT MAKES IT INTEROSPECTABLE. 
+       u can easily discover endpoints. 
+       1 start with schema and then build the code behind the schema.
+       2 write types and code and the u generate schema from that
+       [schema centric approach is preferable]
+    - root type of all types is Query.
+-----------
+
 Graphql is a query lang for our API. The GraphQL service is transport agnostic but is 
 typically served over HTTP.
 
