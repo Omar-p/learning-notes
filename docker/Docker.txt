@@ -517,9 +517,7 @@ compose:
 ~/.docker/config.json
 
 
-install docker
-sudo usermod -a -G docker $USER
-docker images --filter reference=[basedOnName]
+
 ----------
 using buildkit:
  we need to set env var: DOCKER_BUILDKIT=1

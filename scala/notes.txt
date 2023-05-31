@@ -1,21 +1,37 @@
-This is all it means for an expression to be referentially transparent—in any program, the expression can be replaced by its result without changing the meaning of the program. And we say that a function is pure if calling it with RT arguments is also RT. We’ll look at some examples next.
+This is all it means for an expression to be referentially transparent—in any program, the expression can be replaced
+ by its result without changing the meaning of the program. And we say that a function is pure if calling it with RT 
+ arguments is also RT. We’ll look at some examples next.
 ----------
-"If a call-by-value evaluation of an expression terminates, then the call-by-name evaluation of the same expression terminates as well, but the other direction is not true." 
+"If a call-by-value evaluation of an expression terminates, then the call-by-name evaluation of 
+ the same expression terminates as well, but the other direction is not true." 
 
- it might seem that call-by-name is a better evaluation strategy than call-by-value, but it's like most languages actually uses call-by-value by default. There are two reasons for this. One reason is that a call-by-value can avoid sometimes exponentially many reduction steps because it avoids duplication of evaluations. The second reason is that as long as a language has some imperative side effects, which is the case for Scala, call-by-value is actually much more predictable than call-by-name. That means it's much easier to tell when the effects of an expression actually happen if the evaluation strategy is call-by-value than if it is call-by-name.
+ it might seem that call-by-name is a better evaluation strategy than call-by-value, but it's like most languages actually 
+  uses call-by-value by default. There are two reasons for this. One reason is that a call-by-value can avoid sometimes exponentially 
+  many reduction steps because it avoids duplication of evaluations. The second reason is that as long as a language has some imperative
+   side effects, which is the case for Scala, call-by-value is actually much more predictable than call-by-name. That means it's much 
+   easier to tell when the effects of an expression actually happen if the evaluation strategy is call-by-value than if it is call-by-name.
  
  
-A class definition  introduces two entities. It introduces a new type named [class-name]. In the future, one can use Rational just like one can use int or string. It also introduces a constructor, also named [class-name] to create the elements of this type. There's no confusion because Scala keeps the names of types and values in different namespaces.
+A class definition  introduces two entities. It introduces a new type named [class-name]. In the future, one can use Rational 
+ just like one can use int or string. It also introduces a constructor, also named [class-name] to create the elements of this type. 
+ There's no confusion because Scala keeps the names of types and values in different namespaces.
 
-we've seen that a class implicitly introduces not just the type, but also a constructor away to construct elements of that class. This implicit constructor is also called the primary constructor of a class. So the primary constructor takes the parameters of the class and executes all statements in the class body such as the require a couple of slides back or the value definitions of numerator and denominator or any other statement that's in the body of a class. 
+we've seen that a class implicitly introduces not just the type, but also a constructor away to construct elements of that class. 
+ This implicit constructor is also called the primary constructor of a class. So the primary constructor takes the parameters of the class
+  and executes all statements in the class body such as the require a couple of slides back or the value definitions of numerator and denominator 
+  or any other statement that's in the body of a class. 
 
-"If A is a subtype of B, then everything one can do with a value of type B, the supertype, one should also be able to do with a value of type A." It means everything I can do with B, I can also do with a sub-type A, and potentially, I can do more things with A. In a sense, A is better than B. It can fulfill every role that B plays plus potentially more.
+"If A is a subtype of B, then everything one can do with a value of type B, the supertype, one should also be able to do with a value of type A." 
+ It means everything I can do with B, I can also do with a sub-type A, and potentially, I can do more things with A. In a sense, A is better than B. 
+ It can fulfill every role that B plays plus potentially more.
 
  arrays cannot be covariant in Scala.
  
  a type that accepts mutations of its elements, like array did, should not be covariant. But immutable types can be covariant if some conditions on methods are met.
  
-  We say the function type A1 arrow B1 is a subtype of the function type A2 arrow B2 if B1 is a subtype of B2, so that's covariant. The arguments there it goes in the other way, A2 must be a subtype of A1. Functions are contravariant in their argument types and covariant in their result type. 
+  We say the function type A1 arrow B1 is a subtype of the function type A2 arrow B2 if B1 is a subtype of B2, 
+  so that's covariant. The arguments there it goes in the other way, A2 must be a subtype of A1. Functions are 
+  contravariant in their argument types and covariant in their result type. 
   
   
 ▶ covariant type parameters can only appear in method results.
@@ -122,7 +138,10 @@ https://cwiki.apache.org/confluence/display/FLINK/Coding+Guidelines+for+Scala
 ----------------------------------------------------------------------
 Implicit conversions
 
-When the compiler finds an expression of the wrong type for the context, it will look for an implicit Function value of a type that will allow it to typecheck. So if an A is required and it finds a B, it will look for an implicit value of type B => A in scope (it also checks some other places like in the B and A companion objects, if they exist). Since defs can be "eta-expanded" into Function objects, an implicit def xyz(arg: B): A will do as well.
+When the compiler finds an expression of the wrong type for the context, it will look for an implicit Function value of
+ a type that will allow it to typecheck. So if an A is required and it finds a B, it will look for an implicit value of 
+ type B => A in scope (it also checks some other places like in the B and A companion objects, if they exist). Since defs can be 
+ "eta-expanded" into Function objects, an implicit def xyz(arg: B): A will do as well.
 
 So the difference between your methods is that the one marked implicit will be inserted for you by the compiler when a Double is found but an Int is required.
 

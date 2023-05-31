@@ -194,3 +194,25 @@ concurrency:
     - concurrent access to the same memory using different goroutines in the same time will throw an error.
     go run --race .
   . channel : we Generate copy of that memory and passing it . 
+-----
+Web:
+  http.ResponseWriter is interface not a pointer to struct as http.Request
+    ResponseWriter can substituted by multiple implementation, different type of connections
+      may allow to different type of responses [some are streamable, other we need to send the entire response].
+      http.ResponseRecorder is a fake ResponseWriter for testing.
+  
+  to render html text without escaping it: use template.HTML type.
+----
+same origin policy:
+  . browser prevent javascript from making request to different domain.
+  . origin = scheme + host + port
+
+  tplPath := filepath.Join("templates", "home.gohtml") // os separator agnostic.
+
+  -- 
+  panics are reserved for unrecoverable events, like out of memory.
+  --
+  generally if u using Must function, use it in ur main package.
+  -----
+fullTimeGoDEV:
+https://stackoverflow.com/a/40824044/14840351

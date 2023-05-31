@@ -12,3 +12,18 @@ Refactoring:
             - make sure u have safety net[unit & integration test] before making change to ur code.
       ex: removing unnecessary boxing and unboxing.
      . risky
+
+     ----
+     temp:
+
+     sam local invoke FuncResourceName -e event.json 
+
+          sam local invoke FuncResourceName -e event.json  -d 5858
+
+          sam deploy --template-file packaged.yaml --stack-name sam-app --capabilities CAPABILITY_IAM
+          sam deploy --guided
+
+          sam logs -n FuncResourceName --stack-name sam-app --tail
+          sam delete --stack-name sam-app
+
+          exec -it t = tty
