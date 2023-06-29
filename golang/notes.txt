@@ -194,6 +194,13 @@ concurrency:
     - concurrent access to the same memory using different goroutines in the same time will throw an error.
     go run --race .
   . channel : we Generate copy of that memory and passing it . 
+    cahnnel semantics:
+      . send & recieve will block until opposite operation
+      . recieve from a closed channel will return zero value of the channel type without blocking.
+      . send to a closed channel will panic.
+      . closing a closed channel will panic.
+      . send/recieve to nil channel will block forever.
+    - to check if the channel has a zero value or it actually closed. use comma ok idiom.
 -----
 Web:
   http.ResponseWriter is interface not a pointer to struct as http.Request
