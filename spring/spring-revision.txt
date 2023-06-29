@@ -285,3 +285,9 @@ flyway migration
   - store : version, checksum to the file, ...
   - properites:
      spring.flyway
+------------------------
+using interfaces:
+  - we can hide the implementation of the bean behind an interface, and use the interface
+    in the controller. this way we can change the implementation without changing the controller.
+  - Allows for use of JDK Dynamic Proxies.
+  
