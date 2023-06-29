@@ -371,6 +371,10 @@ user -> LB -> one of our servers.
 
 ---
 
+in order to perfectly conform to Open-Closed-Principle. to make a system perfectly extensible u have to perfectly predict the future.
+
+LSP: governs inheritence, poly and subtype
+
 https://users.ece.utexas.edu/~perry/education/SE-Intro/fakeit.pdf
 
 ----------
