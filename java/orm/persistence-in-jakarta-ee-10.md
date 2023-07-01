@@ -41,6 +41,7 @@
     - you can set it on class level, and override it on field level.
     - if u don't specify it, it will be determined by where u put the @Id annotation.
   - Key
+
     - composite key
       - rules:
         - public class, public no-arguments constructor.
@@ -50,3 +51,9 @@
       - @EmbeddedId
     - Simple Primary Key
       - GeneratedValue is supported only for a simple primary key.
+
+  - @Embeddable
+    - should be implement serializable. this is required, as the ID may be <br> used as a key at the second level cache @EmbeddedId.
+  - @IdClass
+    - used to map composite key.
+    - u should declare the same field with the same type in the entity class and the id class. and annotate them with @Id.
