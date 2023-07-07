@@ -301,3 +301,38 @@ docs
 
   conceptually every compnent has another channel that can connect to another things.
 
+----events---
+# Events:
+  - Coupling refers to a degree of knowledge that one object has about the other object that it interacts with. 
+    -  Coupling refers to a degree of knowledge that one object has about the other object that it interacts with. 
+  - Event driven are architecture also follows an open-closed principle. Which means open for extension, but closed for modification.
+  -  Event system allows invoking logic on multiple components at the same time.  
+  # components
+  - Events
+    - An ApplicationEvent is a simple POJO class that holds data and is exchanged between publisher and listener.
+    - we don't need to extend ApplicationEvent class.
+  - Publisher 
+  - Listeners.
+    - limitation of ApplicationListener
+      - ApplicationListener interface only supports void return type.
+      - It can only be used for objects that extend ApplicationEvent class. 
+      - Listener can only process one event type.
+    - there are different flavors of implementing listeners to an event. It can be implemented within notations or by implementing Application Listener.
+       <br>Listeners, The neat thing is that Spring does all the heavy lifting for us and registered all listeners.
+      - <img src="images/event-listener.png" alt="event-listener" style="width:450px;"/> <br />
+    - Async listener 
+      - add @Async annotation to the listener method. @EnableAsync annotation to the configuration class.
+      - limitations:
+        - <img src="images/asyn-listener-limitations.png" alt="asyn-listener-limitations" style="width:450px;"/> <br />
+    - Unlike ApplicationListener interface, which only supports void return type, annotated methods may have a nonvoid return type. When they do, the result of the method in vocation is send as a new event. If the return type is either an array or a collection, each element is send as a new individual event. It is also possible to define the order in which listeners for the same event are to be invoked. To do so, we can use SpringCommon @order annotation, alongside EventListener annotation 
+      - <img src="images/publish-ret-obj-as-events.png" alt="publish-ret-obj-as-events" style="width:450px;"/> <br />
+  # processing
+    - Synchronous By defaults. meaning the publisher thread blocks until all listeners have finished processing the event.
+    - Asynchronous, meaning that it went as published in a new thread and release execution of publisher independently from the listener.
+    - Transection Bound Events, Spring allows us to bind an Event Listener to phase of the current transaction. This allows events to be used with more flexibility when the outcome of the current transaction matters to the listener.
+  - <img src="images/transaction-bound-event.png" alt="transaction-bound-event" style="width:450px;"/> <br />
+  - Filtering Events, Spring Events gives us an option to find tune conditions under which circumstances our Event Listener will be triggered.
+    -  <img src="images/events-filtering.png" alt="events-filtering" style="width:450px;"/> <br />
+  - if we have a use case where we want our listener to be triggered before Application Context is created(for predefined events), we need to register those listeners manually. SpringApplication#addListeners() method allows us to do that.
+  - imagine adding promotion for a new customer or updating some external systems. We not only need to provide an email service, but also all other functionalities that are coming up and centered around customer registration. We might argue, why should the customer registration process need to know about all those first functionalities that are centered around it? This creates more cyclic dependencies, and violates the single responsibility principle. Testing becomes much harder as we might need to mock all different dependencies. 
+  
