@@ -22,16 +22,16 @@ https://youtube.com/playlist?list=PLqq-6Pq4lTTbNRNqJE1XGnazm965uVMJT
 	(in java the project is a group of classes, java file and maybe some xml files / assets) 
 	the application is in ur head. it is not somehing that u manifest as a java concept/thing
 	-A java project structure 
-	 . source code
-	 . test code
-	 . project structure (directories, assets, resources)
+	 - source code
+	 - test code
+	 - project structure (directories, assets, resources)
 	 			which directory contains which files.
-	 . libraries / dependencies
-	 . configurations
+	 - libraries / dependencies
+	 - configurations
 		 		a lot of configurations that specify how certain jars work.
 		 		how the application work
-	 . task runner - build, test, run (run the tasks in the uniform way.) 
-	 . reporting [#of classes, dependencies, pass rate of test cases, test coverage]
+	 - task runner - build, test, run (run the tasks in the uniform way.) 
+	 - reporting [#of classes, dependencies, pass rate of test cases, test coverage]
 	 
 	 * Maven manages java project(described above)  using the project object model.
  

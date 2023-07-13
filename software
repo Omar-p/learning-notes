@@ -6,10 +6,10 @@ the running program is the product not the src code.
 In software it's far cheaper to build the product than design it, even fixing error after release. comparing to other engineering discipline.
 
 "A Big Ball of Mud is a haphazardly structured, sprawling, sloppy, duct-tape-and-baling-wire, spaghetti-code jungle. These systems show unmistakable signs
- of unregulated growth, and repeated, expedient repair. Information is shared promiscuously among distant elements of the system, often to the point where 
- nearly all the important information becomes global or duplicated. The overall structure of the system may never have been well defined. If it was, 
- it may have eroded beyond recognition. Programmers with a shred of architectural sensibility shun these quagmires. Only those who are unconcerned about architecture, 
- and, perhaps, are comfortable with the inertia of the day-to-day chore of patching the holes in these failing dikes, are content to work on such systems."
+of unregulated growth, and repeated, expedient repair. Information is shared promiscuously among distant elements of the system, often to the point where
+nearly all the important information becomes global or duplicated. The overall structure of the system may never have been well defined. If it was,
+it may have eroded beyond recognition. Programmers with a shred of architectural sensibility shun these quagmires. Only those who are unconcerned about architecture,
+and, perhaps, are comfortable with the inertia of the day-to-day chore of patching the holes in these failing dikes, are content to work on such systems."
 
 Rigidity: tendency of the system to be hard to change.
 
@@ -29,8 +29,8 @@ o.f(x) vs f(o, x) :
  1-caller don't know which impl of f will be called. caller is decoupled from the method he is call. {OO is about passing messages; when u pass a message, u lose control on how that message is going to be interpreted; u only hope the reciver react properly. } invert key dependencies, protecting high level policy from low level details. OO design is about dependencies management.
 --
 
-technical debt: prioritizing fast delivery over code quality for a long period of time.
------
+## technical debt: prioritizing fast delivery over code quality for a long period of time.
+
 SOLID is about managing relationship and operation between classes (5)
 
 Component Cohesion Principles[describe forces that cause classes to be grouped into independently deployable compnents ]:
@@ -165,7 +165,7 @@ Thin client#
   a request to the backend server  
   Thick client#
 - On the contrary, the thick client holds all or some part of the business logic.
-  . The typical examples of fat clients are utility apps, online games, and so on.
+  - The typical examples of fat clients are utility apps, online games, and so on.
 
 ---
 
@@ -281,8 +281,7 @@ AJAX – Long polling#
   HTTP by breaking it into smaller chunks. This is made possible with HTML5 and
   a JavaScript Stream API.
 - The technique is primarily used for streaming multimedia content, like large
-  images, videos, etc., over HTTP. Empowered by this technique  
-
+  images, videos, etc., over HTTP. Empowered by this technique
 
 ---
 
@@ -377,35 +376,26 @@ LSP: governs inheritence, poly and subtype
 
 https://users.ece.utexas.edu/~perry/education/SE-Intro/fakeit.pdf
 
-----------
-1980s:1990s web from static pages -----> microservice + restful APIs
-  First Trajectory: 
-    . Intellectual:
-      . dev stopped thinking about the web as a collection of pages   
-         delivered to a universial viewer and started thinking about it
-         as a collection of programs that can be invoked remotely to return
-         any kind of data, not just a viewable web page.
-      . infrastructure of the web came to be viewed as a possible medium
-        for rpc in which a web client essentially calls a func executed on
-        other computer then ret a result.
-        . issues we may face [other computer crash, is call reach ] addressed 
-          by paper [1984] Implementing Remote Procedure Calls.
-          https://web.eecs.umich.edu/~mosharaf/Readings/RPC.pdf
-  Second Trajectory:
-    . Standard Adoption 
-    . HTTP was never designed to support rpc. it wasn't designed to support 
-      a concept of a web session, by the time going byond web static content,
-      HTTP and other related web standards were already entrenched, so instead, 
-      the standards had to be evolved and adapted to the new needs, such as by
-      inventing new HTTP headers for cookies to remember if u logged in or for
-      a caching to speed up delivery of frequently requested content.
-    . HTTP was simple enough that it spread very quickly and good enough
-      that it would be diffcult to displace.
-    . Similarly, RESTFUL APIs have become de facto standard for communication between
-      web svcs, but rather than being created as a prespective standard, REST codifies
-      some of the best practices that were learned the hard way over 2 decades during 
-      which the web evolved.
-    . WINNER: simple solution for devs to understand and work with, works well with
-      existing deployed swf, and don't require individual devs to make licensing
-      arrangements to use it.
+---
 
+1980s:1990s web from static pages -----> microservice + restful APIs
+First Trajectory: - Intellectual: - dev stopped thinking about the web as a collection of pages  
+ delivered to a universial viewer and started thinking about it
+as a collection of programs that can be invoked remotely to return
+any kind of data, not just a viewable web page. - infrastructure of the web came to be viewed as a possible medium
+for rpc in which a web client essentially calls a func executed on
+other computer then ret a result. - issues we may face [other computer crash, is call reach ] addressed
+by paper [1984] Implementing Remote Procedure Calls.
+https://web.eecs.umich.edu/~mosharaf/Readings/RPC.pdf
+Second Trajectory: - Standard Adoption - HTTP was never designed to support rpc. it wasn't designed to support
+a concept of a web session, by the time going byond web static content,
+HTTP and other related web standards were already entrenched, so instead,
+the standards had to be evolved and adapted to the new needs, such as by
+inventing new HTTP headers for cookies to remember if u logged in or for
+a caching to speed up delivery of frequently requested content. - HTTP was simple enough that it spread very quickly and good enough
+that it would be diffcult to displace. - Similarly, RESTFUL APIs have become de facto standard for communication between
+web svcs, but rather than being created as a prespective standard, REST codifies
+some of the best practices that were learned the hard way over 2 decades during
+which the web evolved. - WINNER: simple solution for devs to understand and work with, works well with
+existing deployed swf, and don't require individual devs to make licensing
+arrangements to use it.

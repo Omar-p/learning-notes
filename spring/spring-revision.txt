@@ -38,19 +38,19 @@ Integration:
     - Service activator (invoke service operation based on the arrival of a message)
     - Gateway (connect your channels without SI coupling)
  Message Channels
-  . 2 General classifications of message channels
+  - 2 General classifications of message channels
     - Pollable Channel
     - Subscribable Channel
     
   - Pollable Channel:
-    . May buffer its messages
-      . Require a queue to hold the message
-      . the queue has a designated capacity
-    . Waits for the consumer to get the messages
-      . consumers actively poll to recieve msgs.
-    . Typically a Point-to-Point Channel
-      . Only one reciever of a message in the channel,
-    . Usually used for sending information or "document" message between endpoints      
+    - May buffer its messages
+      - Require a queue to hold the message
+      - the queue has a designated capacity
+    - Waits for the consumer to get the messages
+      - consumers actively poll to recieve msgs.
+    - Typically a Point-to-Point Channel
+      - Only one reciever of a message in the channel,
+    - Usually used for sending information or "document" message between endpoints      
   - Subscribable Channel
      Allows multiple subscribers (or consumers) to register for its messages.
        Messages are delivered to all registered subscribers on message arrival
@@ -61,13 +61,13 @@ Integration:
   -----
   Adapters
     An endpoint that connects a channel to an external system.
-      . it "provide the bridge between integration framework and the external
+      - it "provide the bridge between integration framework and the external
          systems and service"
-      . Providing separation of the messaging concerns from the transports and 
+      - Providing separation of the messaging concerns from the transports and 
         protocols used
     Adapter are inbound or outbound 
-      . Those that bring messages into the SI channels.
-      . Those that get msg from SI channels to the outside app, db, etc.
+      - Those that bring messages into the SI channels.
+      - Those that get msg from SI channels to the outside app, db, etc.
     Built-in Adapter
       File, JMS, JDBC & JPA, FTP, FEED RSS, MAIL ADAPTER,..             
 ----------
@@ -115,41 +115,41 @@ Data:
       name of the database (hsqldb, h2, oracle, mysql, postgresql, and so on).
   
   PageRequest describe the desired page of data.
-     . zero based
-     . Sort describe how to sort req data.
+     - zero based
+     - Sort describe how to sort req data.
   Page<> - an interface describing the result of a paged query 
-    . content, num, size, sort info.
-    . util methods to get previous and next.
+    - content, num, size, sort info.
+    - util methods to get previous and next.
 
   spring data rest /collectionName/search/methodNameInRestRepo?param=
 
 -----
 Transaction: a unit of works
-  . ACID
+  - ACID
 Save Point: programatic point u can set, which allow u to rollback to (ir rollback part of a transaction).
 
 Database Locks:
-  . the db will lock records, (in some cases whole table or db) to prevent other processes from changing data.
-    . ACID compliance
-  . Within a transaction the following DML statements will lock records of the  affected rows:
-     . SELECT FOR UPDATE; UPDATE; DELETE.
-  . During the transactions other sessions attempting to modify locked records will by default
+  - the db will lock records, (in some cases whole table or db) to prevent other processes from changing data.
+    - ACID compliance
+  - Within a transaction the following DML statements will lock records of the  affected rows:
+     - SELECT FOR UPDATE; UPDATE; DELETE.
+  - During the transactions other sessions attempting to modify locked records will by default
      wait for the lock to be released. (ie interactively it will seem like things are hanging)
-  . Deadlock - occur where two transactions lock each other and can never complete.
-     . Both fail and roll  back
+  - Deadlock - occur where two transactions lock each other and can never complete.
+     - Both fail and roll  back
   JPA LOCKING:
-    . Pessimistic LOCKING[used if the data is frequently updated]
-       . Database mechanism are used to lock records for updates
-       . Capabilities vary widely depending on db and version of JDBC driver used.
-       . Simplest version is "SELECT FOR Update.." Locks ro or rows until commit or rollback is issued.
-    . Optimistic Locking 
-      . Done by checking a version attribute of the entitiy.
+    - Pessimistic LOCKING[used if the data is frequently updated]
+       - Database mechanism are used to lock records for updates
+       - Capabilities vary widely depending on db and version of JDBC driver used.
+       - Simplest version is "SELECT FOR Update.." Locks ro or rows until commit or rollback is issued.
+    - Optimistic Locking 
+      - Done by checking a version attribute of the entitiy.
 
   Multi-Request Conversations:
-    . Occurs in web [form] app, or possibly RESTful too, where the update logic is over 
+    - Occurs in web [form] app, or possibly RESTful too, where the update logic is over 
       one or more requests, thus leaving a larger window of time.
-        . Pessimistic Locking is very fast, milliseconds. Will only protect against conflicts at write time.
-        . Optimistic Locking provides a mechanism to detect stale data over a longer period of time (ie - multiple requests)
+        - Pessimistic Locking is very fast, milliseconds. Will only protect against conflicts at write time.
+        - Optimistic Locking provides a mechanism to detect stale data over a longer period of time (ie - multiple requests)
 
   • Pessimistic Lock Modes
     • PESSIMISTIC_READ - uses shared lock, prevents data from being updated or deleted
@@ -269,16 +269,16 @@ spring:
 -----
 DB connection pool:
   - default HikariCP
-    . default pool size = 10
-    . properties to configure
+    - default pool size = 10
+    - properties to configure
       spring.datasource.hikari.
       spring.datasource.hikari.data-source-properties[cachePrepStmts]
 
 flyway migration
   - it's important to have a unique way to reproduce the database state [structre]
      because u may have different environment u want to run ur app in.
-     . development and CI/CD db are easy, just rebuild each time.
-     . QA,UAT,Production are permanent DB. considerations:
+     - development and CI/CD db are easy, just rebuild each time.
+     - QA,UAT,Production are permanent DB. considerations:
         .what state are they in?
         .Has a script been applied?
         .How to create a new database to a release?
@@ -291,3 +291,10 @@ using interfaces:
     in the controller. this way we can change the implementation without changing the controller.
   - Allows for use of JDK Dynamic Proxies.
   
+------------------------
+- to invoke method after the constructor and all setters are called on a bean u can implement initializingBean
+  and override afterPropertiesSet() method.
+- BeanPostProcessor #postProcessBeforeInitialization and #postProcessAfterInitialization
+  - postProcessBeforeInitialization method are called after calling constructor and setters but before calling  afterPropertiesSet.
+- u can also register bean definiation by implementing BeanFactoryPostProcessor->BeanDefinitionPostProcessor and override 
+   postProcessBeanDefinitionRegistry method.

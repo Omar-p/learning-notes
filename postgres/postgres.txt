@@ -5,8 +5,8 @@ Schema:
   
   when u access a table without specifying a schema name, pg searches for that table 
   by using the [schema search path], which is a list of schemas to look in.
-  . The first schema in the search path is called the current_schema. 
-  . PostgreSQL will access the first matching table in the schema search path. 
+  - The first schema in the search path is called the current_schema. 
+  - PostgreSQL will access the first matching table in the schema search path. 
     If there is no match, it will return an error, even the name exists in another
      schema in the database.
   
@@ -78,7 +78,7 @@ Sequence[relkind = 'S']:
     [ [ NO ] CYCLE ]      
     [ OWNED BY { table_name.column_name | NONE } ]
 
-  . when you use the SERIAL pseudo-type for a column of a table, behind the scenes, 
+  - when you use the SERIAL pseudo-type for a column of a table, behind the scenes, 
     PostgreSQL automatically creates a sequence associated with the column.
 ----
 If a column alias contains one or more spaces, you need to surround it with double quotes like this:
@@ -87,7 +87,7 @@ If a column alias contains one or more spaces, you need to surround it with doub
 ORDER BY sort_expresssion [ASC | DESC] [NULLS FIRST | NULLS LAST]
 --
 DISTINCT ON (cols,..) must match the prefix of cols in ORDER BY clause:
-  . select first row in each group.
+  - select first row in each group.
   With DISTINCT ON, you tell PostgreSQL to return a single row for each 
   distinct group defined by the ON clause. Which row in that group is
    returned is specified with the ORDER BY clause.
@@ -95,27 +95,27 @@ DISTINCT ON (cols,..) must match the prefix of cols in ORDER BY clause:
 https://www.geekytidbits.com/postgres-distinct-on/
 ---
 WHERE
-  . The condition must evaluate to true, false, or unknown. It can be a boolean expression
+  - The condition must evaluate to true, false, or unknown. It can be a boolean expression
      or a combination of boolean expressions using the AND and OR operators.
-  . If you use column aliases in the SELECT clause, you cannot use them in the WHERE clause.
+  - If you use column aliases in the SELECT clause, you cannot use them in the WHERE clause.
     -> because query evaluates as: FROM -> WHERE -> SELECT -> ORDER BY
 ---
 LIMIT row_count OFFSET row_to_skip;
-  . If row_count is zero, the query returns an empty set. In case row_count is NULL, 
+  - If row_count is zero, the query returns an empty set. In case row_count is NULL, 
     the query returns the same result set as it does not have the LIMIT clause.  
     
-  . The statement first skips row_to_skip rows before returning row_count rows generated
+  - The statement first skips row_to_skip rows before returning row_count rows generated
     by the query. If row_to_skip is zero, the statement will work like it doesn’t have 
     the OFFSET clause.  
 --
 FETCH is a SQL standard, LIMIT is not.
-  . OFFSET start { ROW | ROWS }
+  - OFFSET start { ROW | ROWS }
     FETCH { FIRST | NEXT } [ row_count ] { ROW | ROWS } ONLY
     
     - start is an integer that must be zero or positive. By default, it is zero.
       In case the start is greater than the number of rows in the result set, 
       no rows are returned;
-  . OFFSET clause must come before the FETCH clause in SQL:2008, IN postgres 
+  - OFFSET clause must come before the FETCH clause in SQL:2008, IN postgres 
     any order of them  will work.
   
   - FETCH FIRST and FETCH NEXT do exactly the same thing. The reason both exist 

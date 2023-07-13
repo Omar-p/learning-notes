@@ -39,7 +39,7 @@ f6 -> to move selected method to other class, selected class to other package.
 when refactoring u should have good unit test because things break.
 ---
 alt + ctrl + v -> extract local var.
-  . can used after ctrl+w
+  - can used after ctrl+w
 alt + ctrl +  -> extract method.
 
 ctrl + a -> begin of the line

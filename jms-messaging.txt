@@ -1,68 +1,68 @@
 why use messaging ?
   - communication between two component.
-    . hetergeneous interoperability.
-    . compnent decoupling.
-    . high scalability through load balancing.
-    . asynchronous capabilities(fire-and-forget) <- not have to wait until message is been sent.
-    . guarantee delivery.
+    - hetergeneous interoperability.
+    - compnent decoupling.
+    - high scalability through load balancing.
+    - asynchronous capabilities(fire-and-forget) <- not have to wait until message is been sent.
+    - guarantee delivery.
 messaging timeline
   - [jms 1.02b 2-apis] 1) point to point using queue. 2) pub/sub using topics.
   - [jms 1.1] unify the prev 2 api to single generic interface
   - [jms 2.0] new simplified api with 4 new features.
 messaging models
   - point to point 
-    . using queues
-    . guarantee  one reciever will recieve the sent message.
-    . two approach:
+    - using queues
+    - guarantee  one reciever will recieve the sent message.
+    - two approach:
       - fire-and-forget one queue.
       - request/reply two queues, send message to q waiting until reciever process it and send confirmation.
-    . supports load balancing of reciever  
-    . if recievers are busy, message wait in the queue.
+    - supports load balancing of reciever  
+    - if recievers are busy, message wait in the queue.
       
   - publish and subscribe
-    . using topic.
-    . message recieved by every subscriber to a topic.
-    . supports fire-and-forget broadcast notification.
-    . [jms 2.0] load balancing of subscribers
-    . generally subscribers are not known by publisher.
-    . virtual topic: we cannot browse topic, [think about it as ]each subscriber has it's own queue
+    - using topic.
+    - message recieved by every subscriber to a topic.
+    - supports fire-and-forget broadcast notification.
+    - [jms 2.0] load balancing of subscribers
+    - generally subscribers are not known by publisher.
+    - virtual topic: we cannot browse topic, [think about it as ]each subscriber has it's own queue
 jms message structure
   - Header
-    . jms standard header properties. 
-    . jms extended header properties.
-    . app-specific header properties: we set to provide additional info to rec about the message.
-    . vendor-specific header properties.
+    - jms standard header properties. 
+    - jms extended header properties.
+    - app-specific header properties: we set to provide additional info to rec about the message.
+    - vendor-specific header properties.
   - Body
     * text payload
-      . TextMessage#setText(payload)
-      . good portability with other protocol (e.g., STOMP)
-      . general purpose message type, can be used for xml.
+      - TextMessage#setText(payload)
+      - good portability with other protocol (e.g., STOMP)
+      - general purpose message type, can be used for xml.
     * java object payload
-      . ObjectMessage#setObject()
-      . limited protability - java to java only 
-      . object must implement Serializable
+      - ObjectMessage#setObject()
+      - limited protability - java to java only 
+      - object must implement Serializable
     * map payload
-      . MapMessage#set[Long|String..]
-      . body is key:value pair
-      . must have an agreed upon contract of property types and values.
-      . good contract extensibility and flexibility.
+      - MapMessage#set[Long|String..]
+      - body is key:value pair
+      - must have an agreed upon contract of property types and values.
+      - good contract extensibility and flexibility.
         [consumer doesn't have to consume all properties, just take what he need]
     * byte payload
-      . ByteMessage#write[Bytes|UTF|
-      . must have an agreed upon contract for order of bytes
-      . highest portability of jms message types
+      - ByteMessage#write[Bytes|UTF|
+      - must have an agreed upon contract for order of bytes
+      - highest portability of jms message types
     * stream payload
-      . StreamMessage
-      . must have an agreed upon contract for order of bytes.
-      . allows for conversion due to java types being stored. java to java only.
+      - StreamMessage
+      - must have an agreed upon contract for order of bytes.
+      - allows for conversion due to java types being stored. java to java only.
     * event payload.
-      . Message send head properties no body.
-      . used for event notification with optional header data.
+      - Message send head properties no body.
+      - used for event notification with optional header data.
 jms message types
 guaranteed delivery 
-  . guaranteed delivery requires message persistence (default)
-  . only persistent messages survive system failures.
-  . there is a performance hit hen using guaranteed delivery.
+  - guaranteed delivery requires message persistence (default)
+  - only persistent messages survive system failures.
+  - there is a performance hit hen using guaranteed delivery.
   producer <--> jms provider <--> consumer
                     |
                 persistence store.    
@@ -71,7 +71,7 @@ guaranteed delivery
   6) provider delete message from persistent store.
 --------
 JMS 1.1
-  . primary api interface 
+  - primary api interface 
     * Connection <- generic interfaces
        ConnectionFactory --> Connection --> Session --> Message
                       |----                        |--> MessageProducer
@@ -84,7 +84,7 @@ JMS 1.1
        TopicConnectionFactory --> TopicConnection --> TopicSession --> Message
                       |----                                        |--> TopicPublisher
        Topic       <--                                             |--> TopicSubscriber
-  . sessions created from connection. in JMS session is a unit amount of work.
-  . producers
-  . consumers
+  - sessions created from connection. in JMS session is a unit amount of work.
+  - producers
+  - consumers
   

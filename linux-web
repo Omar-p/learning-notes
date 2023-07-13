@@ -3,42 +3,42 @@
 Web application Software Stack:
   1 - OS: linux, win
   2 - Load balancer: HAProxy, F5, AWS ELB
-     . Operate as TCP/HTTP proxies
-     . Distribute connections among servers.
-     . Decouple clients from web and app servers.
-     . Monitor the health of servers.
-     . Terminate SSL connections.
+     - Operate as TCP/HTTP proxies
+     - Distribute connections among servers.
+     - Decouple clients from web and app servers.
+     - Monitor the health of servers.
+     - Terminate SSL connections.
        - u would install ur ssl certificates and key on the load balancer.
          user connect to loadbalancer would negotiate the SSL conversation
          and this save some load on the web & app servers. it pushes the CPU overhead
-         involved woth encryption to the load balancer . 
+         involved woth encryption to the load balancer - 
   3 - Web Server: Apache, nginx, Lighttpd 
-     . Manage HTTP connections
-     . Serve static assets
-     . Terminate SSL connections [if u don't make ur load balancer to do thta. or there is no LB]
-     . Produce access and error logs
+     - Manage HTTP connections
+     - Serve static assets
+     - Terminate SSL connections [if u don't make ur load balancer to do thta. or there is no LB]
+     - Produce access and error logs
        - analyze traffic the app recieving. u might want to know what demographic usage of ur site.
          u can perform analytic query on the traffic
-     . Provide flexible, modular configuration.
+     - Provide flexible, modular configuration.
     
   4 - App Server: Passenger(Ruby), uwsgi (python), tomcat(java).
-     . Run the business logic of the app
-     . Expose various interfaces and abstractions for use by the application developer.
+     - Run the business logic of the app
+     - Expose various interfaces and abstractions for use by the application developer.
        - u don't need to reinvent the wheel. imagine for everytime to write web app u have to
          write HTTP translations or to understand HTTP verbs.
          - APP SERVER provide a generic interface to all of those underlying complexities 
            and mask it for us.
-     . Manage the execution environment needed by the application code. 
+     - Manage the execution environment needed by the application code. 
   5 - Database: PostgreSQL, MySQL, Cassandra, MongoDB.
     .
   
   6 - Additional components
-    . Messages queues for asynchronous communication. [buffer app produce messages in, others consume it](activemq)
-    . Coordination and configuration discovery tools. [config server for example or naming server]
-    . In memory caches for fast access to frequently-used data. (Redis)
-    . Real-time event processing frameworks [process tweets]
-    . Data transformation, pipeline, and warehouses.
-    . CDN content-delivery content
+    - Messages queues for asynchronous communication. [buffer app produce messages in, others consume it](activemq)
+    - Coordination and configuration discovery tools. [config server for example or naming server]
+    - In memory caches for fast access to frequently-used data. (Redis)
+    - Real-time event processing frameworks [process tweets]
+    - Data transformation, pipeline, and warehouses.
+    - CDN content-delivery content
   users --Load Balancer-->* web server -> app server -> DB
 ----
 a way to design ur app:
@@ -68,7 +68,7 @@ a way to design ur app:
    - things that only are needed internally for app operations and 
       do not need to be exposed to internet.
   * DNS Server 
-    . to access ur internal service, so it need to be private 
+    - to access ur internal service, so it need to be private 
  reasons for that is security u want to limit ur exposure to the internet 
   and have most thing running  behind a carefully controlled firewall.
 
@@ -82,41 +82,41 @@ a way to design ur app:
   
   improve app availability:
    Eliminate single points of failure (SPOFs)
-     . cluster for app and/or db
-     . Network equipment
-     . Load Balancer
+     - cluster for app and/or db
+     - Network equipment
+     - Load Balancer
    Decouple logically distinct functionality.
-     .  query interface --> query logger [both] -->DB
+     -  query interface --> query logger [both] -->DB
         if query logger fails, queries will be lost.
-     .  user interface ---> queues <--- queue worker [both edges to db]
+     -  user interface ---> queues <--- queue worker [both edges to db]
         a queue can separate the interface from the logging. 
   Encourage statelessness
-    . if web server maintains user sessions. if that server fails the session is lost.
-    . instead, persist session state in a cache or db.
+    - if web server maintains user sessions. if that server fails the session is lost.
+    - instead, persist session state in a cache or db.
   Avoid manual Configuration
-    . to make sure all system be identical. cattle vs pet
+    - to make sure all system be identical. cattle vs pet
   Use Version control
-    . keep configuration and code in version control to assist 
+    - keep configuration and code in version control to assist 
       with change management and deployment. be careful not to 
       store credentials in the repository.
   Improve Application Availability
-    . Instrument all layers of the stack
-    . single source of truth for monitoringm graphing. [grafana]
+    - Instrument all layers of the stack
+    - single source of truth for monitoringm graphing. [grafana]
   Broad Security Considerations
-    . Apply the principle of least privilege.
-    . Reduce the attack surface [expose to internet, the public service only]
-    . Embrace strong authentication
-    . Carefully control credientials [don't store them in configuration files as plain text]
-    . Keep software up-todate.
-    . Encryprt data by default. [make sure the hardware can handle the overhead]
-    . Limit exposure from user devices.
+    - Apply the principle of least privilege.
+    - Reduce the attack surface [expose to internet, the public service only]
+    - Embrace strong authentication
+    - Carefully control credientials [don't store them in configuration files as plain text]
+    - Keep software up-todate.
+    - Encryprt data by default. [make sure the hardware can handle the overhead]
+    - Limit exposure from user devices.
 ------------
   1.6 Charles Proxy : u can use it to intercept all traffic from machine, 
     set breakpoint for certain patterns, modify the request. it is useful for debugging.
   
 ----
 Process Monitoring:
-  . As some point you'll likely find yourself writing a script which needs to run all the time - a 
+  - As some point you'll likely find yourself writing a script which needs to run all the time - a 
     "long running script". These are scripts that shouldn't fail if there's an error, or ones that 
      should restart when the system reboots.
   - supervisord
@@ -134,7 +134,7 @@ Process Monitoring:
 r
     sudo supervisorctl reread  / reload /  status
     supervisorctl stop|stop nodebook
-    . web interface
+    - web interface
     /etc/supervisord.conf, add this:
     port = 9001
     username = user # Basic auth username

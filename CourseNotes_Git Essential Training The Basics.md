@@ -141,11 +141,11 @@ u cannot delete HEAD branch
 Git file managment:
 
 - untracked
-  . Stay in directory
+  - Stay in directory
 - Staged
-  . Stay in staged state.
+  - Stay in staged state.
 - Committed
-  . changes not visible when switch branch.
+  - changes not visible when switch branch.
 
 ---
 
@@ -180,12 +180,11 @@ each command ask 2Q:
 
 - how does this command move info across the 4 Areas[stash, working area, Index, Repository]?
 - how does this command change the Repository?
-  . checkout [branch].
-  --
-  git rm --cached file
-  remove new file from stagging area. [make them untracked]
-  git rm -f file
-  ------HEAD FIRST GIT--------
+  - ## checkout [branch].
+    git rm --cached file
+    remove new file from stagging area. [make them untracked]
+    git rm -f file
+    ------HEAD FIRST GIT--------
 
 why we need version control:
 
@@ -277,7 +276,7 @@ why we need version control:
 # Reset
 
 - Reset changes the files in the staging index/or working directory to the state <br>they had when a specific commit was made.
-  . options;
+  - options;
 - mixed(default) to wd.
   - move all changes until the specified commit to the working directory.
   - used if u want to reorganize commits.

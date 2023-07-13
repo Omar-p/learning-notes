@@ -47,10 +47,10 @@ Spring Aop implements aspects using regular classes,
          original method in proceed method
 
 JDK Dynamic proxy
-    . if the target class is implementing any interface spring create a proxy 
+    - if the target class is implementing any interface spring create a proxy 
       that implement the same interface to be able to substitute.
 CGLIB
-    . if the target doesn't implements any class the proxy will extend the target class.
+    - if the target doesn't implements any class the proxy will extend the target class.
 
 if the target class is final the spring cannot use CGLIB, and if the target contains any
   final methods the we cannot override its behavior and make use of advices for that method.

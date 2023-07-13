@@ -1,26 +1,26 @@
 Practical GO:
   - Built for modern times:
-    . goroutines, channels, [C10K problem], production Ready HTTP server (TLS, HTTP 2)
+    - goroutines, channels, [C10K problem], production Ready HTTP server (TLS, HTTP 2)
   - go use git to fetch external packages.
   - all files in the same folder must have the same package.
   - go env GOARCH GOOS -> architecture & os which the compiler is build the executable for.
-     . u can modify it -> GOOS=darwin go build <- to build for mac.
+     - u can modify it -> GOOS=darwin go build <- to build for mac.
   - main function don't accept args as java or C.  
      but there are package os and flag that can be used in building cli app. 
   - string is a struct [pointer, len int] ,  "Strings behave like arrays of bytes
     but are immutable: once created, it is impossible to change the contents of a string".
-    . A string is a struct that has a length and a pointer to a byte array. 
+    - A string is a struct that has a length and a pointer to a byte array. 
       When you pass a string to another function, it copies the length and 
       the pointer. As a consequence, the new copied string points to the 
       same underlying data.
   - code point = rune(int32) ~= unicode  character.
-  - utf-8 var-len encoding . char can be 1~4 bytes.
+  - utf-8 var-len encoding - char can be 1~4 bytes.
   - len(str) <- return #of bytes in the str not the length len("G☺") -> 4
-    . string in go is bunch of byte(uint8) and rune 
-    . accessing str using [] will deal with it as bytes.
+    - string in go is bunch of byte(uint8) and rune 
+    - accessing str using [] will deal with it as bytes.
       accessing range str as rune.
-    . u have option to decode from utf-16 to utf-8  
-    . 
+    - u have option to decode from utf-16 to utf-8  
+    - 
   - in debugging/logging use %#v not %v
   - Go for http Headers don't use a map data structure
      use a special type called Header -> 
@@ -32,41 +32,41 @@ Practical GO:
   - demarshaling json to go struct by default 
      (number -> float64, array -> []any ([]interface{}), object -> map[string]any| struct)
   - json <---> Go
-    . there are a lot of types in go that are not represented in json. 
+    - there are a lot of types in go that are not represented in json. 
        for ex: time u have to encode time to int represent num of seconds or a string 
-    . JSON -> io.Reader -> Go: json.Decoder
-    . JSON -> []bytes -> Go: json.Unmarshal
-    . Go -> io.Writer -> JSON: json.Encoder
-    . Go -> []byte -> JSON: json.Marshal
+    - JSON -> io.Reader -> Go: json.Decoder
+    - JSON -> []bytes -> Go: json.Unmarshal
+    - Go -> io.Writer -> JSON: json.Encoder
+    - Go -> []byte -> JSON: json.Marshal
   - if u just use a truct in one place don't define it's type as global
     define it as anonymous struct in the scope u use it.
     ex: consuming api, testing.
   - url.PathEscape(str) escape the string to be used safely in url.  
   - defer only happen when the function exit.
-    . function level not a scope level.
-    . several defer in the same function will be called in reverse order.
-    . idiom: acquire a resource, check for error, defer release.
+    - function level not a scope level.
+    - several defer in the same function will be called in reverse order.
+    - idiom: acquire a resource, check for error, defer release.
   - string in go cannot be null, for db there is a way to deal with null in db.
   - io.Copy(writer, reader)
   - slice
-    . type slice struct { array unsafe.Pointer, len cap int}
-    . slicing operation :
-      . it works on the same underlying array.
-      . the capacity of the new slice will be 
+    - type slice struct { array unsafe.Pointer, len cap int}
+    - slicing operation :
+      - it works on the same underlying array.
+      - the capacity of the new slice will be 
          the cap of original one - the first index we slice from.
-      . go panic if the slicing exceed the capacity not the length.
-         . accessing element will panic if u exceed the length
-      . go copy by value but slice has a pointer inside so 
+      - go panic if the slicing exceed the capacity not the length.
+         - accessing element will panic if u exceed the length
+      - go copy by value but slice has a pointer inside so 
          u should be careful [specially when u pass it between funcs].   
   - const 
-    . in go their type is decided depending on where u use them.
+    - in go their type is decided depending on where u use them.
       const n = 2
         var f float64 = 5 ; f = f / n <- n is a float64   
         var i int64 = 5 ; i = i / n <- n is a int64   
   - copy(dst, src) int -> copy as much as it can and return the num of copied.    
 
   - idiom 
-    . if there is a possiblity of panic we additionally return an error 
+    - if there is a possiblity of panic we additionally return an error 
        and check for that in the beginning of the func.
   -  interface in go said what we need not what we provide
   - Rule of thumb : Accept interfaces, return a types[u have no idea what the caller will do with it ].
@@ -171,35 +171,35 @@ TESTING
     - If not using subtests, Fatal will prevent other test in that func from running.
  
  - httptest.NewRecorder() // fake response writer can be passed to the handler and use it to see if the handler work correctly
-   . changing header[w.Header.Set(,)] after calling [w].WriteHeader will have no effect.
+   - changing header[w.Header.Set(,)] after calling [w].WriteHeader will have no effect.
 
  - example as a test.
-   . godoc use that in generated docs.
-   . example for package level name function : Example
-   . nameing: 
-     . Example[FuncNameUTest]
-     . for func that is for a type
-        . Example[TypeName_FuncName]
-     . to name a specific example for a func use lowercase after _
+   - godoc use that in generated docs.
+   - example for package level name function : Example
+   - nameing: 
+     - Example[FuncNameUTest]
+     - for func that is for a type
+        - Example[TypeName_FuncName]
+     - to name a specific example for a func use lowercase after _
        ExampleFunc_specificname,
-   . output order:
-     . in case of testing map or channel, each run will be in different order.
+   - output order:
+     - in case of testing map or channel, each run will be in different order.
         instead of useing // Output: use // Unordered output:    
 ----------
 concurrency:
-  . the whole basis of concurrent progeamming in go is founded on [goroutine],
-     but they are not enough to manage a program that's running concurrently . -> [sync package]
-  . WaitGroups allow a supervising goroutines to wait on other several other goroutines[coordinate tasks]
-  . Mutex [mutal exclusion lock]allow sharing memory between goroutines[protect shared memory]
+  - the whole basis of concurrent progeamming in go is founded on [goroutine],
+     but they are not enough to manage a program that's running concurrently - -> [sync package]
+  - WaitGroups allow a supervising goroutines to wait on other several other goroutines[coordinate tasks]
+  - Mutex [mutal exclusion lock]allow sharing memory between goroutines[protect shared memory]
     - concurrent access to the same memory using different goroutines in the same time will throw an error.
     go run --race .
-  . channel : we Generate copy of that memory and passing it . 
+  - channel : we Generate copy of that memory and passing it - 
     cahnnel semantics:
-      . send & recieve will block until opposite operation
-      . recieve from a closed channel will return zero value of the channel type without blocking.
-      . send to a closed channel will panic.
-      . closing a closed channel will panic.
-      . send/recieve to nil channel will block forever.
+      - send & recieve will block until opposite operation
+      - recieve from a closed channel will return zero value of the channel type without blocking.
+      - send to a closed channel will panic.
+      - closing a closed channel will panic.
+      - send/recieve to nil channel will block forever.
     - to check if the channel has a zero value or it actually closed. use comma ok idiom.
 -----
 Web:
@@ -211,8 +211,8 @@ Web:
   to render html text without escaping it: use template.HTML type.
 ----
 same origin policy:
-  . browser prevent javascript from making request to different domain.
-  . origin = scheme + host + port
+  - browser prevent javascript from making request to different domain.
+  - origin = scheme + host + port
 
   tplPath := filepath.Join("templates", "home.gohtml") // os separator agnostic.
 

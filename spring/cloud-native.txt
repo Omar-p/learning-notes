@@ -55,21 +55,21 @@ ch 02:
     port-forward from ur machine to svc to access it.
 ch 03:
   3.1
-    . One codebase, one application
+    - One codebase, one application
       - each codebase should be mapped to an application, 
         but nothing is said about repositories. You can 
         decide to track each codebase in a separate repository 
         or in the same one.
         - recommendation : each codebase in its own Git repository 
           because it’ll improve maintainability and deployability
-    . Cloud native applications should use a tool that manages 
+    - Cloud native applications should use a tool that manages 
        dependencies explicitly and shouldn’t rely on implicit 
        dependencies from the environment where they are deployed.
         - Using the wrapper, you can ensurethat all team members and 
           automated tools building the project use the same Gradle or Maven version
-    . Each codebase must produce immutable artifacts, called builds,
+    - Each codebase must produce immutable artifacts, called builds,
        that can be deployed to multiple environments[Prod, QA, DEV, Staging].
-    . anything environment-specific like configuration must be outside 
+    - anything environment-specific like configuration must be outside 
        of the application codebase. [DB configs..]
       - In case of code that’s needed by more than one
          application, you should either turn it into an independent
@@ -77,69 +77,69 @@ ch 03:
            as a dependency. [be careful u can turn to distributed monolith]
   
   3.2
-    . archiving as a WAR or EAR would limit the portability because 
+    - archiving as a WAR or EAR would limit the portability because 
       our app now have an external dependency [web-server n external
        server being available in the execution environment].
-      . as a jar our app is self-contained has an embeded server.
+      - as a jar our app is self-contained has an embeded server.
         - allow us to achieve [Port binding : export services by binding to 
           a port that can be configured depending on the environment.,
            Concurrency: When the concurrency limit is hit, we favor 
             horizontal over vertical scaling.] running multiple instances.
     
 
-    . Servlet container—A component, part of a web server, that provides an
+    - Servlet container—A component, part of a web server, that provides an
        execution context for web applications using the Java Servlet API.
-    .  Application server—A server that provides a complete execution environment 
+    -  Application server—A server that provides a complete execution environment 
        (like Jakarta EE) for different types of applications and supports several 
         protocols, such as WildFly.
     
-    . thread-per-request. For each request, the application dedicates a thread
+    - thread-per-request. For each request, the application dedicates a thread
        exclusively to handling that specific request; the thread will not be used
        for anything else until a response is returned to the client.
-    . The DispatcherServlet component provides a central  entry point 
+    - The DispatcherServlet component provides a central  entry point 
       for request processing. When a client sends a new HTTP request 
       for a specific URL pattern, DispatcherServlet asks the HandlerMapping 
       component for the controller responsible for that endpoint,
-    . you would configure a server like Tomcat in dedicated files such 
+    - you would configure a server like Tomcat in dedicated files such 
        as server.xml and context.xml. With Spring Boot, you can configure an
        embedded web server in two ways: through properties or in a WebServerFactoryCustomizer bean.  
-    . server.tomcat.connection-timeout property[default 20s] : a limit for how much time Tomcat should wait
+    - server.tomcat.connection-timeout property[default 20s] : a limit for how much time Tomcat should wait
       between accepting a TCP connection from a client and actually receiving the HTTP request.
       It helps prevent denial-of-service (DoS) attacks where a connection is established,
       Tomcat reserves a thread to handle the request, and the request never comes.
-    . server.tomcat.keep-alive-timeout property to configure how long to keep 
+    - server.tomcat.keep-alive-timeout property to configure how long to keep 
       a connection open while waiting for new HTTP requests.
-    . server.tomcat.threads.max #of threads in the pool.
-    . default max = 200, workers = 10
-    . You can also define the minimum number of threads that 
+    - server.tomcat.threads.max #of threads in the pool.
+    - default max = 200, workers = 10
+    - You can also define the minimum number of threads that 
       should always be kept running (server.tomcat.threads.min-spare),
        which is also how many threads are created at startup.
         fine to start with in prod. u can use them to optimize ur local env 50 5.
 ch04:
   JL 08: 
-    . we should keep config for specific env external from our app and in that env.
-      . we want to be able to promote one binary from one env to another without needing
+    - we should keep config for specific env external from our app and in that env.
+      - we want to be able to promote one binary from one env to another without needing
         to recompiling it. because if don't do that , it would risk introducing slightly
          inconsistency.
-    . Spring ConversionService: is an obj that have different strategies for taking text
+    - Spring ConversionService: is an obj that have different strategies for taking text
       and turning it into types, and vs. 
-    . if u make field under @ConfigurationProperties final u have to annotate the class
+    - if u make field under @ConfigurationProperties final u have to annotate the class
       with @ConstructorBinding(< v3.0.0 ).
-    . Environment abstraction build on top of PropertySource.
-    . PropertySource : we can define our own.
+    - Environment abstraction build on top of PropertySource.
+    - PropertySource : we can define our own.
        u need to register it with spring. SPI, environment post processor   because 
          it need to be available in early phase of initializing the app.
-     . there is a random PropertySource if u ask for property [random.[int|long|uuid]] 
+     - there is a random PropertySource if u ask for property [random.[int|long|uuid]] 
     
   4.0:
-    . Configuration is defined as everything likely to change
+    - Configuration is defined as everything likely to change
       between deployments (as per the 15-Factor methodology),
       like credentials, resource handles, and URLs to backing
       services.
-    . A key aspect of cloud native
+    - A key aspect of cloud native
       applications is that the application artifact will stay
       immutable across environments.
-    . Spring Environment abstraction: property files, JVM system properties, cli arg, and system
+    - Spring Environment abstraction: property files, JVM system properties, cli arg, and system
         environment variables.
         precceding: 
           1- cli --prop=val 2- jvm property -Dpro=val 3-ENV_VAR 4- prop_file
@@ -153,45 +153,45 @@ ch04:
             the application, such as connection pools, credentials,
             feature flags, thread pools, and URLs to third-party
             services.
-    . NOTE Instead of using profiles as feature flags, a more scalable and structured approach is
+    - NOTE Instead of using profiles as feature flags, a more scalable and structured approach is
       defining custom properties to configure functionality, and relying on annotations such as
       @ConditionalOnProperty and @ConditionalOnCloudPlatform to control when
       certain beans should be loaded into the Spring application context.
-    . The 15-Factor methodology recommends not batching configuration values
+    - The 15-Factor methodology recommends not batching configuration values
       into groups named after environments and bundled with the
       application source code because it wouldn’t scale. As a
       project grows, new environments might be created for
       different stages;
-    . NOTE You can use environment variables to define configuration values that depend on the
+    - NOTE You can use environment variables to define configuration values that depend on the
       infrastructure or platform where the application is deployed, such as profiles, port numbers,
       IP addresses, and URLs.
-    . why do we need Config Server?
-      . Environment variables don’t provide granular access control features.
-      . After changing your configuration data, how can you make your
+    - why do we need Config Server?
+      - Environment variables don’t provide granular access control features.
+      - After changing your configuration data, how can you make your
         application read it at runtime without requiring a full restart
-      . version control, auditing
-      . Neither Spring Boot properties nor environment variables support configuration encryption
+      - version control, auditing
+      - Neither Spring Boot properties nor environment variables support configuration encryption
          so you can’t safely store passwords.
-    . NOTE Your choice of configuration service will depend on your infrastructure and
+    - NOTE Your choice of configuration service will depend on your infrastructure and
       requirements.
-    . idea of config server:
-      . A data store for configuration data, providing persistence, versioning, 
+    - idea of config server:
+      - A data store for configuration data, providing persistence, versioning, 
          and possibly access control
-      . A server sitting on top of the data store to manage configuration data and 
+      - A server sitting on top of the data store to manage configuration data and 
          serve it to multiple applications
-      . You can configure which branch the config server should consider by default by
-        setting the spring.cloud.config.server.git.default-label property . 
+      - You can configure which branch the config server should consider by default by
+        setting the spring.cloud.config.server.git.default-label property - 
         when using Gitrepositories, the label concept is an abstraction over Git
         branches, tags, or commit IDs. 
 
-    . the configuration server becomes a backing service for all the applications.
-    . You can use a centralized configuration server for configuration data that doesn’t
+    - the configuration server becomes a backing service for all the applications.
+    - You can use a centralized configuration server for configuration data that doesn’t
       depend on the specific infrastructure or deployment platform, such as credentials, feature
       flags, URLs to third-party services, thread pools, and timeouts.
     
     
-    . 
-    . config-client: 
+    - 
+    - config-client: 
       You can use the [spring.cloud.config.request-connect-timeout]
       property to control the time limit for establishing a
       connection with the config server. The
@@ -233,80 +233,80 @@ ch04:
       ex:
        if u mount cm as a volume [config tree] spring.config.import=configuree:${user.home}/Desktop/config/ <- don't forget the last /
 ch 05:
-  . CHALLENGES WITH DATA SERVICES
-    . Scalability
-    . Resilience: 
+  - CHALLENGES WITH DATA SERVICES
+    - Scalability
+    - Resilience: 
       - Replicating data across different clusters and geographical zones makes it even
         more resilient, but this comes at a cost.
-    . Performance—The way data is duplicated can affect performance, which is also 
+    - Performance—The way data is duplicated can affect performance, which is also 
       limited by the I/O access latency of the specific storage technology and
        the network latency.
-    . Compliance 
-      . some organizations dealing with very sensitive data, like health care providers and banks, prefer
+    - Compliance 
+      - some organizations dealing with very sensitive data, like health care providers and banks, prefer
         to use a type of cloud native storage on their premises so they have more control over data
         management and can ensure compliance with the applicable regulations.
-  . When the @Id field is null and the @Version field is 0, Spring Data JDBC assumes it’s a new object. 
+  - When the @Id field is null and the @Version field is 0, Spring Data JDBC assumes it’s a new object. 
     Consequently, it relies on the database to generate an identifier when inserting the new row in the
     table. When values are provided, it expects to find the object in the database already and to update it.
-  . Spring Data JDBC supports optimistic locking to address that concern. Users
+  - Spring Data JDBC supports optimistic locking to address that concern. Users
     can read data concurrently. When a user attempts an update
     operation, the application checks if there has been any
     change since the last read. If there was, the operation is not
     performed, and an exception is thrown. The check is based
     on a numeric field that starts counting from 0 and
     automatically increases at every update operation.
-  . you can enable auditing for all the persistent entities using the [@EnableJdbcAuditing]
+  - you can enable auditing for all the persistent entities using the [@EnableJdbcAuditing]
     annotation on a configuration class.
-  . repositories provided by Spring Data come configured with transactional contexts for all the operations.
+  - repositories provided by Spring Data come configured with transactional contexts for all the operations.
      For example, all methods in CrudRepository are transactional. That means you can safely call the
      saveAll() method, knowing that it will be executed in a transaction.
-  . script-based initialization is performed by default only for embedded databases, to always initialize a database using scripts
+  - script-based initialization is performed by default only for embedded databases, to always initialize a database using scripts
      spring.sql.init.mode=always
-  . The @DataJdbcTest annotation encapsulates handy features. For example, it makes each 
+  - The @DataJdbcTest annotation encapsulates handy features. For example, it makes each 
      test method run in a transaction and rolls it back at its end, keeping the database clean.
 
-  . You’ll need a deterministic and automated way to infer the database’s state, whether specific
+  - You’ll need a deterministic and automated way to infer the database’s state, whether specific
     changes have already been applied, how to recreate a database fromscratch, and how to migrate 
     it in a controlled, repeatable, and reliable way.
-  . flyway: It offers a single source of truth for the version of your database’s state and keeps
+  - flyway: It offers a single source of truth for the version of your database’s state and keeps
      track of any changes incrementally. It automates changes and lets you reproduce or roll back the state of a database.  
-      . you can also provide an optional undo migration to revert its effects 
+      - you can also provide an optional undo migration to revert its effects 
          (in case something goes wrong).
       
-      . Flyway keeps track of which migrations have already been applied through a flyway_schema_history
+      - Flyway keeps track of which migrations have already been applied through a flyway_schema_history
         table automatically created in the database the first time it runs.
 
-      . A prerequisite for using Flyway is that both the database you want to manage and a user 
+      - A prerequisite for using Flyway is that both the database you want to manage and a user 
         with the correct access privileges exist..
-      . Running schema and data migrations is one of those administrative processes described by the 15-Factor
+      - Running schema and data migrations is one of those administrative processes described by the 15-Factor
 ch 06:
-  . The fact that all the layers in a container image are read-only has some security
+  - The fact that all the layers in a container image are read-only has some security
     implications. You should never store secrets or sensitive information in the lower layers
     because they will always be accessible, even if the upper layers delete them. For example, you
     shouldn’t package passwords or encryption keys within a container image.
   
-  . If you don’t specify any entry point, the container will not run as an executable. Unlike virtual
+  - If you don’t specify any entry point, the container will not run as an executable. Unlike virtual
     machines, containers are meant to run tasks, not operating systems.
-  . ARG Defines a variable that users can pass at build time. Multiple ARG instructions
+  - ARG Defines a variable that users can pass at build time. Multiple ARG instructions
      can be defined.
-     . argument that can be specified when creating the image with the docker build
+     - argument that can be specified when creating the image with the docker build
         command. ex : docker build --build-arg JAR_FILE=target/*.jar -t catalog-service .
   
-  . USER Defines the user that will run all the subsequent instructions and the image itself
+  - USER Defines the user that will run all the subsequent instructions and the image itself
     (as a container).
   
-  . Docker has a built-in DNS server that can enable containers in the same network to find each other using the container
+  - Docker has a built-in DNS server that can enable containers in the same network to find each other using the container
     name rather than a hostname or an IP address
 
   A JAR artifact is a compressed archive containing all the dependencies, 
   classes, and resources used by the application.
   - Putting uber-JARs inside a container image has never been efficient[any change in app will cause rebuild the entire image
      without taking advantages of layered cache].
-    . standard since spring-boot 2.4 layered-jar :
-      . dependencies
-      . spring-boot-loader
-      . snapshot-dependencies
-      . application
+    - standard since spring-boot 2.4 layered-jar :
+      - dependencies
+      - spring-boot-loader
+      - snapshot-dependencies
+      - application
     RUN java -Djarmode=layertools -jar catalog-service.jar extract
   
   - to override paketo-buildpack config in grade.build
@@ -317,16 +317,16 @@ ch 06:
 ------
 JL:
   - monitoring:
-    . java can be very confusing to the outside observer because it does thing
+    - java can be very confusing to the outside observer because it does thing
       that don't quite line up with what u expect for ex:
         - when u give maximum amount of mem, it might only be using a fraction of that
           but it's still gonna malloc the whole thing. so from the outside, it looks it's taking
           the whole ram u specified as the upper bound. in fact it's not.
           -  it's useful to ask the APP itself, what is doing. [actuator do that]
-    . /health
-      . gives an enumeration of the different subsystems in your application,
+    - /health
+      - gives an enumeration of the different subsystems in your application,
         if one of the them is fail, it will affect the overall health of your service.  
-    . /beans  
+    - /beans  
     /info using git-commit-id-maven-plugin u can show the commit 
       info so if some don't work correctly u can know the commit id that is on prod.
     /conditions /configprops
@@ -334,7 +334,7 @@ JL:
     /actuator/health/liveness
     /actuator/health/readiness set them in 
       deployment.yaml file for liveness/readiness of app in the containers.
-      . poweredby micrometer which a vendor neutral applciation metrics facade
+      - poweredby micrometer which a vendor neutral applciation metrics facade
           that allows u to talk to any #different time series db[prometheus, netflix atlas, Wavefront[visualize metric and trace data using the same tool]
            ...]. u can configure it. count how many people went through checkout process? ..
     /mappings tell u all web endpoint ur app is support.
@@ -344,15 +344,26 @@ JL:
   grace period is configurable in k8s and spring boot.
   ---
   spring boot admin:
-    . using service discovery . can get it info from ur other services using their management endpoints,
+    - using service discovery - can get it info from ur other services using their management endpoints,
        and visualize the information.
-    . if u don't use service discovery u can add spring boot admin client to ur service and configure where is the server.
-    . support notifications, it can send u a msg or event on failure of any service.   
+    - if u don't use service discovery u can add spring boot admin client to ur service and configure where is the server.
+    - support notifications, it can send u a msg or event on failure of any service.   
 ---- 
 pluralsight[microservices with spring cloud]:
-  . 
+  - 
   
 when u run shell script file in github actions. set -e will fail the script and then the build if any command in script goes wrong
 
 
 
+actuator added endpoint.health.probes.enabled for k8s liveness & readiness
+  because the old health endpoint aggregate info about all external services our 
+    app is talking to and if one of them failed, the whole application was considered unhealthy
+  , if 3rd party service indicator is down restarting our app doesn't help.
+  /actuator/health/liveness
+  /actuator/health/readiness
+  if u need to publish ur app is broken 
+    AvailabilityChangeEvent.publish(this.eventPublisher, this, LivenessState.BROKEN);
+
+    spring.lifecycle.timeout-per-shutdown-phase=20s
+    spring.config.import=configtree:/tmp/test-config

@@ -3,7 +3,7 @@ Refactoring:
    that does the same as before but has better structure.
 
    types:
-     . safe: we can apply it automatically or semi-automatically to our code to produce better code,
+     - safe: we can apply it automatically or semi-automatically to our code to produce better code,
        unfortunately even the safe are not without risk.
        - so in existing code if u need to add functionality somewhere, at that point
          u can refactor to make that more easier and quicker. -> u can safe time with refactoring.
@@ -11,7 +11,7 @@ Refactoring:
             because changes introduce bugs.
             - make sure u have safety net[unit & integration test] before making change to ur code.
       ex: removing unnecessary boxing and unboxing.
-     . risky
+     - risky
 
      ----
      temp:

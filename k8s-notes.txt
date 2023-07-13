@@ -10,10 +10,10 @@ Versioning:
   k8s versions are expressed using semantic versioning
   a K8S version is expressed as MAJOR.MINOR.PATCH
   there is a new patch release whenever needed.
-  . generally, there is a bout 2 to 4 weeks between patch releases, except when 
+  - generally, there is a bout 2 to 4 weeks between patch releases, except when 
     a critical bug or vulunerability is found.
-  . there is a new minor release approximately every 3 months
-  . at any given time, 3 minor releases are maintained. 
+  - there is a new minor release approximately every 3 months
+  - at any given time, 3 minor releases are maintained. 
    about 9 months maintaince for a minor release.  
 
 cluster is a set of nodes
@@ -41,9 +41,9 @@ k8s node:
   [infrastructure] + [os] + [container runtime] +  [kubelet kube-proxy]
 kubelet kube-proxy : specific k8s processes 
   kubelet:
-    . kubernetes agent run on every node, it's mission is to connect the node
+    - kubernetes agent run on every node, it's mission is to connect the node
        to the controlplace of the cluster .
-    . perform liveness check[liveness probes] for the container running into the pods   
+    - perform liveness check[liveness probes] for the container running into the pods   
   kube-proxy: one of network component of k8s.      
   
   ------
@@ -62,11 +62,11 @@ kubelet kube-proxy : specific k8s processes
     - should we put e.g. a web application server and a cache together?
       ("cache" being something like e.g. Memcached or Redis)
     - Putting them in the same pod means:
-      . they have to be scaled together.
-      . they can communicate very efficiently over localhost.
+      - they have to be scaled together.
+      - they can communicate very efficiently over localhost.
     - Putting them in different pods means:
-      . they can scaled separately
-      . they must communicate over remote IP addresses
+      - they can scaled separately
+      - they must communicate over remote IP addresses
     - Both scenarios can make sense, depending on our goals      
     
     apiVersion, Kind, metadata :- will be in every single api response from k8s
@@ -94,7 +94,7 @@ master node is the brain of the cluster where all decisions are made.
 		Stores configuration and state of the entire cluster.
 		Distributed Key/Value data store 
 		Single source of truth[etcd]
-      . etcd is the backend for service discovery and stores cluster state and configuration.
+      - etcd is the backend for service discovery and stores cluster state and configuration.
 	Scheduler:
 		Watches for new workload/pods and assigns them to a node based on several scheduling factors[is node healty ?, has enough resources?, port available?, affinity and anti affinity rules, etc]
 	Controller Manager:
@@ -215,7 +215,7 @@ Deployments
     keep in ur mind: when u change the ui, and the old & new pods are available. how will we deal with that?
 	  spec.strategy.type=[Recreate|RollingUpdate]
     Recreate
-      . useful when u cannot run multiple version for the application at the same time
+      - useful when u cannot run multiple version for the application at the same time
           [DB schema]
 	  spec.strategy.minReadySeconds : #seconds new pods should be ready to be considered healthy. default 0
     spec.strategy.revisionHistoryLimit: default 10
@@ -225,9 +225,9 @@ Deployments
     --record : record the command in the deployment revision history.
     --save-config: save configs in resource's annotations.
 	- when we update a Deployment with a new Pod definition:
-	  . a new Replia Set is created with the new pod definition.
-	  . that new Replica Set is progressively scaled up.
-	  . meanwhile, the old Replica Set(s) is(are) scaled down.
+	  - a new Replia Set is created with the new pod definition.
+	  - that new Replica Set is progressively scaled up.
+	  - meanwhile, the old Replica Set(s) is(are) scaled down.
 	
 	  
 ReplicaSet always make sure that the desired number of pods is always running.
@@ -262,8 +262,8 @@ Imagine we have n nodes, one node is down.
      when we scale up, because that node is empty. k8s will schedule all pods on that node.
 =======
 DaemonSet and  Stateful set
-  . a DaemonSet is  a deploy that starts one po instance on every node in the cluster
-    . when nodes are added or removed, the DaemonSet automatically change the #of Po accordingly
+  - a DaemonSet is  a deploy that starts one po instance on every node in the cluster
+    - when nodes are added or removed, the DaemonSet automatically change the #of Po accordingly
 
 =======
 AutoScaling:
@@ -285,12 +285,12 @@ ReplicaSet
   
 ======
 Observability: 
-  . pod status [Pending(when scheduler try to figure out where to place the pod ),
+  - pod status [Pending(when scheduler try to figure out where to place the pod ),
                 ContainerCreating,
                 Running 
                ]
         conditions arr of T or F: [PodScheduled, Initialized, ContainerReady, Ready]
-          . Ready : indicate app inside the pod is running and ready to accept traffic.
+          - Ready : indicate app inside the pod is running and ready to accept traffic.
           - service rely on pod Ready cond to route traffic.
           Readiness Probes: in case of web app u can hit an endpoint to check, 
              in case of db u can check if a particular port is listening,
@@ -300,7 +300,7 @@ Observability:
                           port: 5432   path: /api/ready     command: 
                                        port: 8080             - cat
                                                               - /app/is_rea
-            . U CAN set an initial time to wait initialDelaySeconds:, periodSeconds, failureThreshold[3]
+            - U CAN set an initial time to wait initialDelaySeconds:, periodSeconds, failureThreshold[3]
           Liveness Probes: same as readiness but to check if the app inside the container remain healthy.
 
     Monitoring:minikube addons enable metrics-server
@@ -322,10 +322,10 @@ Node Affinity:
   - to ensure some pods deployed on a particular nodes.
 ===========
 Services
-  . a stable endpoint to connect to a pod or a group of pods.
-  . expose a logical set of pods
-  . applying round-robin load balancing to forward traffic to specific pods.
-  . set of pods is targeted by a selector
+  - a stable endpoint to connect to a pod or a group of pods.
+  - expose a logical set of pods
+  - applying round-robin load balancing to forward traffic to specific pods.
+  - set of pods is targeted by a selector
   - stable IP address
   - Stable DNS Name
   - stable Port
@@ -335,16 +335,16 @@ Services
     - NodePort
       - allocate specific node port on the node that forward to the svc cluster ip add
     - ExternalName
-      . work on DNS names; redirection is happening  at a DNS level, useful in migration
+      - work on DNS names; redirection is happening  at a DNS level, useful in migration
     - LoadBalancer
  kube-controller-manager will continuously scan for pods that match the selector and include
  these in the service
  
  Decoupling:
-   . service exist independently from the [deployment]app they provide access to.
-   . the only thing they do, is watch for Pods that have a specific label set
+   - service exist independently from the [deployment]app they provide access to.
+   - the only thing they do, is watch for Pods that have a specific label set
      matching the selector that is specified in the svc
-   . that mean that one service can provide access to pods in multiple deploy,
+   - that mean that one service can provide access to pods in multiple deploy,
      and while doing so, k8s will automatically load balance between these pods
       [used in canary deploy].  
 ======
@@ -388,9 +388,9 @@ Labels:
   - kubectl get pods --selector="key=value,.." === kubectl get pods -l key=value,k2=v2  
   - kubectl get po -l 'labelKey1 in (v1, v2), labelKey2 notin (v1)' 
   
-  . deploy find its pods using selector
-  . svc find its endpoints pod using a selector 
-  . used to facilitate resource management and selection
+  - deploy find its pods using selector
+  - svc find its endpoints pod using a selector 
+  - used to facilitate resource management and selection
 ===
 annotations: 
   Annotations is an unstructured key/value map stored with resource that may be set by external tools to store 
@@ -402,7 +402,7 @@ DNS:
   - each pod has a file /etc/resolv.conf contains the ip of the nameserver
 -----
 when a sa is created, it automatically create a token that used by the external
-  app to authenticate when access to k8s api . create a secret resource to store the token.
+  app to authenticate when access to k8s api - create a secret resource to store the token.
 
 etcd is a consistent and highly-available key value store used as Kubernetes' backing store for all cluster data.
 
@@ -558,38 +558,38 @@ kubectl describe pod podname
 securtyContext:
   define privilage and access control settings 
   for a Pod or container, and includes the following:
-    . Discretionary Access Control which is about permissions to access an object.
-    . Security Enhanced Linux, where security labels can be applied
-    . Running privileged or unprivileged user.
-    . Using Linux capabilities.
-    . AppArmor, which is an alternative to SELinux.
-    . AllowPrivilegeEscalation which controls if a process can
+    - Discretionary Access Control which is about permissions to access an object.
+    - Security Enhanced Linux, where security labels can be applied
+    - Running privileged or unprivileged user.
+    - Using Linux capabilities.
+    - AppArmor, which is an alternative to SELinux.
+    - AllowPrivilegeEscalation which controls if a process can
       gain more privileges than its parent.
   use kubectl explain for a complete overview.
 ---- 
 Managing Jobs
-  . Pods normally created within deployment to run forever.
-  . To create a Pod that runs up to completion, use Jobs instead. 
-  . Jobs are useful for one-shot tasks, like [backup, calculation, batch processing and more]
-  . Use spec.ttlSecondAfterFinished to clean up completed Jobs automatically.
-  . create one or more Pods and ensures that a specified #pods successfully terminate.
+  - Pods normally created within deployment to run forever.
+  - To create a Pod that runs up to completion, use Jobs instead. 
+  - Jobs are useful for one-shot tasks, like [backup, calculation, batch processing and more]
+  - Use spec.ttlSecondAfterFinished to clean up completed Jobs automatically.
+  - create one or more Pods and ensures that a specified #pods successfully terminate.
   -ex: can be configured to run multiple pod in parallel; u need to get data from multiple servers.
   -ex: retrieve data from dbs and cache it in redis; backup; move data between DBs.
-  . once a job is deleted its pods are removed.
+  - once a job is deleted its pods are removed.
 Jobs Types:
   - 3 differents job types can be started, which 
     is specified by [completions] and [parallelism] parameters:
-      . Non parallel jobs: One Pod is started, unless the pod fails
-        . completions=1
-        . parallelism=1
-      . Parallel Jobs with a fixed completion count: the job is complete   
+      - Non parallel jobs: One Pod is started, unless the pod fails
+        - completions=1
+        - parallelism=1
+      - Parallel Jobs with a fixed completion count: the job is complete   
         after successfully running as many times as specified in jobs.spec.completions 
-          . completions=n
-          . parallelism=m
-      . Parallel Jobs with a work queue: multiple Jobs are started,
+          - completions=n
+          - parallelism=m
+      - Parallel Jobs with a work queue: multiple Jobs are started,
         when one completes successfully, the job is complete.
-          . completions=1
-          . parallelism=n
+          - completions=1
+          - parallelism=n
   spec.template.spec.restartPolicy[Never|OnFailure]
   spec.completions:
   spec.parallelism:
@@ -597,7 +597,7 @@ Jobs Types:
 -----
 CronJobs used for task that need to run on regular basis. 
    when running it a job being scheduled. job will start a pod.
-   . names mist be less than 52 because k8s append some extra info.
+   - names mist be less than 52 because k8s append some extra info.
    kubectl create cronjob every3mins --schedule="*/min hr dd " 
    cron format: * * * * *
                 min hr (dayOfMonth) mm dayOfWeek(sunday=0..6)
@@ -623,42 +623,42 @@ CronJobs used for task that need to run on regular basis.
        to create the pod and respond to the API SERVER with the state of it.
        ------------
   K8s network model:
-   . TL, DR:
+   - TL, DR:
      our cluster (nodes and pods) is one big flat IP network.
-   . In detail:
-     .   all nodes must be able to reach each other, without NAT.
-     .   all pods must be able to reach each other, without NAT.
-     .   pods and nodes must be able to reach each other, without NAT.
-     .   each pod is aware of its IP address (no NAT)
-     .   Pod IP address are assigned by the network implementation
-  . kubernetes doesn't mandate any particular implementation
+   - In detail:
+     -   all nodes must be able to reach each other, without NAT.
+     -   all pods must be able to reach each other, without NAT.
+     -   pods and nodes must be able to reach each other, without NAT.
+     -   each pod is aware of its IP address (no NAT)
+     -   Pod IP address are assigned by the network implementation
+  - kubernetes doesn't mandate any particular implementation
   --   
   1 the pod to pod network
   2 the pod to service network:
-     . provide internal communication and load balancing.
-     . is generally implemented with kube-proxy(or e.g. kube-router)
+     - provide internal communication and load balancing.
+     - is generally implemented with kube-proxy(or e.g. kube-router)
   3 Network policies
 ---
 Resources Limitations
-  . By default, a Pod will use as much CPU and memory as necessary to do its work.
-  . This can be managed by using Memory/CPU requests and limits in 
+  - By default, a Pod will use as much CPU and memory as necessary to do its work.
+  - This can be managed by using Memory/CPU requests and limits in 
     pod.spec.containers.resources
-  . A request is an initial request for resources.
-  . A limit defines the upper threshold of resources a Pod can use.
-  . Memory as well as CPU limits can be used.
-  . CPU limits are expressed in millicore or millicpu, 1/1000 of a CPU core
-    . So, 500 millicore is 0.5 CPU
-  . When being scheduled, the kube-scheduler ensures that the node running
+  - A request is an initial request for resources.
+  - A limit defines the upper threshold of resources a Pod can use.
+  - Memory as well as CPU limits can be used.
+  - CPU limits are expressed in millicore or millicpu, 1/1000 of a CPU core
+    - So, 500 millicore is 0.5 CPU
+  - When being scheduled, the kube-scheduler ensures that the node running
     the Pods has all requested resources available
-  . If a Pod with resource limits cannot be scheduled, it will show a status of
+  - If a Pod with resource limits cannot be scheduled, it will show a status of
     Pending 
   
-  . when using a deployment, use [kubectl set resources] to change resource limitations
+  - when using a deployment, use [kubectl set resources] to change resource limitations
     on running applications. u cannot do that for pods because pods don't updateable.  
-  . pod/deployment resource limitations can be combined with quota on
+  - pod/deployment resource limitations can be combined with quota on
     namespaces to restrict these applications in specific namespace only.
   
-  . Try not to force resource to deletion, it may bring them in an
+  - Try not to force resource to deletion, it may bring them in an
     unmanageable state.
     
     kubectl delete all --all
@@ -672,7 +672,7 @@ Networking in K8S
     - clusterIp: service available on the cluster net[used to expose internal compnents of the 
       app to the other compnents; for example DB]
     - nodePort: service on the cluster net; expose high port on nodes.
-       . those node ports are redirecting to the node-port service side. 
+       - those node ports are redirecting to the node-port service side. 
     * now, user can access node on that port, but we don't user to be aware of the node ip so
       there is another service called Ingress the expose our app to the outside world   
 -------------
@@ -694,14 +694,14 @@ Ingress
   - Traffic routing is controlled by rules defined on the Ingress resource
     [which url redirect to which svc in the cluster]
   - Ingress can be configured to do the following:
-    . give services externally-reachable URLs
-    . Load balance traffic
-    . Terminate SSL/TLS      
-    . Offer name based virtual host 
+    - give services externally-reachable URLs
+    - Load balance traffic
+    - Terminate SSL/TLS      
+    - Offer name based virtual host 
   - Controllers:
-    . Creating ingress resources without ingress controller has no effect.
-    . Many Ingress COntroller exist:
-      . nginx, haproxy, traefik, kong, contour.
+    - Creating ingress resources without ingress controller has no effect.
+    - Many Ingress COntroller exist:
+      - nginx, haproxy, traefik, kong, contour.
   Rules:
     - An optional host. if no host is specified, the rule applies to all inbound 
       HTTP traffic.
@@ -714,27 +714,27 @@ Ingress
     - A resource backend typically refers to cloud based object storage,
       where Ingress is used to provide access to storage resources
     - Resource backends and svc backends are mutually exclusive:
-      . either u do it for svc, or u do it for resources              
+      - either u do it for svc, or u do it for resources              
     - A defaulttBackend can be set to handle traffic that doesn't deal with
       any specific backend.  
   Path Types:
     - The Ingress pathType specifies how to deal with path requests.
     - The Exact pathType indicates that an exact match should occur
-      . if the path is set to /foo, and req /foo/ there is no match.
+      - if the path is set to /foo, and req /foo/ there is no match.
     - The Prefix pathType indicates taht the request path should start with
-      . if the path set to /, any requested path woll match
-      . if the path set to /foo, /foo as well as /foo/ will match
+      - if the path set to /, any requested path woll match
+      - if the path set to /foo, /foo as well as /foo/ will match
   Ingress Types:
     - Ingress backed by a single service: there is one rule that defines access
       to one backend Service
-        . kubectl create ingress single --rule="/files=fileservice:80"
+        - kubectl create ingress single --rule="/files=fileservice:80"
     - simple fanout: there are 2 or more rules defining different paths that refer
       to different services
-        . kubectl create ingress single --rule="/files=fileservice:80" \
+        - kubectl create ingress single --rule="/files=fileservice:80" \
           rule="/db=dbservice:80"
    - Name-based virtual hosting: there are 2 or more rules that route requests       
      based on the host header
-       . Make sure there is DNS entry for each host header
+       - Make sure there is DNS entry for each host header
        .kubectl create ingress single --rule="my.examples.com/files*=fileservice:80" \
           rule="my.example.org/data*=dataservice:80"    
   IngressClass
@@ -743,24 +743,24 @@ Ingress
       default IngressClass 
              
   Network Policies
-    . By default, there are no restrictions to network traffic in k8s.
-    . Pods can always communicate, even if they're in other NameSpaces
-    . To limit this, Network Policies can be used.
-    . Network Policies need to be supported by the network plugin though.
-    . If in a policy there is no match, traffic will be denied. 
+    - By default, there are no restrictions to network traffic in k8s.
+    - Pods can always communicate, even if they're in other NameSpaces
+    - To limit this, Network Policies can be used.
+    - Network Policies need to be supported by the network plugin though.
+    - If in a policy there is no match, traffic will be denied. 
       - a network policy without any rules -> nobody can communicate.
-    . If no Network Policy is used, all traffic is allowed. 
+    - If no Network Policy is used, all traffic is allowed. 
  Plugin for minikube [minikube start --cni=calico] -verify-> [kubectl get pods -n kube-system]
    Network Policy Identifiers:
-     . when definig Pod- or NameSpace-based NetworkPolicy, a selector label is used to specify
+     - when definig Pod- or NameSpace-based NetworkPolicy, a selector label is used to specify
        what traffic allowed to and from the Pods that match the selector
-     . In Network Policies, three different identifiers can be used to mach network traffic
+     - In Network Policies, three different identifiers can be used to mach network traffic
        - podSelector: allows access to a Pod with the corresponding selector label.
        - namespaceSelector: allows incoming traffic from namespaces with the matching
          selector label.
        - ipBlock: used to specify  a range of cluster-external IPs that should get access. 
-    . Network Policies do not conflict , they are additive.      
-     . if a network policy exists, all traffic is blocked. Unless there is a match. 
+    - Network Policies do not conflict , they are additive.      
+     - if a network policy exists, all traffic is blocked. Unless there is a match. 
 ---------------
 Storage:
   container can has a volume[only support pointing to(NFS or local storage)]
@@ -786,39 +786,39 @@ Storage:
       storage, being allocated by a provisioner. so storage provisioner need to be available.
         --> finding the right storage provisioner is sometimes challenging. 
   --in more formal way---
-  . File stored in container will only live as long as the container itself.
-  . Pod Volumes are used to allocate storage the outlives a container and
+  - File stored in container will only live as long as the container itself.
+  - Pod Volumes are used to allocate storage the outlives a container and
     stays available during pod lifetime.
-  . Pod Volumes can directly bind to a specific storage type
-  . Pod Volumes can also use persistent volume claims, to decouple
+  - Pod Volumes can directly bind to a specific storage type
+  - Pod Volumes can also use persistent volume claims, to decouple
     the pod from the request site-specific-storage[size, r/w ].
-  . A Persistent volume define access to external storage available in a specific 
+  - A Persistent volume define access to external storage available in a specific 
     cluster.          
-  . a wide rang of PV types is available.
-  . Persistent Volume Claim(PVC) are used to connect to PV
-  . when a PVC is created, it will search for an available PV that matches
+  - a wide rang of PV types is available.
+  - Persistent Volume Claim(PVC) are used to connect to PV
+  - when a PVC is created, it will search for an available PV that matches
     the storage request.
-  . if a perfect match doesn't exist, StorageClass can automatically allocate it.  
-  . in this scenario, the Pod uses the PVC storage type is completely decoupled
+  - if a perfect match doesn't exist, StorageClass can automatically allocate it.  
+  - in this scenario, the Pod uses the PVC storage type is completely decoupled
     from the site-specific storage.
-  . A PVC bind is exclusive: after successfully binding to a PV, the PV cannot
+  - A PVC bind is exclusive: after successfully binding to a PV, the PV cannot
     be used by other PVC anymore  
   ..StorageClass
   - provide a way for an admins to describe a class of storage, useful when u 
      are in an env with diff type of storage are available 
-    . some cloud provide default StorageClass if u create a PVC without specifing StorageClass ur platform will set pvc storageClass to default
-    . every cluster env]s have their own specific storage type .
-    . kubernetes StorageClass allows for automatic provisioning of PVs when a 
+    - some cloud provide default StorageClass if u create a PVC without specifing StorageClass ur platform will set pvc storageClass to default
+    - every cluster env]s have their own specific storage type .
+    - kubernetes StorageClass allows for automatic provisioning of PVs when a 
       PVC request for storage comes in.
-    . StorageClass must be backed by a storage provisioner, which takes care
+    - StorageClass must be backed by a storage provisioner, which takes care
       of the colume configuration.
-    . Kubernetes comes with some internal provisioner, alternatively external 
+    - Kubernetes comes with some internal provisioner, alternatively external 
       provisioner can be installed using Operators.    
   ..StorageClass..as..a.selector
-    . Normally, PVC binding to a PV is based on best match.
-    . While using Storage class in PV as well as PVC, a PVC will only bind to a PV
+    - Normally, PVC binding to a PV is based on best match.
+    - While using Storage class in PV as well as PVC, a PVC will only bind to a PV
       that has the same StorageClass setting.
-    . if such a PV is not available, the PVC will stay in a status of pending  
+    - if such a PV is not available, the PVC will stay in a status of pending  
 PVC(Persistence volume claim):
   read-writable or read only storage and a specific amount of storage.
     
@@ -838,34 +838,34 @@ expose svc
 decouple site specific information from ur generic app code
 
 Providing Variables to kubernetes Application
-  . k8s does not offer a command line option to provide variables while running 
+  - k8s does not offer a command line option to provide variables while running 
     a deployment with [kubectl create deploy  ]
-    . first, use kubectl create deploy mydb --image=mariadb
-    . second, use kubectl set env deploy mydb KEY=VALUE
-  . while running a Pod, env var acn be provided, but u shouldn't
+    - first, use kubectl create deploy mydb --image=mariadb
+    - second, use kubectl set env deploy mydb KEY=VALUE
+  - while running a Pod, env var acn be provided, but u shouldn't
     run naked Pods
-      . kubectl run mydb --image=mysql --env="KEY=VALUE"  
+      - kubectl run mydb --image=mysql --env="KEY=VALUE"  
 Understanding the need for decoupling
-  . It's good idea to separate site-specific information from code.
-  . Code should be static, which makes it portable, so that it can be used in other
+  - It's good idea to separate site-specific information from code.
+  - Code should be static, which makes it portable, so that it can be used in other
     environments
-  . Variables are site-specific, and for that reason should not be provided in the
+  - Variables are site-specific, and for that reason should not be provided in the
     the Deployment configuration.
-  . K8s provides ConfigMaps to deal this issue.
-  . A ConfigMap can be used to define variablesm and the Deployment just points to 
+  - K8s provides ConfigMaps to deal this issue.
+  - A ConfigMap can be used to define variablesm and the Deployment just points to 
     the ConfigMap.
-  . While using ConfigMaps, site-specifi information is included in the ConfigMap,
+  - While using ConfigMaps, site-specifi information is included in the ConfigMap,
     which allows you to keep the Deployment manifest files generic.             
 Understanding ConfigMap
-  . ConfigMaps are used to provide different types of configuration to an application
-  . ConfigMaps can be used for three different types of configuration
-    . Variables
-    . Configuration Files
-    . Command Line arguments(not common to use cm for it)
+  - ConfigMaps are used to provide different types of configuration to an application
+  - ConfigMaps can be used for three different types of configuration
+    - Variables
+    - Configuration Files
+    - Command Line arguments(not common to use cm for it)
     --> configMap created in different ways according to for what they are created.
-  . Note that according to these different types of configurations, ConfigMaps are created
+  - Note that according to these different types of configurations, ConfigMaps are created
     and used in a very different way!
-  . If an application refers to a ConfigMap, the ConfigMap should exist in the cluster 
+  - If an application refers to a ConfigMap, the ConfigMap should exist in the cluster 
     before running the applciation.  
     --
     env
@@ -908,13 +908,13 @@ Secret is a special type of configMap that add encoding
   --
   Secrets in application 
   - There a different use cases for using secrets in applications:
-    . To provide TLS keys to the application: 
+    - To provide TLS keys to the application: 
        kubectl create secret tls my-tls-keys --cert=tls/my.crt --key=tls/my.key
-    . To provide security to passwords:
+    - To provide security to passwords:
        kubectl create secret generic my-secret-pw --from-literal=password=verysecret
-    . To provide access to an ssh private key:
+    - To provide access to an ssh private key:
        kubectl create secret generic my-ssh-key --from-file=ssh-private-key=.ssh/id_rsa
-     . to sensitive files which would be mounted in the app with root access only:
+     - to sensitive files which would be mounted in the app with root access only:
        kubectl create secret generic my-secret-file --from-file=/my/secret
 https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/
 https://kubernetes.io/docs/concepts/configuration/secret/#risks
@@ -998,7 +998,7 @@ The requests amount (but not limits) is used by the scheduler when placing Pods 
  containers[].resources.limits : Upper limit until we want our application to grow at max. We don’t specify CPU limits by intention.
 
  memory:
-   . This type is for the heap memory demands of your application, including volumes 
+   - This type is for the heap memory demands of your application, including volumes 
       of type emptyDir with the configuration medium: Memory.
       - containers that exceed their configured memory limit will trigger the Pod to be evicted;
  cpu:  it is highly recommended that you set requests for the CPU resource but no limits so that 

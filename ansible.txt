@@ -23,14 +23,14 @@ ansible : managing configurations on servers.
  Ansible is using modules:
   - written in python.
   - can manage:
-    . [linux, windows, Aix, network, cloud..]
+    - [linux, windows, Aix, network, cloud..]
       theoritcally: u can write module to manage ur coffe machine as long as
                    it is an IoT coffe machine and it has all required components 
                    to be managable.
  idempotent 
  Playbook in yaml 
  ANsible Tower: web interface allow to manage ansible in enterprise env (AWX)
-   . schedule multiple jobs, can work with multiple user accounts each of 
+   - schedule multiple jobs, can work with multiple user accounts each of 
        them has his roles.
 -----
 2.1 course env
@@ -45,30 +45,30 @@ ansible : managing configurations on servers.
     - user-sudo
 -----
 2.2 
-  . Inventory file: contains name of managable hosts, can contain groups [hostGroup]
+  - Inventory file: contains name of managable hosts, can contain groups [hostGroup]
   ansible [hosts to apply on] -i [inventoryFilePath]
-  . master inventory file : /etc/ansible/hosts
+  - master inventory file : /etc/ansible/hosts
 --- 
 2.3
-  . /etc/ansible/ansible.cfg recommended to create one in ur project dir.
-     . can define how connection can be made:
-        . remote_user on managable host
-        . host_key_checking
+  - /etc/ansible/ansible.cfg recommended to create one in ur project dir.
+     - can define how connection can be made:
+        - remote_user on managable host
+        - host_key_checking
         - privilege_escalation
-          . how to be a privilaged user.
+          - how to be a privilaged user.
 ----
 2.4 dynamic inventory :
-  . in big environment u won't provide each managable host, dynamic inventory
+  - in big environment u won't provide each managable host, dynamic inventory
      allows us to find hosts in a specific env.
    [ https://docs.ansible.com/ansible/latest/inventory_guide/intro_dynamic_inventory.html ] 
    useful in public cloud env
 ---
 3.1
   - ad Hoc commands
-    . ansible using [modules] get a python script to be executed on the managable hosts
+    - ansible using [modules] get a python script to be executed on the managable hosts
       and the result returned to the ansible-controller.
   - playbook
-    . list of modules generate py script ... but run using ansible-playbook command
+    - list of modules generate py script ... but run using ansible-playbook command
 -----
 3.2
   - modules: provide the intelligence about the assets that u want to manage with Ansible

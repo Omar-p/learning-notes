@@ -195,7 +195,7 @@ Lec 10:
     THe DBMS has a finite #of B buffer pages to hold input and output data.
     
     #of passes = 1 + log2(N)
-    Total I/O cost = 2N . (#of passes) 
+    Total I/O cost = 2N - (#of passes) 
     
     Pass #0
       --> Use B buffer pages

@@ -29,16 +29,16 @@ Roles:
       or some sort of credentials that it can then use as authentication during the
       OAuth exchange.:
       - public
-        . In mobile app or SPA, we don't have the ability to include secret in the app,
+        - In mobile app or SPA, we don't have the ability to include secret in the app,
         because users can see the secrets.[SPA (view-source in browser), there are
         tools can extract strings from app binaries].
         Essentially, the diffrence is
         any time the application will be running code on a device that the user controls,
         we cannot include secret in the applciation.[Apple TV, IoT ...]
       - credentialed client
-        . app has credentials but whose identity has not been confirmed by authorization server
+        - app has credentials but whose identity has not been confirmed by authorization server
       - confidential
-        . can be deployed with a client secret where that secret
+        - can be deployed with a client secret where that secret
         won't be visible to anybody using the app.
         [normal for apps running on server, (API keys can be put in the app config or ENV VAR)
         and expecting them remain secret].
@@ -64,11 +64,11 @@ server to get access to resources
       client_id=CLIENT_ID
 
      what can happen ?
-       . auth server can not detect if the owner who is issuing the request now,
+       - auth server can not detect if the owner who is issuing the request now,
          the client may store it and issue the token or may ask for more permission with the password grant.
 
-     . we need to make sure that the owner who is sitting now and issuing the requst right now.
-       . the client first directs the user to the auth server.
+     - we need to make sure that the owner who is sitting now and issuing the requst right now.
+       - the client first directs the user to the auth server.
          the owner authenticate himself, approves the request after he see the consent screen
          and the owner directed to the client app.
 
@@ -101,7 +101,7 @@ the query string of a url because no of these info is sensitive.
 - user logs in and approves the request, the auth server is ready to send an access token back to the client-app and
   send the user back to the client-app. if it were to send the access token back in the
   redirect, that would be like sending an access token in the mail.
-  . the auth server wouldn't really have any guarantee that it was actually
+  - the auth server wouldn't really have any guarantee that it was actually
   delievered back to the app and the app would't really have any guarantee that
   the access token is really from the auth server.
   but this is method is actually described in the core of OAuth spec, but it is
@@ -221,8 +221,8 @@ Authorization Code flow for web application:
 
   ---
 
-  . PKCE Code Verifier -> string 43-128 characters long
-  . Code challenge -> base64url(sha256(code_verifier))
+  - PKCE Code Verifier -> string 43-128 characters long
+  - Code challenge -> base64url(sha256(code_verifier))
 
 auth url
 https://server.com/auth?
@@ -326,14 +326,14 @@ browser security for native app:
 - mobile app now would embed a web view into the apps that the user
   never left that app[open a browser switch to it then back to app (the old way)].
 - problem with web view:
-  . Not a real browser so the user doesn't see an address bar. just see web page
+  - Not a real browser so the user doesn't see an address bar. just see web page
   framed into the app. [the user cannot verify if that is the actual auth server]
-  . No shared cookies with the system. the app has full control over web view, and if it
+  - No shared cookies with the system. the app has full control over web view, and if it
   did share cookie with the system browser or other apps, data would link between
   apps. -> if u logged in auth server in safari and launch the app and got web view to
   auth server, u wouldn't be logged in the app because it doesn't share cookies with
   the system. [UX now worse because user is going to type their pass every time that open up]
-  . App has full control over web view so it can extract the credentials. we don't app to
+  - App has full control over web view so it can extract the credentials. we don't app to
   touch user passwords.
 
 Now, we have APIs which are able to launch a browser in a secure way within the app,
@@ -446,8 +446,8 @@ if we only include openid in "scope" in id_token request, then the ID token we r
   --
   Validating the ID_TOKEN:
 - validate the signature:
-  . u need to know which key to use. some server hard coded it in its docs.
-  . if server support multiple keys or rotating keys, then the headerr of the ID TOKEN
+  - u need to know which key to use. some server hard coded it in its docs.
+  - if server support multiple keys or rotating keys, then the headerr of the ID TOKEN
   will contain an identifier that signed the token.
 - "iss" to make sure the token come from the intended authorization server.
 - "aud" should match the client-id
@@ -476,15 +476,15 @@ Reference Access Token vs Self-Encoded Tokens:
   - can be implemented using DB where u have a table for tokens as a unique - key to retrieve
     [user_id, expires at, scopes]
   - or using a caching layer like Memcache or Redis.
-    . advantages:
-    . simple
-    . doesn't mean anything. doesn't contain any data inside it. [issuing server only can read it]
-    . disadvantage:
-    . have to be stored, very time u want to validate it, the API go back into central DB to
+    - advantages:
+    - simple
+    - doesn't mean anything. doesn't contain any data inside it. [issuing server only can read it]
+    - disadvantage:
+    - have to be stored, very time u want to validate it, the API go back into central DB to
     query that. storage start to become more concerning. if we don't have central storage,
     there is actually another extension called TOken Introspection that talks about an API
     for resource servers, or APIs to validate access token over HTTP.
-    . if u plan on running multiple copies of ur APIs or scaling them to multiple
+    - if u plan on running multiple copies of ur APIs or scaling them to multiple
     datacenters, then reference token may not be the best option. because we are
     pretty limited in the ways that they can be validated.
 - self-Encoded: contains data in some sort of format
@@ -493,12 +493,12 @@ Reference Access Token vs Self-Encoded Tokens:
   extract the information from it. no need for storing them. for example JWT.
   - it does come with some drawbacks, but oftentimes the advantages outweight the downside
   - advantages:
-    . [scalable ]no need to be stored(storage is cheap),
+    - [scalable ]no need to be stored(storage is cheap),
     no need to be looked up and revalidate.
-    . resource server gets a request, it can inspect the token, check the signature
+    - resource server gets a request, it can inspect the token, check the signature
     itself, validate everything inside of it and decide without looking at external
     storage
-    . if u build an API and use other product as an OAuth server. then it make a lot of
+    - if u build an API and use other product as an OAuth server. then it make a lot of
     sense to not have to have any sort of shared storage between those two systems since
     they operate independently
   - drawback payload is visible, need extra work to mark it unvalid token before its expiration
@@ -523,7 +523,7 @@ identifier of the resource server
 . sub -> "subject" identifier for who the token represents. if user involved,
 that's going to be a user identifier. usually an opaque string rather than email. - with client credentials grant, then this should be the client-id of the app.
 . client_id  
- . jti jwt id -> unqiue to make resource server able to see if it is being used more than
+ - jti jwt id -> unqiue to make resource server able to see if it is being used more than
 once.
 . scope
 . auth_time for ex: for sensitive ops require authentication to be happened not more
@@ -558,18 +558,18 @@ know to expect from the OAuth server.
   after validating the signature we should validate the claims[iss,aud,..] because someone
   can use access_token for some other API at our API.
 
-  . this local validation tell us that the token is valid at the time it was issued, and
+  - this local validation tell us that the token is valid at the time it was issued, and
   threr are plenty of ways an access token might become invalid after it was issued,
   but before the token was scheduled to expire.
   the longer u make ur access token lifetime, the longer u risk making an authorization
   decision on out-of-date information
 
-- . Best of both worlds
+- - Best of both worlds
   1 - API Gateway[first line of defense] using local validation to reject invalid tokens
   [expired/malformed/attacker]. however, this local validation step doesn't have any
   way to be aware of user being revoked. so those revoked token still look valid
   because they haven't expired yet.
-  . [EXTRA CONFIRMATION]api call that will do a sensitive operation should
+  - [EXTRA CONFIRMATION]api call that will do a sensitive operation should
   post request to the TOKEN INTROSPECTION endpoint to ask whether is token is still
   valid. now OAuth can reject the revoked token.
 
@@ -603,7 +603,7 @@ to a resource.
   time..] which will eliminate the need to talk to the identity provider to verify it.
   these tokens are signed by the provider. hence other services will be able to use the
   provider public key to verify the token.
-  . content of by-value token will be visible to anyone has access to it. which
+  - content of by-value token will be visible to anyone has access to it. which
   might give some insights about the roles & authorization in ur app. can be solved
   by encryption or use opaque token.
   

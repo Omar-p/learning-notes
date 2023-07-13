@@ -14,102 +14,102 @@ List:
   * collections implements RandomAccess interface their elements can be accessed in O(1)
 ----
 ArrayList:
-  . grows but never shrink.
-  . remove() shift next elements of removed element to left.
-  . grows factor = 1.5 .
-  . removeIf(predicate) remove all elements matching.
-  . trimToSize() <- premature Optimization. if u use it alot then u choose wrong collection.
+  - grows but never shrink.
+  - remove() shift next elements of removed element to left.
+  - grows factor = 1.5 .
+  - removeIf(predicate) remove all elements matching.
+  - trimToSize() <- premature Optimization. if u use it alot then u choose wrong collection.
      - wrong use case: when u use it as a queue grow right shrink left.
-  . people estimate the cost of new object wrong:
+  - people estimate the cost of new object wrong:
      in most cases creating a new ArrayList() is cheaper than existArrList.clear()
-  . clear() iterate over the under the hood array setting all to null. O(n)
+  - clear() iterate over the under the hood array setting all to null. O(n)
 ---------
 Iteration:
-  . based on iterator design pattern.
-  . Before it we had Enumeration which was not throwing exception when
+  - based on iterator design pattern.
+  - Before it we had Enumeration which was not throwing exception when
      do write to the collection we iterate over it. and that may cause wrong results.
-  . throwing ConcurrentModificationException when do write op to the collection we iterate
+  - throwing ConcurrentModificationException when do write op to the collection we iterate
      over. to deal with that we copy the collection do the write ops on it while we iterate,
        then it will end with the desired result. or use -> CopyOnWriteArrayList[be careful(expensive)]
-  . abstract away from collections, it doesn't matter if it set/list/q
+  - abstract away from collections, it doesn't matter if it set/list/q
      it get all the elements in some defined order whatever the order is.
 ------------------
 CopyOnWriteArrayList
-  . creating a copy internally whenever we are modifying it.
-  . when u modify it during iterating it create internal copy of the array,
+  - creating a copy internally whenever we are modifying it.
+  - when u modify it during iterating it create internal copy of the array,
      and the iterator keep iterate in the old one. [called a snapshot iterator].
-     . each modification create new array.
+     - each modification create new array.
 ----------------------------
 LinkedList:
-  . cost of one element = 12b[obj header] + [4prev + 4next] + elem[4byte] = 24 bytes
+  - cost of one element = 12b[obj header] + [4prev + 4next] + elem[4byte] = 24 bytes
       vs arr = 4b 
-  . no random access .
-  . don't use it alot. 
+  - no random access .
+  - don't use it alot. 
 ------------------
 Vector
-  . shouldn't be used [historical]
-  . thread safe -use->Collections.synchronizedList() instead.
+  - shouldn't be used [historical]
+  - thread safe -use->Collections.synchronizedList() instead.
      Collections.synchronizedList(new ArrayList<>()) 
      wrap ur arraylist with another one object confind : u got npn-thread safe collection wrapped with thread-safe one [google]
        so u get thread safety automatically.
-  . slow because of synchronization.
-  . quiet expensive if u serialize it will take large space.
-  . grow factor x2.
+  - slow because of synchronization.
+  - quiet expensive if u serialize it will take large space.
+  - grow factor x2.
 -------
 stack
-  . Stack extends Vector [thread safe].
-  . historical
-  . if u want thread-safety use ConcurrentLinkedDeque instead.
+  - Stack extends Vector [thread safe].
+  - historical
+  - if u want thread-safety use ConcurrentLinkedDeque instead.
 ------------
 Sorting lists.
-  . .sort(null) use natural order, Comparable#compareTo
-       . don't compare int using subtraction -use-> Integer.compare(,)
-  . Cmparator.comparing(extractor)
-    . while chaining comparator, compiler sometimes cannot figuring out the type.  
+  - .sort(null) use natural order, Comparable#compareTo
+       - don't compare int using subtraction -use-> Integer.compare(,)
+  - Cmparator.comparing(extractor)
+    - while chaining comparator, compiler sometimes cannot figuring out the type.  
        to avoid that don't omit the type in the first comparing lambda .comparing((Student s) ->) instead of (s -> ) .
        OR use type witness Comparator.<Student>comparing(s ->)
        OR use method reference.
 
-  . linkedlist -> java copy the entire list to arr and sort it then cp the arr to the linkedlist.
+  - linkedlist -> java copy the entire list to arr and sort it then cp the arr to the linkedlist.
 
-  . java use timSort based on Insertion sort and merge sort, faster than merge sort if the list is already sorted.
+  - java use timSort based on Insertion sort and merge sort, faster than merge sort if the list is already sorted.
     to use merge sort set: java.util.Arrays.useLegacyMergeSort : jvm property to true.
 
-  . u can use parallelSort over array, [if already sorted will be slower than normal sort]
+  - u can use parallelSort over array, [if already sorted will be slower than normal sort]
 
-  . for primitives : java use dual pivot quicksort
+  - for primitives : java use dual pivot quicksort
 -------------
 Sets
-  . intersection -> retainAll
+  - intersection -> retainAll
 -------------------------------------
 treeset:
-  . red/black tree.
-  . using type !implements Comparable, in RT when inserting to it will throw ClassCastException.
-  . identity determined based on compareTo
+  - red/black tree.
+  - using type !implements Comparable, in RT when inserting to it will throw ClassCastException.
+  - identity determined based on compareTo
 ----------
 ConcurrentSkipListSet
-  . thread safe.
-  . it is similar to TreeSet with an added feature of being concurrent.
-  . The implementation is based on ConcurrentSkipListMap.
-  . It should be preferred over implementing Set interface when concurrent modification of set is required.
+  - thread safe.
+  - it is similar to TreeSet with an added feature of being concurrent.
+  - The implementation is based on ConcurrentSkipListMap.
+  - It should be preferred over implementing Set interface when concurrent modification of set is required.
   https://stackoverflow.com/a/1904598/14840351
 ------------------------
 CopyOnWriteArraySet
-  . identity determined by equal method.
-  . it is a Set that uses an internal CopyOnWriteArrayList for all of its operations. 
-  . Multiple Threads are able to perform update operations simultaneously but for every 
+  - identity determined by equal method.
+  - it is a Set that uses an internal CopyOnWriteArrayList for all of its operations. 
+  - Multiple Threads are able to perform update operations simultaneously but for every 
     update operation, a separate cloned copy is created. As for every update a new cloned 
     copy will be created which is costly. Hence if multiple update operations are required 
     then it is not recommended to use CopyOnWriteArraySet.
-  . An Iterator of CopyOnWriteArraySet class can perform only read-only and should not perform the 
+  - An Iterator of CopyOnWriteArraySet class can perform only read-only and should not perform the 
      deletion, otherwise, we will get Run-time exception UnsupportedOperationException.
-  . Use CopyOnWriteArraySet in applications in which set sizes generally stay small, read-only 
+  - Use CopyOnWriteArraySet in applications in which set sizes generally stay small, read-only 
     operations vastly outnumber mutative operations, and you need to prevent interference among
     threads during traversal.
 
 -------
 StringBuilder vs StringBuffer:
-  . builder: unsynchronized form of buffer
+  - builder: unsynchronized form of buffer
    arrayList<Char> vs Vector<Char>.
 System.err is flushed quicker than System.out
 VM options -> -verbose:gc 

@@ -12,11 +12,11 @@ Security:
           - in controller u can in endpoint that return non sensitive data, u can enable it when 
             returning a ResponseEntity .cacheControl(CacheControl.maxAge(30, TimeUnit.SECONDS))    
       - X-Content-Type-Option: nosniff
-          . tell the browser not to guess the Content-Type because certain browsers ignore 
+          - tell the browser not to guess the Content-Type because certain browsers ignore 
               the Content-Type header and try to guess it.      
           why? in certain situation u can upload a polyblack  file(image|gif) and it can be a valid JS as well,
           then u can execute a cross-site scriptting attack by uploading an image.
-          . other consideration - if user will upload a file u don't let him choose the filename because 
+          - other consideration - if user will upload a file u don't let him choose the filename because 
               it might impact the content-type , we don't want to serve the file from the same domain because if
               we serve it from a separate domain, then we're enabling same origin policy to protect us.
 
@@ -27,6 +27,7 @@ Security:
           --config-
           u can allow frame from the same origin -> #HttpSecurity.headers().frameOptions().sameOrigin()
           or for a specific domain  #HttpSecurity.headers().addHeaderWriter(new StaticHeadersWriter("X-FRAME-OPTIONS", "ALLOW_FROM domain.com"))
+          - disallow ur app to be rendered in iframe
           
       - X-XSS-Protection: 1; mode=block
         Reflective XSS
@@ -35,37 +36,38 @@ Security:
             by the client browser against our app.
           
         1 - stored
-          . hacker can execute malicious script in ur app, can steal ur cookies, sessions
-          . how ? u recieve an input fron the user and u didn't encode it well. -> hacker can execute any js code.
+          - hacker can execute malicious script in ur app, can steal ur cookies, sessions
+          - how ? u recieve an input fron the user and u didn't encode it well. -> hacker can execute any js code.
         2 - Reflicted
-          . parse request param and hacker provide a script in it. chrome protect aganist this by default.
+          - parse request param and hacker provide a script in it. chrome protect aganist this by default.
         3 - Down base attack[]
         4 - mutation XSS , content of page that returned from the server is modified by the browser before it is rendered in the browser.
 
-        how to prevent XSS Attack? in server side we make sure we provide context sensitive encoding . 
+        how to prevent XSS Attack? in server side we make sure we provide context sensitive encoding - 
           in client side u make sure u use safe js api.
       - CSRF
       [only use the CSRF token for state changing ops such as POST, PUT, DELETE, PATCH]
-          . this attack is taking advantages of that a browser will send any cookies associated with 
+          - this attack is taking advantages of that a browser will send any cookies associated with 
           a certain domain to that domain  .
               - we have session cookie for bank.com, when another website[attacker.com] send a req from
               ur browser to bank.com the browser will send the cookie [session associated with bank.com]
               with the request.
-          . spring use [Synchronizer Token Pattern]     to protect against CSRF, spring send 
+          - spring use [Synchronizer Token Pattern]     to protect against CSRF, spring send 
             a randomly generated token with cookies to the browser [browser has no knowledge about it because it an app specific]
-            . so spring will expect from client to send the token with each state changing request or the request will be rejected
+            - so spring will expect from client to send the token with each state changing request or the request will be rejected
               by CsrfFilter
-          . in thymleaf form <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+          - in thymleaf form <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 
-          . if u using SPA, u can configure cserf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) to place token inside the cookie ,
+          - if u using SPA, u can configure cserf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) to place token inside the cookie ,
             that way the jsClient can extract the token from the cookie and send it with the request. 
             the CsrfFilter will compare the token in the request against the one in the cookie.
             ## Browser restrict JS to only access the cookies for their domain.
-          . if u use stateless basic or digest authentication u still need CSRF protection as the Browser
+            - don't store it in the cookie
+          - if u use stateless basic or digest authentication u still need CSRF protection as the Browser
             will include the basic and digest Authorization header by default
-        . csrf token [synchronized token pattern]. every request  that change the state of ur application 
-           needs to have a CSRF token in it. and then spring security will validate that . if it's invalid -> forbidden
-            . CsrfFilter -> a token repository is in charge of loading the default csrf token, that token is, 
+        - csrf token [synchronized token pattern]. every request  that change the state of ur application 
+           needs to have a CSRF token in it. and then spring security will validate that - if it's invalid -> forbidden
+            - CsrfFilter -> a token repository is in charge of loading the default csrf token, that token is, 
               by default stored into the HTTP session, u can customize it to be placed in a cookie which is not quit as secure
               but it make sense in SPA. which the JS looks for the csrf token to be included automatically in a cookie.
         - if u use thymleaf _csrf token will be included by default. if not the csrf token is included in the request
@@ -76,6 +78,12 @@ Security:
             alternatively u can include Spring's multipart request filter ahead of spring security but this means a malicious
              user could upload files before we able to validate the csrf token. it's better to include it in the action.
         <form mthod="post" encrypt="multipart/form-data" th:action="@{/upload(_csrf=${_csrf.token})}">
+      - SameSite:
+        * if u disable csrf and add spring-session dependency it will be lax.
+        - default with spring security: its value is empty
+        - strict: JSESSIONID will not be sent with any cross-site request(3rd party request).
+        - lax: JSESSIONID will be sent when a request is from 3rd party site but it's coming from the same application or top level redirect, or a GET request.
+
     - CSP
       to access contentSecurityPolicy HttpSecurity.headers.contentSecurityPolicy("value")        
     - Https 
@@ -128,11 +136,11 @@ Security:
 
 Authentication#getName()
     - formLogin
-    . return username field
+    - return username field
     - openid
-    . subject
+    - subject
     - Non-openid
-    . vary depending on the custom impl[]FB/geithub claim -> id]
+    - vary depending on the custom impl[]FB/geithub claim -> id]
     ------
     FilterChainProxy composing other filters into a single filter
 ----
@@ -167,12 +175,12 @@ filter will extract credientals from req and create approperiate AuthenticationT
         and set the principal to the SecurityContext.
 Header[WWW-Authenticate: Basic realm="Realm"] tell the browser basicAuth was required.       
 -------
-  . adding spring security to the app , u effectivly adding a single filter [[delegating filter proxy]]
-    . this filter passing a request to a collection called a FilterChainProxy -each FilterChain -> handle different request path
-    . adding oauth2Login -adds-> oauth2AuthorizationRequestRedirectFilter and oauth2LoginAuthenticationFilter[handle the exchanges of the authorization code]
-       all this all customizable: . when use sign a request to oauth2 =request redirected to RedirectEndpoint which redirect the user to Authorization server. 
+  - adding spring security to the app , u effectivly adding a single filter [[delegating filter proxy]]
+    - this filter passing a request to a collection called a FilterChainProxy -each FilterChain -> handle different request path
+    - adding oauth2Login -adds-> oauth2AuthorizationRequestRedirectFilter and oauth2LoginAuthenticationFilter[handle the exchanges of the authorization code]
+       all this all customizable: - when use sign a request to oauth2 =request redirected to RedirectEndpoint which redirect the user to Authorization server. 
        which redirect to the authorization endpoint with the authorization code. authorization endpoint call token endpoint with auth-code, client-id|secret, state.
-       . when u register new user from oauth2/oidc u must u use a unique immutable claim from the token 
+       - when u register new user from oauth2/oidc u must u use a unique immutable claim from the token 
           to make sure that is never change. in oidc sub is unique. don't use for example the email if the
             auth-server allow users to change their email. <- check the doc if the auth server don't support oidc.
             onAuthenticationSuccess(req, response, Authentication) -> the impl of Authentication is depending on how the
@@ -193,24 +201,24 @@ DelegatingFilterProxy  -delegate Regquest To -> FilterChainProxy --assign the re
             OAuth2LoginAuthenticationProvider..] --> exchange auth_code with access_token.. 
 ---
  
-   . delegation of authorization, specs mention authentication should happen but not specify how. [OIDC]
-  . we can centralize user registration in authorization server instead of
+   - delegation of authorization, specs mention authentication should happen but not specify how. [OIDC]
+  - we can centralize user registration in authorization server instead of
     writing it to each service we have. 
-     . adding all what we need in one place like multi-factor authentication...
- . OAuth2 in spring
-   . in the past, oauth2 support scattered between a number of projects.
-   . 5.2+ spring team decide to unify JWT, JOSE, OAuth2 and OIDC support under spring security.
-   . --
-   . spring app(client) redirect owner to authorization server  
+     - adding all what we need in one place like multi-factor authentication...
+ - OAuth2 in spring
+   - in the past, oauth2 support scattered between a number of projects.
+   - 5.2+ spring team decide to unify JWT, JOSE, OAuth2 and OIDC support under spring security.
+   - --
+   - spring app(client) redirect owner to authorization server  
       for authentication. [spring configure that url for popular authorization server(CommonOAuth2Provider(FB|GOOGLE|OKTA)). if u don't use one of them u need to configure it.()]
-       . auth server redirect to redirect-url that only registered from the client.
-       . u as a client take that code that sent to the redirect-url in frontChannel and exchange with auth server via tokenUri.
+       - auth server redirect to redirect-url that only registered from the client.
+       - u as a client take that code that sent to the redirect-url in frontChannel and exchange with auth server via tokenUri.
         to debug it [OAuth2AuthorizationCodeAuthenticationProvider]
-    . OIDC :
-      . provides an identity layer on top of the OAuth 2.0 protocol.
-      . Clients can verify the identity of an end-user based on the 
+    - OIDC :
+      - provides an identity layer on top of the OAuth 2.0 protocol.
+      - Clients can verify the identity of an end-user based on the 
          authentication performed by an authorization server.
-      . Gives clients access to basic profile information about the 
+      - Gives clients access to basic profile information about the 
          end user via REST.
          redirect url: urDomain/login/oauth2/code/google
          all oidc orovider must use the same path ex:

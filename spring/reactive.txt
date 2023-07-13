@@ -1,14 +1,14 @@
 Reactive System.
-  . using reactive lib or style doesn't make sys reactive
+  - using reactive lib or style doesn't make sys reactive
     to make system reactive:
-     . Responsive [Resilient, Scalable]  
-     . Messages [vs events. msg go to explicit destination].
+     - Responsive [Resilient, Scalable]  
+     - Messages [vs events. msg go to explicit destination].
 Reactive Programming.
-  . Event driven and focus on Data flow
+  - Event driven and focus on Data flow
     Events propagate changes, forming a stream of data that is
      propagated to everyone listening to those changes. 
-  . Non-blocking , Asynchronous, Functional/Declarative.
-  . when we have one ubiquitous abstraction, one consistent type, 
+  - Non-blocking , Asynchronous, Functional/Declarative.
+  - when we have one ubiquitous abstraction, one consistent type, 
     that's at the core of our code, then we can reuse threads, we get 2 other benefits:
      - one abstraction to deal with different data, so if we want to pull data [], it just a reactive stream no need for adapters or code glue.
      - we have single place to introduce supporrt for robust APIs, 
@@ -16,7 +16,7 @@ Reactive Programming.
 
   --------
    - implied cost of moving to microservices, what the complexities of moving communication to the wire ?
-     . we need now to think more about threads, instead of just spin up more instances, to reduce cost of scaling
+     - we need now to think more about threads, instead of just spin up more instances, to reduce cost of scaling
   - RSocket: protocol designed by engs in netflix and then went to meta, a protocol that reifies the concept 
       of reactive programming on the wire. it make it real so that u can build services that have back pressure 
         in them as part of the protocol itself, not just an afterthought.
@@ -30,9 +30,9 @@ Reactive Programming.
         - with reactive we can do better,  
             using blocking API, threads most of the time is idle waiting for other svc to respond.
     - when u subscribe, subscription happen in different threads, no gurantee the subscription will be in the same thread
-     . so when u want to do things in some order, use operator then
+     - so when u want to do things in some order, use operator then
 
-     . tailable cursors [similar to continous query]: mongodb give u publisher type and as soon as data is available it push it to u.
+     - tailable cursors [similar to continous query]: mongodb give u publisher type and as soon as data is available it push it to u.
        to do that u need to start mongo in replicated set mode,
 
        @Tailable
@@ -62,9 +62,9 @@ Asynchronous Programming in java using callback may reach us
   2- value pushed to pipeline of operators when u subscribe to the publisher. [backpressure]
 ---
 spring mvc 
-  . servlet api, blocking api, synchronous, one request per thread.
+  - servlet api, blocking api, synchronous, one request per thread.
 spring webflux
-  . Reactive stream, Non-Blocking API (servlet 3.1+), Asynchronous,
+  - Reactive stream, Non-Blocking API (servlet 3.1+), Asynchronous,
       use event model where many concurrent connections use a few #of threads
 ----
 Reactive Streams 
@@ -92,15 +92,15 @@ For the report Drragon feature, we will be using AWS step functions, AWS Lambda,
 AWS step functions. 
 -------------------
 ServerWebExchange: 
- . container for http req and res, req and session attributes, and other related properties ..
-   . ServerHttpRequest . ServerHttpResponse. reactive version of res and req.
+ - container for http req and res, req and session attributes, and other related properties ..
+   - ServerHttpRequest - ServerHttpResponse. reactive version of res and req.
 
      Method arguments with reactive support:
-       . WebSession
-       . Principal
-       . @RequestBody
-       . HttpEntity -> access request headers
-       . @RequestPart to access part in a multipart/form-data request.
+       - WebSession
+       - Principal
+       - @RequestBody
+       - HttpEntity -> access request headers
+       - @RequestPart to access part in a multipart/form-data request.
 ----
 then()
  allow the first pub to complete 
@@ -113,8 +113,8 @@ no subscribe in controller spring will call it  for u at the right time.
 - Functional Web Endpoints:
   WebMvc.fn 5.2
   WebFlux.fn 5.0
-    . if mono -> flatMap Mono to ServerResponse
-    . if flux -> set it to body.
+    - if mono -> flatMap Mono to ServerResponse
+    - if flux -> set it to body.
     route()
       .GET("products")
       .POST("products") we have a duplication so u can go for
@@ -122,24 +122,24 @@ no subscribe in controller spring will call it  for u at the right time.
         .Path("products", Builder)  <- like @RequestMapping() on controller and then append to it on method level.
   
   Router Function Builder:
-    . Nesting . Resources . Router function built using builder.
+    - Nesting - Resources - Router function built using builder.
   Predicates:
-    . METHOD, HEADERS, ACCEPT, PATH, QUERY PARAMETER, Composition(or and )
+    - METHOD, HEADERS, ACCEPT, PATH, QUERY PARAMETER, Composition(or and )
   Exception handler: onError()
 Handler Function 
-  . take arg of ServerRequest and return Mono<T extends ServerResponse>
+  - take arg of ServerRequest and return Mono<T extends ServerResponse>
 Router function
-  . delegate handling of request to handler func .
-  . most cases we don't write it we use : RouterFunctions.route(RequestPredicate, HandlerFunction)
+  - delegate handling of request to handler func .
+  - most cases we don't write it we use : RouterFunctions.route(RequestPredicate, HandlerFunction)
     RequestPredicate : match against [Content-type|Method|pattern]
-    . evaluated in order.
-    . set more specific route before more general one.
+    - evaluated in order.
+    - set more specific route before more general one.
 ----
 WebTestClient:
-  . bindToController
-  . bindToRouterFunction
-  . bindToApplicationContext
-  . bindToServer
+  - bindToController
+  - bindToRouterFunction
+  - bindToApplicationContext
+  - bindToServer
   exchange() not retrieve() to access to the whole response not the body only.
   if response has no body u can make sure exchange().expectBody(Void.class); or .isEmpty()
 

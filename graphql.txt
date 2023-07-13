@@ -1,21 +1,21 @@
 JL
 
-  . needed a way to give the clients the data they need 
+  - needed a way to give the clients the data they need 
     when they need it rather than calling multiple svcs and 
     integrate that data in their way, in redundant fashion 
     across all different clients.
-  . API became future-proof because the build api providing all data
+  - API became future-proof because the build api providing all data
     and if the client didn't need all that, they didn't get all of that.
-  . Edge service: intermediary service between client and down stream service.
-     - . correlated to a client . so u have a clent specific edge svc for ios,
+  - Edge service: intermediary service between client and down stream service.
+     - - correlated to a client - so u have a clent specific edge svc for ios,
           another for android, another for Roku...
-       . these edge services exist to transform data, to make them more accessible 
+       - these edge services exist to transform data, to make them more accessible 
            to the use cases for a particular client.
-       . from performance perspective do u want ur client to go to different mss and do 
+       - from performance perspective do u want ur client to go to different mss and do 
          the composition and do the scatter gather service orchestration in the client 
          memory?
   Grapgql was designed to support 3 main use cases:
-    . read[query] . update[mutation] . subscription(read data over long period) 
+    - read[query] - update[mutation] - subscription(read data over long period) 
     - this technology gives u the means u need to be able to ask for a particular
       set of data and get only that data this critical in removing the cycle or breaking
       the cycle of constantly standing up new edge services to adapt downstream service 
@@ -63,12 +63,12 @@ History of Data Transport
          because SOAP implementations were fairly complicated.
   - REST
      Drawbacks:
-      . overfetching
+      - overfetching
         we’re getting a lot of data back that we don’t need.
-      . underfetching
+      - underfetching
          The result is a slower user experience, and users with slower network
            speeds or slower devices might not be able to view the content at all.
-      . Another common complaint about REST APIs is the lack of flexibility. 
+      - Another common complaint about REST APIs is the lack of flexibility. 
          As the needs on the client change, you usually have to create new endpoints, 
          and those endpoints can begin to multiply quickly. To paraphrase Oprah, 
          “You get a route! You get a route! Every! Body! Gets! A! Route!”   .
@@ -85,9 +85,9 @@ GraphQL clients handle tasks like network requests, data caching,
   Whenever the edges are ordered pairs, we have a directed graph or digraph.
 
   The degree of a node is equal to the number of edges that are attached to that node.
-  . Because each of the nodes had odd degrees, Euler found that crossing each bridge
+  - Because each of the nodes had odd degrees, Euler found that crossing each bridge
      without recrossing was impossible.
-  . Eulerian cycle. In this case, the starting node is the same as the ending node.
+  - Eulerian cycle. In this case, the starting node is the same as the ending node.
      Each edge is visited only once, but the start and end node is repeated
   
 

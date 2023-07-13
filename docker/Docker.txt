@@ -212,7 +212,7 @@ docker logs [container-id] [-f/--follow] [--tail n] -> start from last n lines.
 docker stop --> send a signal to a specified container to shutdown and wait 10sec. if the container ignore it. the host send a kill signal and stop it forcelly.
 
 Automated --> the image build is done buy the container register itself[we can check it]. more trust.
-	blank . someone build it on his machine and push it to the register.
+	blank - someone build it on his machine and push it to the register.
 ---------------------------------------------------------
 ubuntu version schema year.month -> 20.04 -> 2020/4
 ------------------------------------------------------------------------
@@ -359,7 +359,7 @@ we can't do it directly we made COPY UP, copy that file from the image
 to the read-write layer then we can open that file. 
 changes in the container doesn't appear in docker diff.
 --------------------------------------------------------------
-if i mount empty volume to non-empty one . docker copy the file from container to that volume. if i mount non-empty volume the container will use that volume as it is in the host.
+if i mount empty volume to non-empty one - docker copy the file from container to that volume. if i mount non-empty volume the container will use that volume as it is in the host.
 
 -------------------
 we can bind /var/run/docker.sock to jenkins image and make it build or images in the CI/CD
@@ -371,7 +371,7 @@ Docker Recap:
      execute command, record changes to the filesystem, work great to install libraries, packages, various files.
      -DO NOT record state of processes. Autimatically start daemons... to do that use CMD or ENTRYPOINT.
 ---
- to chain multiple commands in one line use && not ; . to catch any error in any command.
+ to chain multiple commands in one line use && not ; - to catch any error in any command.
 ----
 COPY -- we can't refer to a file outside the context.
 COPY /temp/ --> / don't refer to the root of the filesystem but refer to the context equavlant to temp/.
@@ -426,10 +426,10 @@ DOCKER DEEP DIVE
 	  
 Multi stage builds:
   [less size] = 
-     . faster build
-     . less money spend on storage.
-     . faster deployment
-     . less attack surface for attackers, because image contains minimum #of packages.
+     - faster build
+     - less money spend on storage.
+     - faster deployment
+     - less attack surface for attackers, because image contains minimum #of packages.
 ----
 in docker world [atomic unit of scheduling is a container]
 in vitualization world [atomic unit of scheduling is a vm]
@@ -525,3 +525,15 @@ using buildkit:
    what can be run in parallel. [can parallelize multiple stages at the same time],
    remove all intermediate image leaving only the final one.
    - u don't need need docker to use buildkit.
+--------
+jar vs dockerfile:
+  - JVM and Docker solve different problems.
+    - an application is not just bytecode and assets <br>
+    it's also about setting permissons, creating scripts, or configuring <br>
+    the JVM with the specific parameters among other settings.
+    - container is about creating a complete execution environment <br>
+    - a container package a fixed version of an environment
+    - u can have the same environment used in prodocution
+    - new members can have a development environment in minutes.
+----
+down side of layered java image. u have to build the cp and to know the name of the main method

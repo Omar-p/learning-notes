@@ -20,8 +20,8 @@ process : when the file loaded to the memory to be executed
    
 Process vs Thread
   Thread: Stack + share from its process [Code, Data, Files, Heap]
-    . cheaper to create and terminate
-    . multiple threads in a process
+    - cheaper to create and terminate
+    - multiple threads in a process
       * share address space
       * easier to communicate
       * cheaper context switching comparing to processes.

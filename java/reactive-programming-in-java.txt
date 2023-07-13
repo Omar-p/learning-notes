@@ -5,8 +5,8 @@ Reactive Programming doen't necessary implies async, we can have it synchronous.
 
 Traditional use cases:
   - User events
-    . when user clicks a button
-    . when I/O response happens
+    - when user clicks a button
+    - when I/O response happens
   --React to something: when user clicks this button, run this function.
 
   Modern app dev:

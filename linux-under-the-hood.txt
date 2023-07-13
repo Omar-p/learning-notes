@@ -6,9 +6,9 @@
 1.2
   - cpu access Disk, RAM and Network.
   - to perform task effectively, the kernal manage the hardware via modules.
-     . memory management -> to manage ram.
-     . Scheduling -> to slice the time of cpu on different proc
-     . drivers -> to access disk, networking and other hardware device.
+     - memory management -> to manage ram.
+     - Scheduling -> to slice the time of cpu on different proc
+     - drivers -> to access disk, networking and other hardware device.
   - application can communicate with kernal through system-calls.
 --
 1.3 
@@ -16,12 +16,12 @@
   - modinfo driver-name -> to get more info about a driver
   - linux store driver of device at /dev/** , 
     when listing ls -l
-     . first character in permissions [b|c]rwxr-xr-x:
+     - first character in permissions [b|c]rwxr-xr-x:
         kernel distinguish in 2 types of devices
-        . b ->  block devices is used to store block of data.
-        . c -> used to stream data, like a serial port, which is a char device.
-     . two number major, minor: internal representation in the kernel for this file in /dev/
-     . /dev/** interfaces for user, kernel deals with the major and minor number
+        - b ->  block devices is used to store block of data.
+        - c -> used to stream data, like a serial port, which is a char device.
+     - two number major, minor: internal representation in the kernel for this file in /dev/
+     - /dev/** interfaces for user, kernel deals with the major and minor number
 --
 1.4
   - glibc gnu version of libc, c standard library, all linux distribuation use it.
@@ -37,9 +37,9 @@
   - everything is happening as a file: device access, I/O handling, inter process communication..
   - Every process keep a table of file descriptors that shwos files that are currently in use.
   - Common fd are:
-    . 0 -> STDIN
-    . 1 -> STDOUT
-    . 2 -> STDERR
+    - 0 -> STDIN
+    - 1 -> STDOUT
+    - 2 -> STDERR
   - to list all pid-> ls /proc. to list fd used by specific proc -> ls /proc/pid/fd 
 
 ---

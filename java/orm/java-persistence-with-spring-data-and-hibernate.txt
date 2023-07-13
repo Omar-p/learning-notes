@@ -63,7 +63,7 @@ ch01:
          UDT support is one of several so-called object/relational extensions to traditional SQL. 
          This term alone is confusing, because it means the database management system has 
          (or is supposed to support) a sophisticated data type system.
-         . SQL standard supports user-defined data types, but poorly.
+         - SQL standard supports user-defined data types, but poorly.
 
          most engineers accept that SQL products have limited type systems. 
          Even with a sophisticated UDT system in your SQL DBMS, you would still likely duplicate the type declarations,
@@ -141,21 +141,21 @@ ch01:
         dirty checking, association fetching, and other optimization functions. The JPA
         specification covers some basic caching strategies
     Hibernate:
-      . Productivity
-      . Maintainability
-      . Performance : automated solutions like Hibernate allow the use of many optimizations 
+      - Productivity
+      - Maintainability
+      - Performance : automated solutions like Hibernate allow the use of many optimizations 
         at all times. One example is the efficient and easily tunable caching in the application tier
-      . Vendor independence
+      - Vendor independence
     Spring Data:
-      . Shared infrastructure—Spring Data Commons.
-      . Removes DAO implementations —JPA implementations use the data access object (DAO) pattern. This pattern starts with the idea of an abstract interface to a database and maps application calls to the persistence layer while hiding the details of the database.
-      . Automatic class creation: 
-      . Default implementations for methods:
+      - Shared infrastructure—Spring Data Commons.
+      - Removes DAO implementations —JPA implementations use the data access object (DAO) pattern. This pattern starts with the idea of an abstract interface to a database and maps application calls to the persistence layer while hiding the details of the database.
+      - Automatic class creation: 
+      - Default implementations for methods:
         Spring Data JPA will generate default implementations for each method 
         defined by its repository interfaces. Basic CRUD operations do not need to be implemented any longer.
-      . Generated queries: 
+      - Generated queries: 
         Spring Data JPA will parse the method name and create a query for it.
-      . Close to the database if needed—Spring Data JDBC can communicate directly with
+      - Close to the database if needed—Spring Data JDBC can communicate directly with
         the database and avoid the “magic” of Spring Data JPA. It allows you to interact
         with the database through JDBC, but it removes the boilerplate code by using
         the Spring framework facilities.
@@ -234,7 +234,7 @@ ch01:
      then it just appends the sort clause to the query — it skips checking whether the property to sort by belongs to the domain model.
     
     Projection:
-      . the book create class called Projection and create interfaces and calsses that are used for projection
+      - the book create class called Projection and create interfaces and calsses that are used for projection
          as nested.
     Projection using interface:
     - By executing queries at runtime, the execution engine creates proxy instances of the

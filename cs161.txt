@@ -56,7 +56,7 @@ Register:
     ld _> linker ld format to build executale from obj 
     db -> 1 byte, dw -> 2 bytes, dd -> 4 bytes.
     x86 stack:
-      . LIFO
-      . Random access, -> add/sub from the stack pointer to access any address.
-      . ESP register hold the lowest addr of the stack 
-      . pop put data in eax
+      - LIFO
+      - Random access, -> add/sub from the stack pointer to access any address.
+      - ESP register hold the lowest addr of the stack 
+      - pop put data in eax

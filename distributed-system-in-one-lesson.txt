@@ -1,9 +1,9 @@
 Distributed System:
   - A collection of independent computers that appear to its users as
     one computer, with 3 characteristics:
-      . the computers operate concurrently.
-      . the computers fail independently.
-      . the computers don't share a global clock:
+      - the computers operate concurrently.
+      - the computers fail independently.
+      - the computers don't share a global clock:
         - the computing that each one of these machines does, is 
           asynchronous with respect to other machines in the sys.
 
@@ -14,17 +14,17 @@ Distributed System:
   - Messaging: Kafka
 -----
 Single-Master Storage -- to -> Read Replication
-  . Complexity
-  . Consistency [take some time for all replicas to be the same]
-  . approperiate in read heavy workload.
+  - Complexity
+  - Consistency [take some time for all replicas to be the same]
+  - approperiate in read heavy workload.
 ---
 Sharding:
   - More Complexity.
   - Limited data model.
-    . we need a common key in all queries we issue, that we can shard on.
+    - we need a common key in all queries we issue, that we can shard on.
       if u cannot find one then sharding is not a great choice. 
   - Limited data access patterns.
-    . if u need to query without using the sharding key, u must go to all shards
+    - if u need to query without using the sharding key, u must go to all shards
        scatter that query out to all of them, get results and gather those back together.
 scatter gather    
 ---.
@@ -86,27 +86,27 @@ CAP:
 -----
 Distributed computing:
   - Scatter/Gather
-    . general paradiagm we saw in Distributed computatuion,
+    - general paradiagm we saw in Distributed computatuion,
       where we scatter a computation out to lots of individual
       nodes where it process usually on local data. and gather 
       those results back together.
-    . data being local is the key.   
-    . move computation close to data.
+    - data being local is the key.   
+    - move computation close to data.
   - MapReduce
-    . key paradiagm that hadoop implement.
-    . computation strategy not a piece of code.
-    . 
+    - key paradiagm that hadoop implement.
+    - computation strategy not a piece of code.
+    - 
   - Hadoop
   - Spark
   - Storm
-    . another distrbuted computation solution but it's oriented 
+    - another distrbuted computation solution but it's oriented 
       around event processing instead of working on data persisted 
       on some storage. realtime very small computation based on
       incoming events.
   - MapReduce
     what happen is Map/shuffle/reduce.
     but we just give the system the mapper and reducer.
-    . as word count example:
+    - as word count example:
       Mapper take a text file.
        produce list of key/value pair. pass the to the shuffling stage.
         where hadoop for example bring all common key across different nodes
@@ -114,7 +114,7 @@ Distributed computing:
       Reducer take the output of shuffling and do some king of aggregation, 
        probably produce a scalar.
 
-      . shuffling can use hash partitioning, i.e. to get value of common 
+      - shuffling can use hash partitioning, i.e. to get value of common 
         key together.
         key is assigned to reduce # = hash(key)%number of reduce  
         
@@ -129,37 +129,37 @@ multicast vs broadcast
  multicast send to a specific group of nodes.
 
   - group of nodes want to inform all other nodes.
-    . most of them are application level protocol.
-    . simplest implementation:
+    - most of them are application level protocol.
+    - simplest implementation:
        loop over lst of the nodes and send to all of them using TCP/UDP.
-         . overhead on the sender rlate to num of reciever.
-         . if sender fail the rest of reciever will not recieve
-   . Tree-Based -> build a spanning tree.
-     . IPmulticast[network level protocol], [Application level protocol] SRM, RMTP, TRAM, TMTP.
-     . low latency. less overhead.
-     . problems ? how to setup and maintain the tree, detect failure.?    
+         - overhead on the sender rlate to num of reciever.
+         - if sender fail the rest of reciever will not recieve
+   - Tree-Based -> build a spanning tree.
+     - IPmulticast[network level protocol], [Application level protocol] SRM, RMTP, TRAM, TMTP.
+     - low latency. less overhead.
+     - problems ? how to setup and maintain the tree, detect failure.?    
      
      --
-     . build a spanning tree among the processes of the multicast group
-     . use spanning tree to dissements (ACKs) or (NAKs) to repair multicasts not recieved
-     . SRM (Scalable Reloable Multicast)
-       . Uses NAKs
-       . if the reciever not get a message send a repair NAK up to the root 
-       . but adds random delays, and uses exponential backoff to avoid NAK storm.
-     . RMTP (Reliable Multicast Transport Protocol)
-       . Uses ACKs - use post ACK . receiver send a collection of ack for all multicast msgs
-       . But ACKs only sent to designated recievers, which then re-transmit missing multicasts.
-     . these protocols still cause an O(N) ACK/NAK overhead.  
+     - build a spanning tree among the processes of the multicast group
+     - use spanning tree to dissements (ACKs) or (NAKs) to repair multicasts not recieved
+     - SRM (Scalable Reloable Multicast)
+       - Uses NAKs
+       - if the reciever not get a message send a repair NAK up to the root 
+       - but adds random delays, and uses exponential backoff to avoid NAK storm.
+     - RMTP (Reliable Multicast Transport Protocol)
+       - Uses ACKs - use post ACK - receiver send a collection of ack for all multicast msgs
+       - But ACKs only sent to designated recievers, which then re-transmit missing multicasts.
+     - these protocols still cause an O(N) ACK/NAK overhead.  
      ---
    Gossip protocol [Push]
-     . Periodically, transmit to b [fanout] Random target. Gossip message [UDP]
-     . Other Nodes do same after receiving multicast
-     . nodes are not in sync but in analysis we assume it.
-     . node can receive messages more than once.
-     . Protocol rounds (local clock) b random per round.
-     . ...
-     . once u have a multicast msgs, u start gossiping about it,
-     . multiple msgs> Gossip a  random subset of them, or recently-received onces, 
+     - Periodically, transmit to b [fanout] Random target. Gossip message [UDP]
+     - Other Nodes do same after receiving multicast
+     - nodes are not in sync but in analysis we assume it.
+     - node can receive messages more than once.
+     - Protocol rounds (local clock) b random per round.
+     - ...
+     - once u have a multicast msgs, u start gossiping about it,
+     - multiple msgs> Gossip a  random subset of them, or recently-received onces, 
        or higher priority once.
      
      
@@ -174,10 +174,10 @@ multicast vs broadcast
      
 ------------
 Peer To Peer System:
-  . first distributed system that seriously focused on scalability
+  - first distributed system that seriously focused on scalability
     with respect to number of nodes.
-  . P2P techniques in cloud computing system
-      . Key-value stores(e.g., Cassandra, Riak, Voldemort, DynamoDb) use Chord p2p hashing.
+  - P2P techniques in cloud computing system
+      - Key-value stores(e.g., Cassandra, Riak, Voldemort, DynamoDb) use Chord p2p hashing.
 
   - Widely-deployed P2P Systems
     1. Napster
@@ -192,33 +192,33 @@ Peer To Peer System:
   Napster
    Server:
      Store a directory, i.e, filenames with peer pointers
-     . maintain directory information using (ternary tree algorithm)
+     - maintain directory information using (ternary tree algorithm)
    Client:
-     . Connect to a Napster Server 
-       . Upload list of music files that you want to share.
-       . Server maintain list of <filename, ip_address, portnu> tuples.
+     - Connect to a Napster Server 
+       - Upload list of music files that you want to share.
+       - Server maintain list of <filename, ip_address, portnu> tuples.
          Server Store no files.
-     . Search
-       . Send Server keywords to search with
-       . (Server search its list with the keywords)
-       . Server returns a list of hosts - <ip_address, portnum> tuples - to_client
-       . Client ping each host in the list to find transfer rates.
-       . Client Fetches file from best host.
-     . All communications uses TCP   
+     - Search
+       - Send Server keywords to search with
+       - (Server search its list with the keywords)
+       - Server returns a list of hosts - <ip_address, portnum> tuples - to_client
+       - Client ping each host in the list to find transfer rates.
+       - Client Fetches file from best host.
+     - All communications uses TCP   
 
-     . Joining A P2P system
-       . can be used for any p2p system
-         . Send an http request to well-known url for that
+     - Joining A P2P system
+       - can be used for any p2p system
+         - Send an http request to well-known url for that
            P2P service - http://www.myp2pservice.com
-         . message routed (after lookup in DNS=Domain Name Sydtem) to 
+         - message routed (after lookup in DNS=Domain Name Sydtem) to 
            introducer, a well known server that keeps track of some recently 
            joined nodes in p2p system.
-         . Introducer initializes new peers' neighbor table.         
-     . Problems:
-       . Centralized server a source of congestion. can be overwhlmed with search queries.
-       . Centralized server single point of failure.
-       . No Security: Plaintext messages and passwds.
-       . napster.com declared to be responsible for users' 
+         - Introducer initializes new peers' neighbor table.         
+     - Problems:
+       - Centralized server a source of congestion. can be overwhlmed with search queries.
+       - Centralized server single point of failure.
+       - No Security: Plaintext messages and passwds.
+       - napster.com declared to be responsible for users' 
          copyright violation=> "indirect infringement"     
   -----
   Gnutella

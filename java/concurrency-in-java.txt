@@ -18,8 +18,8 @@ thread: smallest unit of programmed instructions that can be managed
    
 ----
   - OS kernel
-    . provides mechanisms to manage and access computing resource.
-       . hardware sensors, transceivers(wifi), storage,
+    - provides mechanisms to manage and access computing resource.
+       - hardware sensors, transceivers(wifi), storage,
          General purpose Cpu, Special purpose Cpu, virtual mem,
          processes(unit of resource allocation and protection that
          coordinate with the os virtual mem manager to ensure no
@@ -27,9 +27,9 @@ thread: smallest unit of programmed instructions that can be managed
          threads management.
   
   - System Libraries:  
-    . implementation that provide wrapper functions for the
+    - implementation that provide wrapper functions for the
       underlying OS mechanisms.   pthreads lib
-    . Available to java programs via JNI(Java native interface):
+    - Available to java programs via JNI(Java native interface):
        - enable java code which run on vm to call and be called by
          programs specific to a hardware and os platform, as well
          as by libs written in other lang, C & C++.
@@ -38,12 +38,12 @@ thread: smallest unit of programmed instructions that can be managed
   - Threading & Synchronization packages.
   
   - Additional Frameworks and Langs
-    . provide other capabilities and features that leverage
+    - provide other capabilities and features that leverage
       java concurrency mechanism, e.g.:
         - Android concurrency frameworks[HaMeR]
           - handler run long duration tasks in background thread and the publish
             the result to the UI thread. 
-    . Scala ->  Akka, ActiveObject
+    - Scala ->  Akka, ActiveObject
   
   - Application  
 --
@@ -56,13 +56,13 @@ Good Performance Involve:
  
   techniques:
     multiple cores:
-      . for embarrassingly parallel programs that require little or no interactions 
+      - for embarrassingly parallel programs that require little or no interactions 
         between parallel task.
-      . dividing large problem into smaller ones and then merge the solutions.
+      - dividing large problem into smaller ones and then merge the solutions.
          - map reduce paradigm.
 ---
   Amdahl's Law:
-    . the speedup of program using multiple processors in parallel computing is 
+    - the speedup of program using multiple processors in parallel computing is 
       limited by the time needed for the sequential fraction of the prograqm that
       can't run in parallel.         
       

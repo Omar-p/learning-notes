@@ -1,11 +1,11 @@
 1.1 value of relational DB
-  1 . Concurrency & Transaction
-  2 . Integration : can be accessed by different applications
-      . while the database’s concurrency control handles multiple
+  1 - Concurrency & Transaction
+  2 - Integration : can be accessed by different applications
+      - while the database’s concurrency control handles multiple
         applications in the same way as it handles multiple users 
         in a single application.
-  3 . Standard Model
-      . core benefits presented in a standard wa. Different vendors’ 
+  3 - Standard Model
+      - core benefits presented in a standard wa. Different vendors’ 
         SQL dialects are similar, transactions operate in mostly the same way.
 ====
 1.2

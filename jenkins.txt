@@ -177,7 +177,7 @@ Distributed Build
   
   - the master is act as the controller for the build, running specific build on specific
     agents, allowing for parallelism and greater ease in multiconfiguration pipelines.
-      . if u have 3 versions of the software to perform 5 unit tests against, this can be
+      - if u have 3 versions of the software to perform 5 unit tests against, this can be
         done in one parallel pass, resulting in 5 tests on each agent rather than 15 tests 
         on the master.
   - The master acts as the controller for the build, running specific builds on specific 
