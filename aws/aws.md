@@ -1163,23 +1163,42 @@ and the region that the bucket is in
 - Pricing on [put, get, copy]requests, storage, data out.
   -beaware if u have large base of customers {because u will recieve a lot of requests}
 move data from internet to s3 is free.
+
+- DEMO
+  - unblock public access
+  - if u  have a domain name, u can use it.
+    - {bucketName}.{yourDomainName}
+    
+  - properties -> static website hosting -> enable
+  - upload index.html, error.html, and other assets.
+  - add bucket policy to allow public access.
+    - GetObject action on the website objects{index.html, error.html, assets..} / or all /*
+  - error.html will be displayed if the object is not found.
+  - to customize the url
+    - go to r53 -> hosted zones -> choose the domain u write in the bucket name
+    - create record -> simple routing -> choose the bucket name, set the other options to match the bucket info.
+
 <hr>
-Object Versioning
+
+# Object Versioning
 
 - controlled at a bucket level.
 
   - start at disable.
   - once enabled cannot be disabled.
-
+  - <img src="images/object-versioning-states.png" width="450">
   - we can suspend the bucket but we can enable it back.
+  - without versioning modifying object will replace the object.
   - lets us store [multiple versions] of objects within a bucket.
     operation which would modify objects generate a new version.
   - attribute id=null, when versioning is disabled.
   - when enabled for each object aws allocate id to objects.
   - when u access object without specifying its id, u will get the latest version.
   - when delete, S3 add delete marker to hide all versions of specific object.
+    - if u delete the latest version, the previous version will be the latest.
   - but u can undo the operation.
   - if u want to fully delete, specify the object id and this version will be fully deleted.
+  - u will be charged for all versions size of the object even u suspend object versioning.
 
 ---
 
@@ -1189,9 +1208,10 @@ MFA delete
 - MFA is required to change bucket [versioning state].
 - MFA is required to delete any version of an object.
 - to fully delete any versions, u need MFA token.
-- Serial number (MFA) + code passed with API CALLS.
+- Serial number (MFA) + code  to delete version or change bucket version
+    is concating with any api call.
 
-S3 Performance Optimization:
+# S3 Performance Optimization{it's often about performance and reliability}:
 
 - Single PUT Upload[default]:
 
@@ -1200,22 +1220,24 @@ S3 Performance Optimization:
   - single put upload limit to 5GB of data as maximum.
 
 - Multipart Upload
-- Data is broken up
-- Min data size 100MB for multipart
-- broken to 10000 max parts, 5MB -> 5GB. last piece can be smaller
-- Parts can fail, and be restarted.
-- transfer rate = speed of all parts.
-  S3 Accelerated Transfer(OFF by default)
-- use network of aws Edge Location
-- restrictions to enable it:
-  - the bucket name cannot contain periods, and it needs to be DNS compatible
-    in its naming.
-- when upload data to S3, instead going to it directly, it immediately enters
-  the closest best performing AWS edge location
-  - reaching edge location occur over public internet, but geogeraphically its really close.
-    - Edge location transit the data over AWS global network which is directly under the
-      control of AWS. tends to have a direct link between these lcoations and other areas
-      of the AWS global network, in this case, the S3 bucket.
+  - Data is broken up
+  - Min data size 100MB for multipart
+  - broken to 10k max parts, 5MB -> 5GB. last piece can be smaller
+  - Parts can fail, and be restarted.
+  - transfer rate = speed of all parts.
+  
+- S3 Accelerated Transfer(OFF by default)
+  - use network of aws Edge Location
+  - restrictions to enable it:
+    - the bucket name cannot contain periods, and it needs to be DNS compatible
+      in its naming.
+  - when upload data to S3, instead going to it directly, it immediately enters
+    the closest best performing AWS edge location
+    - reaching edge location occur over public internet, but geogeraphically its really close.
+      - Edge location transit the data over AWS global network which is directly under the
+        control of AWS. tends to have a direct link between these lcoations and other areas
+        of the AWS global network, in this case, the S3 bucket.
+    - public internet is not designed for speed, it is designed for flexiaility and resiliance.
 
 ---
 
@@ -1224,105 +1246,149 @@ S3 Performance Optimization:
 - a way to give another person or app an access to s3 obj using ur credentials in a safe and secure way{encoded in the url}.
   - iam identity create a presigned url, which is a url that contains a signature. it has a time limit. and it indicate the operations that can be performed on the object.
   - presigned url can be used to upload or download an object in a private s3 bucket.
-  - <img src="./images/presigned-url.png" width="850" height="400">
+  - <img src="./images/presigned-url.png" width="850" height="500">
 
 - exam powerup:
-  - <img src="./images/presigned-url-exam-powerup.png" width="850" height="400">
+  - <img src="./images/presigned-url-exam-powerup.png" width="850" height="500">
 
 ---
-
+kms key precviously called CMK
 Key Management Service(KMS)
 
 - Regional & public service.
 - occupies AZ public zone and it can be connected to from anywhere with access to
   this public zone. [if u have permissions to access it]
 - Create, Store and manage Keys.
-- handle [Symmetric] and [Asymmetric Keys]
+- handle [Symmetric ] and [Asymmetric Keys]
 - perform Cryptographic operations(encrypt, decrypt...)
-- [Keys never leave KMS] - Provide FIPS 140-2(Layer 2)
-  KMS can create keys, keys can be imported, it manages keys, it can use these keys
+- [Keys never leave KMS] 
+- Provide FIPS 140-2(Level 2) {try-to-remember}
+- KMS can create keys, keys can be imported, it manages keys, it can use these keys
   to perform operations, but keys are locked inside KMS.
-  Customer Master Key(CMK)
+  Customer Master Key(KMS key)
 - used KMS within cryptoghraphic ops, u can use them, applications can use them
   and other AWS services can use them.
-- CMKs are logical - containers of the actual physical master key.
+- KMSs are logical - containers of the actual physical master key.
   contains [ID, date, key policy, desc & state]
   ..backed by physical key materials.
   these physical material can be generated by KMS or imported into KMS.
 
-  - this material contained inside a CMK can be used by the KMS product to directly
-    encrypt or decrypt data - CMKs can be used for up to 4kb of data.
+- when u ask kms to decrypt data, u don't need to specify the key to use, kms
+  will use the correct key to decrypt the data. that info is encoded in the ciphertext.
+  - <img src="./images/kms.png" width="850" height="500">
+  - permission for encryption and decryption are different.
+  - this material contained inside a kms can be used by the KMS product to directly
+    encrypt or decrypt data - KMS keys can be used for up to 4kb of data.
     --
-    KMS encrypt the cmk [CreateKey] before it's stored persistently on disk.  
-     when we wanto encrypt data we send it to KMS, which decrypt the cmk and use it to
-    encrypt data and return it. in decrypt operation KMS can use the correct CMK because
+    KMS encrypt the KMS key [CreateKey] before it's stored persistently on disk.  
+     when we wanto encrypt data we send it to KMS, which decrypt the KMS key and use it to
+    encrypt data and return it. in decrypt operation KMS can use the correct KMS key because
     that information is encoded into the ciphertext of the encrypted data by kms.
 
-    to get around limit of 4kbs in cmk
+    to get around limit of 4kbs in KMS key
 
-- Data encryption keys(DEKs)
-- aother type of key which KMS can generate, and generate it using CMK.
+# Data encryption keys(DEKs)
+- aother type of key which KMS can generate, and generate it using KMS key.
 - GenerateDataKey - works on > 4kb
-- links to specific CMK
+- links to specific KMS which create them
 - KMS does not store the DEK in anyway:
   - it provide it to who use it and then discards it. because KMS doesn't
-    perform encryption or decryption of data using the DEK. the user do that.
-    KMS doesn't use DEK for anything beyond generating them .
+    - perform encryption or decryption of data using the DEK. the user do that.
+      -  because kms doesn't use dek in encryption or decryption,  u do.
+    - KMS doesn't use DEK for anything beyond generating them .
 - after KMS create it, it provide to u 2 versions of the key:
-  - plaintext version - ciphertext version[encrypted be the CMK].
+  - plaintext version 
+  - ciphertext version[encrypted be the kms].
 - Discard it.
+- <img src="./images/dek.png" width="850" height="500">
 
--user of the service use the plaintext of cmk encrypt the data and
+-user of the service use the plaintext of KMS key encrypt the data and
 store the encrypted data and encrypted version of the key. - when user want to decrypt data- > send the encrypted DEK) to kms to
 decrypt it and return the plaintext of the key to use it.
 
+
 S3 use KMS: - generate DEK for every single object, encrypt the object and discard the plaintext
 version .
-Key points for KMS in the exam: - CMKs are stored within KMS specific to a region & never leave.
+- Key points for KMS in the exam: 
+  - KMS keys are stored within KMS specific to a region & never leave.
+  - <img src="./images/kms-key-concepts.png" width="850" height="500">
+- u can't directly deal with KMS keys, u must use APIs available from KMS. 
+- Aws managed KMS key or customer managed KMS keys 
+- AWS managed KMS keys are created automatically by aws when use a service such as S3
+  which use KMS for encryption. 
+- Customer managed key are created explictly by the customer.
+  - much more configurable :
+   - u can edit key policy, allow other AWS accounts access the KMS key to perform ops 
+   - KMS key support key rotation .. physical backing material 
+   - data that's used to actually do the cryptographic operations is changed. with AWS KMS key managed key  it always enabled for every 1095 days. if u enable it for customer KMS key it will happen
+  every one year. 
+  - KMS key itself contains the current backing key, and previous backing keys  [the physical material]  - caused by rotating that material. 
+  - u can use Aliases[per region] to KMS keys. u can point to the KMS key alias and change
+  the KMS key beneath it as required.
 
-- u can't directly deal with cmks, u must use APIs available from KMS. - Aws managed CMK or customer managed CMKs - AWS managed CMKs are created automatically by aws when use a service such as S3
-  which use KMS for encryption. - Customer managed key are created explictly by the customer.
-- much more configurable : - u can edit key policy, allow other AWS accounts access the CMK to perform ops - CMK support key rotation .. physical backing material - data that's used
-  to actually do the cryptographic operations is changed. with AWS CMK managed key
-  it always enabled for every 1095 days. if u enable it for customer CMK it will happen
-  every one year. - CMK itself contains the current backing key, and previous backing keys
-  [the physical material] - caused by rotating that material. - u can use Aliases[per region] to CMKs. u can point to the cmk alias and change
-  the CMK beneath it as required.
+- kms and permissions:
+  - most service in aws trust the aws account root user except kms need to explicitly add the account to the key resource policy.
 
 --
 Key Polices and security
 
 - key policy (resource)
-- every CMK has one! --> need to explicitly set who can access the key
+- every KMS key has one! --> need to explicitly set who can access the key
 - Key policies + IAM policies.
+- <img src="./images/kms-policies-permissions.png" width="850" height="500">
 
 ---
 
-S3 encryption:
+# S3 encryption:
 
-- Bucket aren't encrypted .. objects are..
+- Bucket aren't encrypted .. objects are.. ..bucket default encryption is different.
 - each object inside the bucket could use a different encryption settings.
 - S3 support [Client]-side Encryption and [Server]-Side Encryption.
-  both of these reer to encrption at rest.
-  method of determining how objects are encrypted, when they're persistently stored on disk
-  it doesn't refer to encryption in transit. [ encryption in transit] come standard with s3.
-  Server-Side Encryption:
-  Server-Side Encryption with Customer-Provided Keys(SSE-C)
-  customer is responsible for encryption key.
-  s3 store the encrypted object and the hash of the key.
-  Server-Side Encryption with Amazon S3-Managed Keys(SSE-S3 AES256)
-  u send data, s3 generate Master Key to use[key for each object]
-  Server-Side Encryption with CMKs stored in AWS KMS (SSE-KMS) - generating key by KMS, DEK - default master key cmk - this CMK used to generate a unique DEK for each object/ - u can use customer managed CMK
-  benefits[separation of roles] - if u have permission on S3 to manage it, and u don't have access to KMS
-  u cannot decrypt the data inside S3.
-  Bucket default encryption:
-  data ---PUT---> S3
-  u specify header [ x-amz-server-side-encryption ] if u don't the object isn't
-  be encrypted. if u configure the bucket with default val it will be used.
-  if u set it to AES256 SSE-S3 will be used, aws:kms -> SSE-KMS
+  - both of these refer to encrption at rest.
+- method of determining how objects are encrypted, when they're persistently stored on disk
+- it doesn't refer to encryption in transit. [ encryption in transit] come standard with s3. 
+- <img src="./images/s3-encryption.png" width="850" height="500">
+- customer-side
+  - u are responsible for managing and performing the encryption and decryption of data.
+- Server-Side Encryption:
+  - Server-Side Encryption with Customer-Provided Keys(SSE-C)
+    - customer is responsible for encryption key.
+    - s3 manage the encryption and decryption process.
+    - s3 store the encrypted object and the hash of the key.
+    - so u need to provide the object and the encryption key to s3  .
+    - a hash of the key is attached to the object to check the key when u want to decrypt it.
+    - s3 store the encrypted object and the hash of the key. and discard the key.
+    - u offloading the encryption and decryption process to s3.
+  - Server-Side Encryption with Amazon S3-Managed Keys(SSE-S3 AES256)
+    - aws s3 and the operation and the key management.
+    - u send data, s3 generate root Key to use[key for each object]. it's invisible to u.
+    - s3 generate key for every single object. and then encrypt the object with that key.
+      - then s3 encrypt the key with the root key and store it with the object. and the key is discarded.
+    - not suitable option for role separation. when u need some to manage the infrastructure and some to manage/access the data.
+  - Server-Side Encryption with KMS keys stored in AWS KMS (SSE-KMS) 
+
+    - generating key by KMS, DEK 
+    - default master key KMS key 
+    - this KMS key used to generate a unique DEK for each object/ 
+    - u can use customer managed KMS key
+    - benefits[separation of roles] 
+    - if u have permission on S3 to manage it, and u don't have access to KMS
+    - u cannot decrypt the data inside S3.
+- summary:
+  - <img src="./images/s3-encryption-summary.png" width="850" height="500">
+  # Bucket default encryption:
+  - data ---PUT---> S3
+  - u specify header [ x-amz-server-side-encryption ] if u don't the object isn't
+  be encrypted. 
+  - if u don't set the header the default for bucket will be used.
+  - if u configure the bucket with default val it will be used.
+  - if u set it to AES256 SSE-S3 will be used, aws:kms -> SSE-KMS
+  - u can use bucket policy to restrict the possible encryption options.
   ***
-  S3 Object Storage class
-  - S3 standard
+
+
+# S3 Object Storage class
+# S3 standard
     - object store across at least 3 AZs in the aws region.
       return HTTP/1.1 200 OK
     - provide 11 9s durability for 10m objects, 1 object loss per 10k years.
@@ -1333,28 +1399,33 @@ S3 encryption:
     - S3 standard has a 'milliseconds' first byte latency and objects can be made publicly
       available.
     - used for frequently accessed data which is important and Non replaceable.
-- S3 standard-IA infrequent access.
+    - <img src="./images/s3-standard.png" width="850" height="500"
+# S3 standard-IA infrequent access.
   - same as S3 standard but,
     a new cost component, which a retrieval fee for each GB of data retrieved from
     the product there is the cost + transfer fee.
     objects can be stored for less, but the minimum biling always applies.
   - minimum duration charge of 30 days - object can be stored for less, but minimum
     biling always applies
-  - standard-IA has a minimum charge of 128kb per object
+  - standard-IA has a minimum charge of 128kb per object. not prefered class if u have
+    lots of tiny objects.
   - cost effect as long as u don't access the data very often, or u don't need
     to store it short term, u don't need to store lots of tiny objects.
-- S3 One zone-IA
+  - <img src="./images/s3-standard-ia.png" width="850" height="500">
+# S3 One zone-IA
   - data replicated but inside on Az
   - used for long-lived data, which is Non-critical & replaceable and where access
     is infrequent -> replica copies if u're using same or cross-region replication,
     then u can use this class for your replicated copy. or if u're generating intermediate
     data that u can afford to lose,
-- S3 Glacier - Instant
+  - <img src="./images/s3-one-zone-ia.png" width="850" height="500">
+# S3 Glacier - Instant
   - 3AZ
   - minimum duration charge of 90 days.
   - a minimum capacity charge of 128kb
   - instance access as S3 standard but cost increase in frequent access.
-- S3 Glacier - flexiable
+  - <img src="./images/s3-glacier-instant.png" width="850" height="500">
+# S3 Glacier - flexiable
   - 3AZ
   - 11 9s durability.
   - 1/6 cost of s3 standard retrieval.
@@ -1372,7 +1443,8 @@ S3 encryption:
   - 40kb min size, 90 day min duration.
   * suitable for archival data where frequent or realtime access
     isn't needed (e.g. yearly) mins-hours retrieval.
-- S3 glacier Deep Archieve
+  - <img src="./images/s3-glacier-flexiable.png" width="850" height="500">
+# S3 glacier Deep Archieve
   same as [flexible] but:
 
   - standard (12hrs)
@@ -1381,11 +1453,13 @@ S3 encryption:
 
   - 40kb min size, 180 days min duration.
 
-  * suitable for archival data that rarely if ever needs to be accessed -
+  - not suitable for backup
+  - suitable for archival data that rarely if ever needs to be accessed -
     hours or days for retrieval. e.g. Legal or Regulation data storage
     in term of Retention length.
+  - <img src="./images/s3-glacier-deep-archieve.png" width="850" height="500">
 
-- S3 Intelligent-tiering
+# S3 Intelligent-tiering
 
   - contain 5 different storage tier:
 
@@ -1407,11 +1481,19 @@ S3 encryption:
 
     - S3 Intelligent-Tiering should be used for long-lived data, with
       changing or unknown patterns.
+    - <img src="./images/s3-intelligent-tiering.png" width="850" height="500">
 
----
+<hr>
 
-S3 Lifecycle configuration - u can create Lifecycle rule on s3 bucket which can automatically
-expire object in the bucket. great way to optimize the cost of S3. - set of rules, consist of [actions] do x if y is true. - can be applied on a Bucket or groups of objects. - Transition Actions: change object class [S3 standard -> S3-IA] - Expiration Actions: Delete object or a specific version. - actions on version is more complex.
+# S3 Lifecycle configuration 
+  - u can create Lifecycle rule on s3 bucket which can automatically
+expire object in the bucket. great way to optimize the cost of S3. 
+  - set of rules, consist of [actions] do x if y is true. 
+  - can be applied on a Bucket or groups of objects. 
+    - Transition Actions: change object class [S3 standard -> S3-IA] 
+    - Expiration Actions: Delete object or a specific version. 
+      - actions on version is more complex.
+
 S3 Standard
 S3 Standard-IA
 S3 Intelligent-Tiering
@@ -1419,19 +1501,30 @@ S3 one AZ
 S3 Glacier - Instant retrieval
 S3 Glacier - Flexible Retrieval
 S3 Glacier Deep Archieve
-lifecycle rules can move object downward not upward.
-all can move data down to any lower class, but S3 one AZ
-cannot move objects to S3 glacier - Instant view.
 
-A single rule cannot transition to Standard-IA or One Zone-IA. and then
-to glacier classes ... within 30 days (duration minimums)
+- lifecycle rules can move object downward not upward.
+- all can move data down to any lower class, but S3 one AZ
+cannot move objects to S3 glacier - Instant retrieval {be aware of that exception}.
 
-in single rule to move fro s3 to [s3-ia or S3-1-AZ-IA] rule applied after 30 days,
+- A single rule cannot transition to Standard-IA or One Zone-IA. and then
+to glacier classes ... within 30 days (duration minimums) 
+  - u can have 2 rules without 30 days gap.
+
+- in single rule to move from s3 to [s3-ia or S3-1-AZ-IA] rule applied after 30 days,
 and to move with the same rule to galcier class u need to wait another 30 days.
 
-- u can have 2 rules without 30 days gap.
 
-smaller objects can cost more on classes under standard because (minimum size).
+
+- smaller objects can cost more on classes under standard because (minimum size).
+- <img src="./images/s3/s3-lifecycle.png" width="850" height="500">
+--------
+# Policy Interpretation
+
+- start with $.Statement
+  - Effect{Allow, Deny}
+    - remember that explicit Deny always wins.
+  - Resource
+    - is the policy applied to the resource or a sub resource. {bucket, bucket's objects}
 
 ---
 
