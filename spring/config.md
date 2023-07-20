@@ -10,6 +10,9 @@
 <br>
 
 # use cases for external configuration
+- u can change the app behavior at runtime without rebuilding the application.
+
+  - logging levels
 - Database config
 - feature toggles configuration
     - under development features are enabled in testing environment, but disabled in production environment.
@@ -23,8 +26,9 @@
   - it's not part of the application code, so it can be changed without rebuilding the application.
 
 - microservice 
-    - identify common-configurations and move them to a separate repository. 
-    - u can override the common configuration in each service if needed.
+  - enforcing consistency across elastic services 
+  - identify common-configurations and move them to a separate repository. 
+  - u can override the common configuration in each service if needed.
     
 <br>
 <hr>
@@ -45,19 +49,38 @@
   - version control {git}.
   - file system{easier to modify but it's hard to mange if u go for horizontal scaling u'll need to replicate it on different host}
   - database
+    - any jdbc compliant datastore.
+    - redis
   - cloud storage {s3..}.
-
+  - vault
 # config server
 - Git Backend
-    - native support for versioning and auditing.
-    - distributed 
-        -  each server can has its own copy. if git server goes down, the distributed copy in the<br>
-        config server will act as a cache. with a worst case scenario configuration will be stale.
-    - can be served over https and ssh
-- u can force the config server to fetch the configuration from the git server on startup.
-    - spring.cloud.config.server.git.force-pull=true
-- it's also possible to configure the server to access the repo over ssh if the key is stored in the <br> neccessary location.
-    
+  - native support for versioning and auditing.
+  - distributed 
+      -  each server can has its own copy. if git server goes down, the distributed copy in the<br>
+      config server will act as a cache. with a worst case scenario configuration will be stale.
+  - can be served over https and ssh
+  - u can force the config server to fetch the configuration from the git server on startup.
+      - spring.cloud.config.server.git.force-pull=true
+  - it's also possible to configure the server to access the repo over ssh if the key is stored in the <br> neccessary location.
+
+  - /{application}/{profile}/{label-branch} <- label is optional
+  - to nest the configs in directory inside the repo u can use spring.cloud.config.server.git.search-paths= {array of paths}
+  - u can add another git repo 
+    - spring.cloud.config.server.git.repos.pattern = '*/pref'
+    - spring.cloud.config.server.git.repos.uri
+      /appName/pref/label
+      this will retrieve the config from the second repo.
+
+- file system
+  - u need to activate native profile
+    - spring.profiles.active=native
+  - default search locations
+    - classpath:/config
+    - classpath:/
+    - file:./config
+    - file:./
+  - This does not expose the application.properties from the server to all clients
 
 
 # preparing config client
@@ -97,9 +120,45 @@
 
 
 
+<hr>
 
+# Secrets Management
+- secrets are sensitive information that should be protected from unauthorized access.
+  - API keys
+  - database passwords
+  - certificates
+  - encryption keys
 
+- Encryption With Spring Cloud Config Server
+  - Native mechanism for encrypting and decrypting secrets.
+  - Support asymmetric and symmetric encryption.
+    - Asymmetric encryption
+      - public key can be securely used for encryption by infinite number of people. {more scalable}
+    - Symmetric encryption
+      - a dedicated team will be responsible for encrypting and decrypting the secrets.
+  - using cipher notation
+    - {cipher}encryptedValue
+  - benefits
+    - Auditing of all changes to secrets overtime if the server backed by git.
+    - Consistent with existing architecture .
 
+- creating secret 
+  - <img src="images/pluralsight-config3/create-secret.png" width="500" height="350">
 
+- using secret
+  - <img src="images/pluralsight-config3/using-secrets.png" width="500" height="350">
+  - to force config server to not decrypt the secrets u can set
+    - spring.cloud.config.server.encrypt.enabled=false
+      - u need to set the encryption key in the client side, to be able to decrypt the secrets.
 
-    
+# Symmetric Encryption
+- set the key as {environment variable, system property, file} : ENCRYPT_KEY
+  - don't commit the key to the source control.
+  - prefered to be at least 32 bytes
+
+# Asymmetric Encryption
+- creating self-signed key pair
+  -  keytool -genkeypair -alias mytestkey -keyalg RSA -dname "CN=config,OU=author,O=Local,L=Alexandria,C=Egypt" -keystore config-server.jks -storepass password
+- list key
+  - keytool -list -v -keystore config-server.jks
+
