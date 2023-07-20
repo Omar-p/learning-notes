@@ -465,27 +465,39 @@ DNS
 
 - a discovery service.
 - a huage distributed DB.
-- DNS Client =>
-  Resolver: swf on ur device or a server which queries DNS on ur behalf.
-  DNS zone => A part of DNS DB, Point at TLD authoritative servers where is
-  [.com] [.uk] [what data is]
-  gTLD => generic top level domain(.com .org
-  ccTLD => country-code top level domain(.uk .eg)
-  ZONEFILE => how physical database for a zone stored
-  NAMESERVER => where zonefiles are hosted, host zonefile.
+- DNS Client = > ur laptop, phone, tablet, pc.
+- Resolver: swf on ur device or a server which queries DNS on ur behalf.
+- DNS zone => A part of DNS DB, Point at TLD authoritative servers where is
+  {.com} {.uk} [what data is]
+  - gTLD => generic top level domain(.com .org
+  - ccTLD => country-code top level domain(.uk .eg)
+  - ZONEFILE => contain the records for a specific zone{ex: amazon.com} hosted by a
+    nameserver. {physical database for a zone}. how zone physically stored.
+  - NAMESERVER => where zonefiles are hosted, host zonefile.
   - we need to find the ns which host the zonefile we query for
   ***
+  - last invisible dot in a domain name is the root zone
 - DNS Root Server (hosts the DNS root Zone)
-  - DND Root Servers(13) managed by 13 different comanies
-    .2 Root hints files stored inside the resolver point to the list of Root servers IPs.
-    .3 Resolver communicate with 1 or more DNS servers to access Root Zone.
+  - DND Root Servers(13) managed by 13 different companies.
+    - they manage the root servers themselves not root zone database.
+      - {Root hints files} stored inside the resolver point to the list of Root servers IPs.
+      - Resolver communicate with 1 or more root servers to access Root Zone.
   - Root zone managed by IANA which delegate each root to another organization to manage.
+  - first, u only trust the root servers, then u trust the root servers to tell u who
+    manage the TLDs, then u trust the TLDs to tell u who manage the domains.
+      - delegation of trust.
   ***
   Client --> resolver -using root hint files--> Dns root servers
   root servers send the address of the server manage the top level root u search for (.com)
   --> then u ask for (amazon)
   --> resolver query amazon.com for www and send the result to the client
   --> client go to www.amazon.com
+  - <img src="dns-resolution.png" alt="dns-resolution" width="500" height="300"/>
+  - Root hints => provided by os vendor, stored in resolver, list of root servers IPs.
+  - Root servers => managed by 13 different companies, host the dns root zone.
+  - Root zone => managed by IANA, delegate TLDs {authoritative servers}.
+  - TLDs => managed by different companies, host the TLDs zone. 
+  
 
 ---
 
@@ -496,7 +508,6 @@ Route53 Fundamentals:
 
   - Register Domains
   - Host Zones.. managed nameserver
-
   - services provided:
     - Register Domains: - it has relationships with all the major domain registries[.com .net .io .org] - when a domain is registered a few things happen: - R53 checks with the registry for that top level domain if the domain is available - R53 create a Zonefile for the domain being registered and allocates name service
       for this zone, and these are servers which R53 create and manages which are
@@ -504,15 +515,45 @@ Route53 Fundamentals:
        and liaisng with that registry, it add these name server records into zone file
       for .org|com top level domain. using name server records which they after that
       delegate to host zone[authoritative for the domain] in the future
-      -Hosted Zone[4 servers for one individual]
-  - create and manage Zone files in AWS
-  - Hosted on four managed name servers
-  - can be public
-  - Or private .. linked to VPC(s)
-  - ..Store records (recordsets)
+  - Hosted Zone[4 servers for one individual]
+    - create and manage Zone files in AWS
+    - Hosted on four managed name servers
+    - can be public
+    - Or private .. linked to VPC(s)
+    - ..Store records (recordsets)
 
 ---
+# Records Type
 
+- Nameserver (NS) => allow delegation to occur in DNS, point to the name server
+  authoritative for a domain. {the next node in the tree}
+- A and AAA records =>   map host to IP address, A map to ipv4, AAA map to ipv6.
+  - generally, as an admin u normally create 2 records with the same name, one for ipv4
+    and one for ipv6.
+- CNAME => canonical name, map one name to another name.
+  - ex: www.amazon.com => www.amazon.co.uk 
+  - CNAME ftp, CNAME mail, CNAME www all point to the same server.
+   - cannot point to ip address, only to another name.
+- MX => mx record has a priority{smaller is highest} and value
+  - value : 
+    - it can be just a host, if it just a host no dot on right, it assume to be part of the same zone.
+      - ex: if value in google.com zone is mail, then it is mail.google.com
+    - if it contain a dot on the right, it is a fully qualified domain name.
+      - ex: if value in google.com zone is mail.other.domain.
+
+    - <img src="./images/mx-record.png" alt="mx-record" width="500" height="300">  
+- TXT Records
+  - allow u to add arbitrary text to a domain .
+  - one usage is to prove domain ownership.
+  - it can be used for spam protection.
+  - <img src="./images/dns-txt-record-ownership.png" alt="txt-record" width="500" height="300">
+
+- TTL . u can set on DNS record.
+  - if u may change ur dns record u should lower TTL value to low value before changing the record,
+   to make sure that the change is propagated quickly. no machine will cache the old record for long time.
+   - <img src="./images/dns-ttl.png" alt="dns-ttl" width="500" height="300">
+
+-------
 public Vs Private Service
 
 - <img src="./images/private-public-services.png" alt="private-public-service" width="800" height="500">
@@ -1518,6 +1559,96 @@ and to move with the same rule to galcier class u need to wait another 30 days.
 - smaller objects can cost more on classes under standard because (minimum size).
 - <img src="./images/s3/s3-lifecycle.png" width="850" height="500">
 --------
+
+# S3 Replication
+- a feature that allow u to configure a replication of obj between a source and destination.
+- CRR (Cross-Regin Replication) : replicate obj between 2 buckets in different regions.
+- SRR (Same-Region Replication) : replicate obj between 2 buckets in the same region.
+
+- to replicate between two different accounts u need to add a bucket policy to the destination bucket, 
+  to allow the source account to replicate to it. beacuse the s3 in  destination account don't trust the source account{role}.
+
+- <img src="./images/s3/s3-replication.png" width="850" height="500">
+
+- options
+  - All objects or a subset of objects.
+  - Storage class of the destination. default is same as source.
+  - Ownership of the object. default is same as source.
+  - Replication Time Control (RTC) 
+    - add gurantee that the object will be replicated within the 15 mins.
+
+- consideration for exams
+  - Not retroactive. only new objects. & versioning needs to be enabled.
+  - One-way replication. src to dest
+  - it can handle Unencrypted, SSE-S3, SSE-KMS(with extra config)
+  - src bucket owner needs permissions to obj.
+  - NO system events, Glacier or Glacier Deep Archieve.
+  - DELETES are not replicated.
+
+- why use replication...?
+  - SRR - Log Aggregation
+  - SRR - PROD and TEST Sync
+  - SRR - Resilience with strict sovereignty requirements.
+  - CRR - Global Resilience improvements
+  - CRR - Latency Reduction
+--------
+# S3 Select and Glacier Select
+- <img src="./images/s3/s3-select.png" width="850" height="500">
+- comparing retrieving the whole object vs retrieving a subset of the object.
+- <img src="./images/s3/s3-comparing-select-with-normal-retrieving.png" width="850" height="500">
+--------
+# cors
+- <img src="./images/s3/s3-cors-for-exam.png" width="850" height="500">
+---------
+# S3 EVENTS
+- allow u to create event notification configuration on  bucket.
+- s3 events u can listen to 
+  - <img src="./images/s3/s3-event-types.png" width="850" height="500">
+  - example 
+    - <img src="./images/s3/s3-event-flow.png" width="850" height="500">
+-------
+# S3 Access log
+- we have a src bucket and target bucket.
+  - target bucket is where we want to store the access logs.
+  - src bucket is where we want to enable access logs.
+- we need to enable access logs on the src bucket.
+  - using console ui, or via PUT bucket logging API.
+- logging is managed by s3 log delivery group which read the log config u set on src bucket.
+- it's a best effort feature 
+  - any change in config take hours to take effect.
+- u need to get s3 log delivery group the permission to write to the target bucket.
+- logs delivered as log file, each file consist of log records.
+- u need to personally manage the deletion of the log files.
+- <img src="./images/s3/s3-access-log.png" width="850" height="500">
+-------
+# S3 Requester Pay
+- shift the responsibility for paying for data transfer charges out of aws tp the requester.
+  - <img src="./images/s3/s3-requester-pay.png" width="850" height="500">
+
+--------
+# S3 Object Lock
+- Object Lock enabled on `new` buckets*(support req for existing)
+- Versioning is also enabled on that bucket. once enabled it cannot be disabled.
+- write once read many (WORM) model. No Delete, No Overwrite.
+- 2 modes
+  - Governance Mode : users can't overwrite or delete an object version or alter its lock settings unless they have special permissions.
+  - Compliance Mode : a protected object version can't be overwritten or deleted by any user, including the root user in your aws account.
+- 1 Retention Period
+  - specify DAYS & YEARS - A Retention Period
+    - COMPLIANCE - can't be adjusted, deleted, overwritten. no change to obj ver or retention period settings. even by root user.
+      - medical or financial records.
+    - GOVERNANCE - can be adjusted, deleted, overwritten. but only by users with special permissions.
+      - legal or business records.
+      - s3:BypassGovernanceRetention
+      - x-amz-bypass-governance-retention:true (console default) header provided in the request. to chabge the retention period.  
+
+- 2 - Legal Hold
+  - u can place a legal hold on an object version to protect it from deletion indefinitely.
+  - u can't place a legal hold on an object version that is already locked in governance mode.
+  - <img src="./images/s3/s3-legal-hold.png" width="850" height="500">
+- <img src="./images/s3/s3-object-lock.png" width="850" height="500">
+- it can be used in conjunction with each other legal hold and retention period.
+------- 
 # Policy Interpretation
 
 - start with $.Statement
