@@ -487,12 +487,13 @@ DNS
     manage the TLDs, then u trust the TLDs to tell u who manage the domains.
       - delegation of trust.
   ***
-  Client --> resolver -using root hint files--> Dns root servers
-  root servers send the address of the server manage the top level root u search for (.com)
-  --> then u ask for (amazon)
-  --> resolver query amazon.com for www and send the result to the client
-  --> client go to www.amazon.com
-  - <img src="dns-resolution.png" alt="dns-resolution" width="500" height="300"/>
+  Client 
+  <br>--> resolver -using root hint files
+  <br>--> Dns root servers root servers send the address of the server manage the top level root u search for (.com)
+  <br>--> then u ask for (amazon)
+  <br>--> resolver query amazon.com for www and send the result to the client
+  <br>--> client go to www.amazon.com
+  - <img src="images/dns-resolution.png" alt="dns-resolution" width="800" height="500"/>
   - Root hints => provided by os vendor, stored in resolver, list of root servers IPs.
   - Root servers => managed by 13 different companies, host the dns root zone.
   - Root zone => managed by IANA, delegate TLDs {authoritative servers}.
@@ -531,27 +532,35 @@ Route53 Fundamentals:
   - generally, as an admin u normally create 2 records with the same name, one for ipv4
     and one for ipv6.
 - CNAME => canonical name, map one name to another name.
+
   - ex: www.amazon.com => www.amazon.co.uk 
   - CNAME ftp, CNAME mail, CNAME www all point to the same server.
+   - <img src="images/dns-cname.png" width="800"height="500">
    - cannot point to ip address, only to another name.
-- MX => mx record has a priority{smaller is highest} and value
+- MX 
+  - mx-record is for how server can find mail server for a specific domain.
+  - when sending email to hi@google.com
+    - send mx query to google.com.
+=> mx record has a priority{smaller is highest} and value
   - value : 
     - it can be just a host, if it just a host no dot on right, it assume to be part of the same zone.
       - ex: if value in google.com zone is mail, then it is mail.google.com
     - if it contain a dot on the right, it is a fully qualified domain name.
       - ex: if value in google.com zone is mail.other.domain.
 
-    - <img src="./images/mx-record.png" alt="mx-record" width="500" height="300">  
+    - <img src="./images/dns-mx-record.png" alt="mx-record" width="800" height="500">  
 - TXT Records
   - allow u to add arbitrary text to a domain .
   - one usage is to prove domain ownership.
+    - <img src="./images/dns-txt-record-ownership.png" alt="txt-record" width="800" height="500">
   - it can be used for spam protection.
-  - <img src="./images/dns-txt-record-ownership.png" alt="txt-record" width="500" height="300">
+    - add certain information to domain indicating which entities are authorized to send email on ur behalf and if any email server receiving mail from any other servers that is a good indication this is a spam.
+  
 
 - TTL . u can set on DNS record.
   - if u may change ur dns record u should lower TTL value to low value before changing the record,
    to make sure that the change is propagated quickly. no machine will cache the old record for long time.
-   - <img src="./images/dns-ttl.png" alt="dns-ttl" width="500" height="300">
+   - <img src="./images/dns-ttl.png" alt="dns-ttl" width="800" height="500">
 
 -------
 public Vs Private Service
@@ -778,7 +787,7 @@ CloudFormation:
   - u can restrict allowed value
 - Mappings section
   - allow to create lookup table
-  - <img src="images/mapping-cfn.png" width="500">
+  - <img src="images/mapping-cfn.png" width="800" height="500">
 - Conditions section
   - based on some condition do->
 - outputs:
@@ -788,7 +797,7 @@ CloudFormation:
 -one template can create 1 to many stacks
 -for any logical instance in the stack aws create a physical one match it.
 -it's cfn job to keep logical and physical in sync.
-  - <img src="images/logical-physical-cfn.png" width="500">
+  - <img src="images/logical-physical-cfn.png" width="800" height="500">
 
 ---
 
@@ -813,7 +822,7 @@ CloudWatch{}:
   - generate statistics consumed by API & console
   - Alarm & events to SNS / autoscaling
   - CW architecture:
-    - <img src="images/cw-arch.png" width="500">
+    - <img src="images/cw-arch.png" width="800" height="500">
 
 ---
 
@@ -842,7 +851,7 @@ Shared Responsibility Model:
   os, network & firewall configuration,
   platform - applications - identity & Access management,
   Customer Data]
-- <img src="images/shared-reponsability-model.png" width="450">
+- <img src="images/shared-reponsability-model.png" width="800" height="500">
 ---
 
 HA[high availability] vs FT[fault tolerance] vs DR[disaster recovery]  
@@ -1160,7 +1169,7 @@ S3 -- S3 is private by default
   - can apply on objects & bucket -- cannot select a group of them
   - a subresource , legacy
   - inflexible & simple permission [READ|WRITE|READ_ACP|WRITE_ACP|FULL_CONTROL]
-  - <img src="images/acl-s3.png" width="550">
+  - <img src="images/acl-s3.png" width="800" height="500">
 - Block Public Access:
   - added in respone to lots of public PR disaster, where buckets were being configured
     incorrectly and being set open to the world. this resulted in a lot of data leaks.
@@ -1227,7 +1236,7 @@ move data from internet to s3 is free.
 
   - start at disable.
   - once enabled cannot be disabled.
-  - <img src="images/object-versioning-states.png" width="450">
+  - <img src="images/object-versioning-states.png" width="800" height="500">
   - we can suspend the bucket but we can enable it back.
   - without versioning modifying object will replace the object.
   - lets us store [multiple versions] of objects within a bucket.
@@ -1659,92 +1668,204 @@ and to move with the same rule to galcier class u need to wait another 30 days.
 
 ---
 
-VPC : how to design a scalabe network inside VPC.
-Considerations: - What size should the VPC be ... - Are there any Networks [we can't use] ... - VPC's, CLoud, On-premises, Partners & Vendors - try to avoid ranges which other parts use,
-which u might need to interact with. - Try to predict the future... - VPC Structure - Tiers & Resiliency (Availability) Zones. - Tier : separate application components and allow different security to be  
- applied. - Networks are often split and part of that network are assigned
-to each of this AZ.
+# VPC : 
 
-Custom VPC: - Regional Service - All AZs in the region. - Isolated network - Nothing IN or Out without explicit configuration. - if u have one resource or multiple are exploited, the impact is limited
-to the current VPC and only anything connected to it. - Flexible configuration - other cloud & on-premises - Default or Dedicated Tenancy! - control whether the resource is created inside the VPC are procisioned
-on shared hardware or dedicated hardware. - if u choose dedicated hardware on VPC level, any resource created on that VPC
-will be on dedicated hardware. increase cost. be careful, don't select it
-only if u know what u doing. - IPv4 private CIDR Blocks & [public IP]
-(when u want to make a svc available for public access).
+- how to design a scalabe network inside VPC.
+- Considerations: 
+  - What size should the VPC be ... 
+  - Are there any Networks [we can't use] ... 
+    - overlapping or duplicate ranges will make network communitcating diffcult
+    - networks
+      - VPC's, CLoud, On-premises, Partners & Vendors 
+  - try to avoid ranges which other parts use, which u might need to interact with. 
+  - Try to predict the future... 
+    - try to think about how many regions ur business will operate in, think about the highest possible number and buffer to it.
+      - <img src="images/vpc/more-consideratons.png" width="850" height="500">
+  - VPC Structure 
+  - Tiers & Resiliency (Availability) Zones. 
+    - Tier : separate application components and allow different security to be  applied{web-tier, db-tier} 
+  - Networks are often split and part of that network are assigned to each of this AZ.
 
-- 1 Primary Private IPv4 CIDR block, allocated in creation. - Minn /28 (16 IP) Max /16 (65536 IP) - optional secondary IPv4 Blocks. - optional single assigned IPv6 /56 CIDR Block.
-  DNS in a VPC - Provided by R53 - VPC `Base IP +2` Address - [enableDnsHostnames] - give instances DNS Names . - indicate whether public instances inside VPC are given dns public hostname. - [enableDnsSupport] - enables DNS resolution in VPC - whether DNS resolution inside VPC enable or disable. if e [VPC +2 is available]
+- custom vpc: a private network in aws.
+  - u need to know the range of ip addresses u want to use in advance. 
+    - it's a critical point because it cannot be change later.
+    - ranges we cannot use in our A4L scenario
+      - <img src="./images/vpc/ranges-we-cannot-use.png" width="850" height="500">
+  - Regional Service 
+  - IGW
+    - give resources in VPC public access.
+  - NGW
+    - give private instances only outgoing access.
+  - All AZs in the region. 
+  - Isolated network 
+  - Nothing <mark>IN</mark> or <mark>Out</mark> without explicit configuration. 
+  - if u have one resource or multiple are exploited, the impact is limited to the current VPC and only anything connected to it. 
+  - Flexible configuration 
+  - Hybrid Networking - 
+    - let u to connect to other cloud & on-premises network. 
+  - Default or Dedicated Tenancy! 
+    - control whether the resource is created inside the VPC are provisioned on shared hardware or dedicated hardware. 
+    - if u choose dedicated hardware on VPC level, any resource created on that VPC will be on dedicated hardware. increase cost. be careful, don't select it only if u know what u doing. 
+  - IPv4 private CIDR Blocks & [public IP] (when u want to make a svc available for public access).
 
-Subnets:
-blue means private subnets, green means public.
-AZ resilient.
-A subnetwork of a VPC - a part of VPC within a particular AZ.
-1 Subnet => 1 AZ, 1 AZ => 0+ Subnets.
-IPv4 CIDR is a subset of the VPC CIDR. must be inside the VPC CIDR.
-Cannot overlap with other subnets.
-Optional IPv6 CIDR (/64 subset of the /56 VPC - space for 256)
-Subnets can communicate with other subnets in the VPC.
-Subnet IP Addressing:
+  - 1 Primary Private IPv4 CIDR block, allocated in creation. 
+    - Min /28 (16 IP) Max /16 (65536 IP) 
+    - optional secondary IPv4 Blocks. {after creation}
+    - optional single assigned IPv6 /56 CIDR Block.
+      - the range is either allocated by aws, or u can select to use your own IPv6 addresses which u own. u cannot pick a block.
+      - IPv6s are publicly routable by default, but u need to allow it explicitly .
+  - <img src="images/vpc/vpc-sizing.png" width="850" height="500">
+# DNS in a VPC 
+  - Provided by R53 
+  - VPC `Base IP +2` Address 
+  - {enableDnsHostnames} : 
+    - give instances DNS Names .
+    - indicate whether public instances inside VPC are given dns public hostname. 
+      - if it set to true they get dns hostname.
+  - {enableDnsSupport} 
+    - enables DNS resolution in VPC 
+    - whether DNS resolution inside VPC enable or disable. if e [VPC +2 is available]
+    - enableDnsSupport first setting to check if u have dns issue
+
+<br>
+<br>
+
+- recommandation for structuring your VPC.
+  - 3-subnet + 1 for future
+  - 3-tier + 1 spare
+    - 16 subnet in /16 network will result in 16 /20 network{4091 IPS}.
+  - <img src="images/vpc/vpc-structure.png" width="850" height="500">
+
+<br>
+<br>
+
+# Subnets:
+- vpc services run from subnet to directly from vpc.
+- blue means private subnets, green means public.
+- located in one AZ.
+- AZ resilient.
+  - created in on AZ and it can never be changed
+- A subnetwork of a VPC 
+  - a part of VPC within a particular AZ.
+- 1 Subnet => 1 AZ, 1 AZ => 0+ Subnets.
+- IPv4 CIDR is a subset of the VPC CIDR. must be inside the VPC CIDR.
+  - Cannot overlap with other subnets.
+- Optional IPv6 CIDR (/64 subset of the /56 VPC - space for 256)
+- Subnets can communicate with other subnets in the VPC.
+
+# Subnet IP Addressing:
 
 - Reserved IP addresses (5 in total).
 - 10.16.16.0/20 (10.16.16.0=> 10.16.31.255)
 - first address is a Network address (10.16.16.0)
-- Network +1 (10.16.16.1) - VPC Router, logical network device
-  which move data between subnets and in/out VPC if it configured
-  to allow that
+- Network +1 (10.16.16.1) 
+  - VPC Router, logical network device  which move data between subnets and in/out VPC if it configured to allow that
 - `Network +2` (10.16.16.2) - Reserved (DNS\*) <- reserved in every subnet.
 - `Network +3` (10.16.16.3) - Reserved Future Use
 - Broadcast address 10.16.31.255 (Last IP in subnet)
-  VPC has a configuration object apply to it called a DHCP option set.
-  how computing device recieve ip address automatically. 1 DHCP option set
-  apply to VPC at one time and this configuration flows through to subnets
-  it control things like DNS service, Ntp services... cannot be updated
-  u can create new one and change VPC allocation to this new one.
-  2 options u [Auto assign public IPv4, IPv6 ]
+  - NOT SUPPORTED INSIDE VPC, BUT IT RESERVED
+
+<hr>
+
+# DHCP Options Set
+- VPC has a configuration object apply to it called a DHCP option set.
+    - how computing device recieve ip address automatically. 
+    - 1 DHCP option set  apply to VPC at one time.
+      - this configuration flows through to subnets .
+      -  it control things like DNS service, Ntp services... 
+- cannot be updated
+ -  u can create new one and change VPC allocation to this new one.
+- 2 options u [Auto assign public IPv4, IPv6 ]
 
 ---
 
-bASTION hOST[JumpBox] - an instacne in a public subnet. - used to manage incoming management connection. - then access internal VPC resource. - used as management point or entry point for private only VPC. - often the only way IN to a highly secure VPC. - can be configured to only accept connection from
-certain IP addresses. to authenticate with ssh.
-or to integrate with our own on premises identity server.
+# bASTION hOST[JumpBox] 
+- an instacne in a public subnet. 
+- used to manage incoming management connection. 
+- access internal VPC resource. 
+- used as management point or entry point for private only VPC. 
+- often the only way IN to a highly secure VPC.
+- can be configured to only accept connection from certain IP addresses. <br> to authenticate with ssh. or to integrate with our own on premises identity server.
 
 ---
 
-VPC Router - Every VPC has a VPC Router - highly available.
-[move traffic from somewhere to somewhere else]
-Runs in all AZs the VPC uses, - In every subnet .. `network+1` address. - the default config : Routes traffic between subnets in that VPC. - Controlled by `route table` each subnet has one. - specify what to do with traffic when it leave the subnet. - A VPC has a Main route table - subnet default. - VPC can only have one Route table, but Route table can associated with many VPC -
-IGW
-.[Region Resilient] gateway attached to a VPC. - 1 VPC = 0 or 1 IGW, 1 IGW = 0 or 1 VPC. - Runs from within the AWS public Zone. - GW traffic between the VPC and the Internet or AWS
-public Zone (S3..SQS...SNS..etc) - Managed - Aws handles performance. it simply works! - when attached to VPC we use it as a target in the route table. -
-1 Create IGW
-2 Attach IGW to VPC
-3 Create Custom RT
-4 Associate RT
-5 Default Routes [0.0.0.0/0 & ::/0] IGW
-6 Subnet allocate IPv4
-no if there is no security limitation any services in subnet with public ip
-can communicate with internet and vice versa.
+# VPC Router 
+- Every VPC has a VPC Router 
+- highly available.
+- [move traffic from somewhere to somewhere else]
+- Runs in all AZs the VPC uses, - In every subnet .. `network+1` address. 
+- the default config : Routes traffic between subnets in that VPC. 
+- Controlled by `route table` each subnet has one. 
+- specify what to do with traffic when it leave the subnet. 
+- A VPC has a Main route table 
+  - subnet default. 
+  - VPC can only have one Route table, but Route table can associated with many VPC 
+  - Target #local means the dest in the VPC itself
+  - local routes have higher priority
+
+  
+# IGW
+- Region Resilient gateway attached to a VPC. 
+- 1 VPC = 0{private} or 1 IGW, 1 IGW = 0 or 1 VPC. 
+- Runs from within the AWS public Zone. 
+- IGW traffic between the VPC and the Internet or AWS public Zone (S3..SQS...SNS..etc) 
+- Managed 
+- Aws handles performance. it simply works! 
+- when attached to VPC we use it as a target in the route table. 
+-
+<ol>
+<li> Create IGW </li>
+<li> Attach IGW to VPC </li>
+<li> Create Custom RT </li>
+<li> Associate RT </li>
+<li> Default Routes [0.0.0.0/0 & ::/0] IGW </li>
+<li> Subnet allocate IPv4 </li>
+</ol>
+
+- if there is no security limitation any services in subnet with public ip can communicate with internet and vice versa.
 --
-IPv4 Addresses with a IGW - IGW maintain a recorde mapping [private:public] - os configured with the private ipv4 in the EC2. \*\*\*\* - ipv6 is natively public - IGW manage the translation of the ip dest/src private <-> public.
+
+- IPv4 Addresses with a IGW 
+  - IGW maintain a recorde mapping [private:public] 
+  - os configured with the private ipv4 in the EC2. 
+    - OS don't know about the public ip
+    - public ip never touch the instance
+    - <img src="images/vpc/igw-pub-private.png" width=600 height=320>
+  - \*\*\*\*  ipv6 is natively public 
+  - IGW manage the translation of the ip dest/src private <-> public.
 
 ---
+<hr>
 
-Every `connection` has two parts - Request(initiation) and Response.
-1 - The client picks a temporary(ephemeral) source port,
-1024-65535(Depends On Os)
-2 - The Client 'Bobs Labptop' initiates a connection to the server on
-a well-know Destination port HTTPS tcp/443
-3 - The server responds using source port of tcp/443 and the Destination
-ephemeral port picked by the client.
+- Every `connection` has two parts 
+  - Request(initiation) and Response.
+  - <img src="images/vpc/in-out-req.png" width=600 height=320>
+<ol> 
+<li> The client picks a temporary(ephemeral) source port, 1024-65535(Depends On Os) </li>
+<li> The Client 'Bobs Labptop' initiates a connection to the server on a well-know Destination port HTTPS tcp/443 </li>
+<li> The server responds using source port of tcp/443 and the Destination ephemeral port picked by the client. </li>
+</ol>
 
-Directionality...Inbound or outbound depends on perspective.  
- Stateless vs Stateful Firewall. - stateless firewalls: - see the two part of the connection [Request/Response] each as
-a separate connection. allowing or denying them need 2 RULES. - one for each [INBOUND/OUTBOUND] - with stateless firewalls remember the RESPONSE EPHEMERAL PORTS ..
+- Directionality
+  - Inbound or outbound depends on perspective.  
+  - <img src="images/vpc/directionality.png" width=600 height=320>
+# Stateful and Stateless firewall.
+ 
+- stateless firewalls: 
+  - it doesn't understand the state of the connection.
+    - req & resp for the same are different.
+  - see the two part of the connection [Request/Response] 
+    - each as a separate connection. allowing or denying them need 2 RULES. 
+  - one for each [INBOUND/OUTBOUND] 
+  - with stateless firewalls remember the RESPONSE EPHEMERAL PORTS .. so u allow the whole range.
 it's NOT THE WELL KNOWN APP PORT. so we have to allow the full
-range of ephemeral ports to any destinations. - stateful firewalls: - stateful means lower admin overhead. - A Stateful firewall is Intelligent enough to identitfy the
-REQUEST and RESPONSE components of a connection as being
-related. - ALLOWING the REQUEST (INBOUND or OUTBOUND), means the RESPONSE
-is AUTOMATICALLY allowed. - no need to allow the full range of ephemeral ports.
+range of ephemeral ports to any destinations.
+
+- stateful firewalls: 
+  - stateful means lower admin overhead. 
+  - A Stateful firewall is Intelligent enough to identitfy the REQUEST and RESPONSE components of a connection as being related. 
+  - ALLOWING the REQUEST (INBOUND or OUTBOUND), means the RESPONSE is AUTOMATICALLY allowed. 
+  - no need to allow the full range of ephemeral ports.
 
 ---
 
