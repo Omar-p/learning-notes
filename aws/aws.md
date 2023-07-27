@@ -908,144 +908,166 @@ FT:
 
 ---
 
-Identity policies(also know as policy documents)[json](Sid, effect, resource, action):
+Identity policies(also know as policy documents)[json]
+  - (Sid : statement id, effect: Allow|Deny, resource, action: READ|WRITE):
 
 - get attached to identities inside AWS
-- set of security statements to AWS, it grants access or deny access
-  to AWS products and features to any identitiy which use that policy.
-- rules: 1- explicit deny 2- explicit allow 3- Default Deny(implicit) [deny, allow, deny]
-- except the root account, aws identity start off with no access to any
-  AWS resources. if they're not allowed access, they have no access.
+- set of security statements to AWS, 
+  -it grants access or deny access to AWS products and features to any identitiy which use that policy.
+
+- rules: 
+  - explicit deny 
+  - explicit allow 
+  - Default Deny(implicit) 
+- [deny, allow, deny]
+
+- except the root account, aws identity start off with no access to any  AWS resources. if they're not allowed access, they have no access.
+
 - inline policy vs managed policy[reusable, low management overhead]:
-  instead of given each member identity it's own policy(inline), we create one managed
-  policy and attach that policy to any identity. managed policy fit when u have set
-  of common access right to different identities.
-  - inline policy used in exceptional allow or deny.
+  - instead of given each member identity it's own policy(inline), we create one managed  policy and attach that policy to any identity. managed policy fit when u have set  of common access right to different identities.
+- inline policy used in exceptional allow or deny.
 
 ---
 
-IAM Users are an identity used for anything requiring long-term AWS access e.g. Humans,
-Application or service accounts.
+- IAM Users are an identity used for anything requiring long-term AWS access e.g. Humans, Application or service accounts.
 
 - Principal: represents an entity trying to access an AWS account. [initially unidentified]
-  - need to authenticate against an identity within IAM. prove to IAM that it is an identity
-    that it claims to be.
+  - need to authenticate against an identity within IAM. prove to IAM that it is an identity  that it claims to be.
     - principal goes through the auth process --> authenticated identity
 
-ARN amazon resource name:
+# ARN amazon resource name:
 
-- uniquely identify resources within any AWS accounts.
+- uniquely identify single resources within any AWS accounts.
 
-arn:partition:service:region:account-id:resource-id
-arn:partition:service:region:account-id:resource-type/resourc-id
-arn:partition:service:region:account-id:resource-type:resource-id
+  - arn:partition:service:region:account-id:resource-id
+  - arn:partition:service:region:account-id:resource-type/resourc-id
+  - arn:partition:service:region:account-id:resource-type:resource-id
 
-ex:
-arn:aws:s3:::cargifs <-- identify bucket
-arn:aws:s3:::cargifs/\* <-- identify objects in the bucket
+- ex:
+- arn:aws:s3:::cargifs <-- identify bucket {access & action}
+- arn:aws:s3:::cargifs/\* <-- identify objects in the bucket
 
 some field can be ignored bec
 
 ---
 
-IAM USERS:
+# IAM USERS [EXAM POWERUP]:
 
 - 5000 IAM Users per account
 - IAM user can be member of 10 groups.
 - This has a system design impact.
-- IAM Role & Identity federation fix this.
+- IAM Roles & Identity Federation fix this
+- Internet-scale application
+  - use federation or user Roles.
 
 ---
 
-IAM groups:
+# IAM groups:
 
-- IAM Groups are containers for Users, they exist to make organizing large
-  sets of IAM users easier. u cannot log into a group.
-- no limit on how many members can be in the groups.. but there is a limit for
-  #of IAM users in the account -> 5000 .
+- IAM Groups are containers for Users, they exist to make organizing large sets of IAM users easier.
+  - u cannot log into a group.
+  - iam group have no credentials on their own.
+- no limit on how many members can be in the groups.. but there is a limit for: 
+  - #of IAM users in the account -> 5000 .
 - No Nesting : no groups within groups.
 - limit 300 groups per account. but this can be increased with a support ticket.
+- IAM user can be a member of multiple group.
+- groups can have policy attached to them: Inline, Managed.
+  - aws merge all policies that atttached to the user or group the user in. remeber : deny, allow, deny.
+- there is a built in all-user-group inside aws iam: <- check google
 
-* resources policy can reference identities. so for example, a bucket could have
-  a policy associated with that bucket and that policy could allow [user] access
-  to that bucket. it controls access to a specific resource and allows or denies
-  identities to access that bucket. it does this by referencing these identities,
-  and it reference these identities using ARN - Users and IAM roles can be referenced
-  in this way. so a policy on a resource can reference IAM Users and IAM roles by using
-  the ARN. so bucket could give access to one or more users or it could give access
-  to one or more roles. But,
-  Groups are not a true identity. they can't be referenced as a peincipal in a
-  policy .
+- resources policy can reference identities. so for example, a bucket could have
+  - a policy associated with that bucket and that policy could allow [user] access to that bucket. it controls access to a specific resource and allows or denies identities to access that bucket. 
+  - it does this by referencing these identities, and it reference these identities using ARN 
+    - Users and IAM roles can be referenced in this way. 
+  - so a policy on a resource can reference IAM Users and IAM roles by using the ARN. so bucket could give access to one or more users or it could give access to one or more roles.
+  - <b> But, Groups are not a true identity. they can't be referenced as a principal in a policy. </b>
+    - a resource policy cannot grant access to an iam group..
+  - iam groups allow permission to be assigned to them and users in these groups inherit those permissions.
 
 ---
 
-IAM Roles:
+# IAM Roles:
 
-- assigned to multiple aws users, services - inside or outside the aws account [unknown number]
-- if u cannot determine the #of principles who will use the identity then IAM ROLE is a good
-  candidate.
-- or we have mor than 5000 principles[limit for IAM USERs], IAM ROLE is a also a candidate.
+- assigned to multiple aws users, services 
+- inside or outside the aws account [unknown number]
+  - if u cannot determine the #of principles who will use the identity then IAM ROLE is a good  candidate.
+  - or we have mor than 5000 principles[limit for IAM USERs], IAM ROLE is a also a candidate.
 
-* IAM ROLES are assumed.. u become that role for a period of time then stop.
-* IAM ROLE don't identify a specific user, it just provide a certain level of permission
-  inside the AWS account.
+- IAM ROLES are assumed.. u become that role for a period of time then stop.
+- IAM ROLE don't identify a specific user, it just provide a certain level of permission inside the AWS account for a short period of time.
 
-- roles are real identity and can be refrenced within the resource policies
-  any thing assume the role can access what the role can access.
+- roles are real identity and can be refrenced within the resource policies any thing assume the role can access what the role can access.
 
-IAM ROLE has 2 policy: Trust policy and permission policy.
-Trust Policy: - specify identities can assume that role. \* can specify users or service inside the account or outside.
-and even can allow an anonymous usage of that role and
-other type of identity such as fb, google, and twitter. - if a role get assumed for entity in the trust policy, AWS generate temporary
-security credentials by STS[secure token service] sts:AsumeRole, and these
-are made available to the identity which assumed
-the role. [ temporary security credentials] are like access keys[time limited]. - after expiration of the credentials. the identity need to renew them by
-assuming the role.
-Permissions Policy: - every time temporary credentials is used , the access is checked against
-this permission policy. - what is allowed to access by identity in the trust policy.
+- IAM ROLE has 2 policy: 
+  - Trust policy and permission policy.
+    - Trust Policy
+      - specify identities can assume that role. \* can specify users or service inside the account or outside. <br> and even can allow an anonymous usage of that role and other type of identity such as fb, google, and twitter. 
+        - if a role get assumed for entity in the trust policy, AWS generate temporary security credentials by STS[secure token service] sts:AsumeRole, <br>and these are made available to the identity which assumed the role. [ temporary security credentials] are like access keys[time limited]. 
+        - after expiration of the credentials. the identity need to renew them by assuming the role.
+    - Permissions Policy: 
+      - every time temporary credentials is used , the access is checked against this permission policy. 
+      - what is allowed to be accessd by the (IAM ROLE)  in the trust policy.
 
-when to use: - aws services run on your behalf and they need access rights to
-perform certain actions.
+  - roles are being used within aws organization to allow us to log into other accounts in the organization without having to log in again. 
 
-- AWS Lambda[start/stop EC2, do real-time data processing]. - so function invokation need to have the permissions to perform. - rather than hardcoded aws access key in the code we can
-  a role known as (Lambda Execution ROle)
-  -trust policy: trust lambda service
-  -permission policy: grant access to the needed services.
-  when execute: first assume role [sts:AssumeRole] generate credentials
-  second, access the resources using the temp credentials
-  --if u hardcoded aws access key instead, it's a security risk,
-  u will need to change them if u rotate the access key.
+- when to use: 
+  - aws services run on your behalf and they need access rights to perform certain actions.
+
+- AWS Lambda[start/stop EC2, do real-time data processing]. 
+  - so function invokation need to have the permissions to perform.
+  - rather than hardcoded aws access key in the code we can a role known as (Lambda Execution Role) which has a trust policy <br> which trust aws lambda.
+    - lambda can assume that role.
+    - permission policy: grant access to the needed services.
+  - when execute: 
+    - 1- assume role [sts:AssumeRole] generate credentials
+    - 2- access the resources using the temp credentials
+  - if u don't use the role u will hardcode aws access key instead, it's a security risk, <br>  u will need to change them if u rotate the access key.
+  - u don't know the #lambda so it's a good candidate for AWS ROLE.
+
+  <hr>
 
 - Break Glass For Key
 
-  - when the default conditions require a certain level of permissions,
-    and u want to provide more in emergency situation. u can define role for
-    that. and the role is assumed when it is required for that situation.
+  - when the default conditions require a certain level of permissions, <br>    and u want to provide more in emergency situation. u can define role for <br>   that. and the role is assumed when it is required for that situation.
+    - the access to that role will be logged.
+      - so u'll know if it misused.
 
-- we have co-operate with existing identities and we need to offer SSO,
-  or we have more 5000 identities.
-  external identities cannot be used directly in aws. -- we need to
-  allow IAM Role inside aws account to be assumed by one of the external
-  identities, after sts:assumeRole they can know access the resources
-  defined in the permission policy. [ID federation].
+<hr>
 
+- we have co-operate with existing identities and we need to offer SSO, <br> or we have more 5000 identities.
+  - external identities cannot be used directly in aws. 
+    - we need to allow IAM Role inside aws account to be assumed by one of the external identities, after sts:assumeRole they can know access the resources  defined in the permission policy. [ID federation].
+      - u manage small #accounts|Identities{iam role} and many account can access.
+    - it's one of a major use cases to IAM ROLE.
+
+<hr>
 - developing mobile app with many users.  
-  when the app need to store or retrieve data from aws service [DynamoDB],
-  we cannot create IAM USER for each app user. we can fix it using process
-  called (web identity federation). use IAM ROLE.
+  - when the app need to store or retrieve data from aws service [DynamoDB],<br>  we cannot create IAM USER for each app user. we can fix it using process ,<br>  called (web identity federation). 
+    - use IAM ROLE.
 
   - if u use web identities [google, fb, twitter] we can allow these identities
     to assume an IAM ROLE based on ROLE TRUST POLICY.
-    advantages: - no aws credential on the app, can scale, using existing customer login.
-
+    - advantages: 
+      - no aws credential on the app, can scale, using existing customer login.
+      - u can scale to 100kk's of accounts
+<hr>
 - Cross Accounts Access:
-  - if u want users from other AWS account to access service from ur account,
-    u can create IAM ROle for that. and the accounts from other account can
-    assume it.
-
+  - if u want users from other AWS account to access service from ur account, <br>   u can create IAM ROle for that. and the accounts from other account can assume it.
 ---
 
-AWS organization:
+# Service-linked roles:
+- special tye of iam role
+- IAM ROLE linked to a specific AWS service
+  - provide set of predefined permission by a service.
+    - providing permission that a service needs to interact with other Aws service on ur behalf.
+  - service might create/delete the role or allow u to during the setup or within IAM
+- You can't delete the role until it's no longer required.
+  - <img src="images/iam/service-linked-role-mgmt.png" >
+  - <img src="images/iam/service-linked-role.png" >
+---
+
+# AWS organization:
 
 - without it, each account will have its own IAM users, and its own payment method.
 - how to manage many aws accounts.
@@ -1073,27 +1095,35 @@ AWS organization:
 
   - we log in to this account and using ROLE Switch to access the others.
 
-- Service Control Policies
+<br>
+<br>
 
+- Service Control Policies
   - accounts permissions boundaries
   - they limit the account (including account root user) can do.
-    - u can never afffect the account root user, but if u restrict the account
-      u also affect the root user.
+    - u can never afffect the account root user, but if u restrict the account itself u also affect the root user.
   - feature of organization to restrict members account
   - they don't grant any permissions, only restrict.
-  - json document can attach to the root to affect all acc in the organization
-    or can attach to a specific OU or to individual account.
-  - management account cannot be restricted by SCP.
+  - json document can attach to : 
+    - the root to affect all acc in the organization or
+    - can attach to a specific OU or to individual account.
+  - <b> management account cannot be restricted by SCP. </b>
 
+  - u can use it in 2 ways : {block by default and allow certain services or allow by default and block certain services}
+  
   - Allow list vs Deny list
-    - FullAWSAccess by default and u deny what u want.
-    - most go for deny all because aws will add new services to deny all[remove FullAWSAccess]
+    - Allow list : 
+      - FullAWSAccess: allow access to all svc by default and u deny what u want.
+
+    - deny all
+      - remove FullAWSAccess
+      - ![](./images/iam/scp-deny-all.png)
+    - must go for deny all because aws will add new services. deny all[]
       - explicit allow services.
     - to reduce admin overhead of allowing each required service u can allow all and deny
       what u want.
   - only allowed service in both Identity policies in account and SCP will be allowed.
-  - allowed in SCP but not granted!!!
-  - Identity policies allow's access but only what allowed in SCP () will be allowed.
+    - <img src="images/iam/effective-permissions-scp-id.png">
 
 ---
 
@@ -1665,7 +1695,14 @@ and to move with the same rule to galcier class u need to wait another 30 days.
     - remember that explicit Deny always wins.
   - Resource
     - is the policy applied to the resource or a sub resource. {bucket, bucket's objects}
-
+  - NotAction
+    - any action other than the included ones.
+    - ['cloudfront:*', 'iam:*', 'route53:*', 'support:*'] <- global services generally u interact with as they in us-east-1 from logging prespective.
+  - condition
+    - policy only apply if the it's evaluated to true.  
+- identify any Not before considering a solution
+- if u have single statement with deny. then generally it will be used in conjunction with another policy.  
+  - because in it's own it does nothing because the default is implicit deny.
 ---
 
 # VPC : 
@@ -1869,58 +1906,98 @@ range of ephemeral ports to any destinations.
 
 ---
 
-NETWORK ACCESS CONTROL LISTs (NACL) - can be though of as a traditional firewall available within AWS VPC. - Every subnet has an associated NACL, filter traffic crossing the subnet
-boundary INBOUND or OUTBOUND. - connections within a subnet aren't impacted by NACLs. - contain a #of rules [Inbound/Outbound] rules. Inbound rules match traffic
-ENTERING the subnet, Outbound rules match traffic LEAVING the subnet. - NACLs are stateless doesn't matter if it's req/res. what is important is
-the direction. - Rules are proccessed in order, lowest rule number first. Once a match occurs,
-Processing stops. \* is an implicit DENY if nothing else matches.
+# NETWORK ACCESS CONTROL LISTs (NACL)
+- can be though of as a traditional firewall available within AWS VPC. 
+- Every subnet has an associated NACL, filter traffic crossing the subnet boundary INBOUND or OUTBOUND. 
+- connections within a subnet aren't impacted by NACLs. 
+- contain a #of rules [Inbound/Outbound] rules. 
+  - Inbound rules match traffic 
+    - ENTERING the subnet, 
+  - Outbound rules 
+    - match traffic LEAVING the subnet. 
 
-- Because NACLs are stateless each communication needs 1 REQUEST rule
-  and 1 RESPONSE rule. - These rule-pairs (app port & ephemeral ports) are needed on each NACL
-  for each communication type which occurs 1) within a VPC, 2) TO a VPC 3) FROM a VPC  
-   Default NACL
+- NACLs are stateless doesn't matter if it's req/res. what is important is the direction. 
+- Rules are proccessed in order, lowest rule number first. Once a match occurs, Processing stops. \* is an implicit DENY if nothing else matches.
 
+- Because NACLs are stateless each communication needs 1 REQUEST rule  and 1 RESPONSE rule. 
+  - These rule-pairs (app port & ephemeral ports) are needed on each NACL for each communication type which occurs 
+    - 1) within a VPC, 
+    - 2) TO a VPC 
+    - 3) FROM a VPC  
+   
+# Default NACL
 - A VPC is created with a Default NACL
-- INBOUND and OUTBOUND rules have the implicit deny(\*) and an ALLOW ALL
-  rules. <- reduce admin overhead.
+- INBOUND and OUTBOUND rules have the implicit deny(\*) and an ALLOW ALL   rules. <- reduce admin overhead.
 
-Custom NACLs
+# Custom NACLs
 
-- can be created for a specific VPC and are initially associated with NO
-  subnets.
+- can be created for a specific VPC and are initially associated with NO  subnets.
 - They only have 1 INBOUND rule the implicit (\*) DENY.
 - They only have 1 OUTBOUND rule the implicit (\*) DENY.
-  \*\* ALL traffic is DENIED.  
-  RECAP
-- [NACL] stateless - REQUEST and RESPONSE seen as different.
+  - ALL traffic is DENIED.  
+# RECAP
+- [NACL] stateless 
+  - REQUEST and RESPONSE seen as different.
 - Only impacts DATA CROSSING SUBNET BOUNDARY.
 - NACLs can EXPLICTLY ALLOW and DENY.
-- Deals with IPs/CIDR, Ports & Protocols - no logical resources.
-- NACLs cannot be assigned to AWS resources - only subnet.
+- Deals with IPs/CIDR, Ports & Protocols 
+  - no logical resources.
+- NACLs cannot be assigned to AWS resources 
+  - only subnet.
 - Use together with Security Group[allow] to add explicit DENY (Bad IPs/Nets)
 - Each subnet have one NACL (Default or Custom).
 - A NACL can be associated with MANY Subnets.
 
 ---
 
-VPC Security Groups (SG) - STATEFUL - detect response traffic automatically. - Allowed (IN or OUT) request = allowed respone. - LIMITATION: NO EXPLICIT DENY .. Only ALLOW or implicit DENY.  
- ... cannot block specific bad actors. - Supports IP/CIDR ... and logical resources.
-.. including other security groups AND ITESELF. - Attached to ENI's[Elastic netowrk interface] not instacnes
-(even if UI shows it this way).
-(SG) Logical Reference: - we have WEB[instances] and APP[instances]. - we allow all inbound traffic in SG of WEB. - WEB need to access APP in [tcp:1337] to allow that in SG of APP? - add the ip of web instances ? add the whole subnet ? both are not
-taking advantages of (SG) Logical References. \* we can reference to allow inbound traffic on port 1337 from any
-resources the WEB-SG assigned to it.
-and even when we scale WEB instances the new one can access.
+# VPC Security Groups (SG) 
+- STATEFUL 
+  - detect response traffic automatically. 
+  - u don't need to allow ephemeral ports.
+- Allowed (IN or OUT) request = allowed respone. 
+- LIMITATION: 
+  - NO EXPLICIT DENY .. Only ALLOW or implicit DENY.  
+    - cannot block specific bad actors. 
+      - so if u need to deny a specific ip in allowed range u need to use NACLs in conjunction with SGs.
+    - Supports IP/CIDR ... and logical resources.
+- including other security groups AND ITESELF. 
+  - not attached to instances or subnet.
+  - Attached to ENI's[Elastic netowrk interface] not instacnes (even if UI shows it this way).
+- (SG) Logical Reference: 
+  - we have WEB[instances] and APP[instances]. 
+  - we allow all inbound traffic in SG of WEB. 
+  - WEB need to access APP in [tcp:1337] to allow that in SG of APP? 
+    - add the ip of web instances ? add the whole subnet ? both are not
 
-    Self-References:
-      - // private subnet in VPC with changing number of resources.
+<br>
+
+- taking advantages of (SG) Logical References. 
+  - we can reference sg{u now refrence any instances in this sg} to allow inbound traffic on port 1337 from any resources the WEB-SG assigned to it.
+  -  <img src="images/vpc/sg-logical-ref.png" width=800 height=320>
+
+- and even when we scale WEB instances the new one can access.
+- Self-References:
+  - // private subnet in VPC with changing number of resources.
+  - <img src="images/vpc/sg-self-ref.png" width=800 height=320>
 
 ---
 
-NAT and NAT gateway[giving a private resource a outgoing access to internet]: - A set of processes -remapping SRC or DST IPs.
+NAT and NAT gateway[giving a private resource an outgoing access to internet]: 
+  - A set of processes , remapping SRC or DST IPs.
+  - AZ resilient.
+  - (IP Masquerading) 
+    - hiding CIDR Blocks behind one IP [many private to one public] 
+    - Give private CIDR range [outgoing] internet\* access.
+    - don't support security groups. only nacls.
+  - historical u can use ec2 instance and configure it as NAT.
+    - u need to Disable src/dest checks in ec2 instance. to not to drop the traffic.
+    - <img src="images/vpc/nat-instance-vs-natgw.png" width=800 height=320>
 
-- (IP Masquerading) - hiding CIDR Blocks behind one IP [many private to one public] - Give private CIDR range [outgoing] internet\* access.
-
+  - <img src="images/vpc/natgw.png" width=800 height=320>
+    - charge per hour Duration & Data Volume.
+  
+  - IPV6
+    - <img src="images/vpc/natgw-ipv6.png" width=800 height=320>
 ---
 
 ====
