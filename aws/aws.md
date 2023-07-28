@@ -1698,6 +1698,8 @@ and to move with the same rule to galcier class u need to wait another 30 days.
   - NotAction
     - any action other than the included ones.
     - ['cloudfront:*', 'iam:*', 'route53:*', 'support:*'] <- global services generally u interact with as they in us-east-1 from logging prespective.
+    - deny any action from any region other than {'eu-west-1','ap-southeast-2'} excepting the global service.
+      - <img src="images/resource-evaluation-02.png">
   - condition
     - policy only apply if the it's evaluated to true.  
 - identify any Not before considering a solution
@@ -2001,49 +2003,51 @@ NAT and NAT gateway[giving a private resource an outgoing access to internet]:
 ---
 
 ====
-EC2
+# EC2
 ====
-AWS NITRO
+- AWS NITRO
 
 ---
 
-Virtualization 101:
+# Virtualization 101:
 
 - Running more than one OS on one physical machine.
-  TYPES:
-- Emulated Virtualization[SWF]:
-  - host OS/Hypervisor manage the [unmodified]guest OS.
-  - each privilage call from guest kernel using Binary Translation (on the fly)
-    translated to be made by the Hypervisor.
-  - inefficient because hardware doesn't aware of it.
-- Para-Virtualization:
-  - each vm run a modified OS for a specific Hypervisor.
-  - these modified part instead of making a privilaged call,
-    make a [hyper-call].
-  - more efficient than Emulated OS because now the host OS aware of it.
-- Hardware assisted V:
+  - TYPES:
+    - Emulated Virtualization[SWF]:
+      - host OS/Hypervisor manage the [unmodified]guest OS.
+      - each privilage call from guest kernel using Binary Translation (on the fly)translated to be made by the Hypervisor.
+      - inefficient because hardware doesn't aware of it.
+    - Para-Virtualization:
+      - each vm run a modified OS for a specific Hypervisor.
+      - these modified part instead of making a privilaged call, make a [hyper-call]: calling the hypervisor rather than the hardware.
+      - more efficient than Emulated OS because now the host OS aware of it.
+    
+    - Hardware assisted V:
+      - hardware aware Virtualization, cpu provide a special intructions for Hypervisor to manage VM.
+      - need to manage access to the devices, not effiecient in case of I/O intensive workload. unless u have physical nic for each VM u'll get some level of delay.
 
-  - hardware aware Virtualization, cpu provide a special intructions for
-    Hypervisor to manage VM.
-  - need to manage access to the devices, not effiecient in case of I/O intensive
-    workload.
-
-  * SR-IOV virtualization aware on the devices level [Network interfaces..],
-    now, even in intensive I/O the VM will perform well.
-    - EC2 enhanced networking.
+      - <b>SR-IOV virtualization</b> aware on the devices level [Network interfaces..], now, even in intensive I/O the VM will perform well.        - EC2 enhanced networking.
 
 ---
 
-EC2 Architecture: - EC2s are VM (OS+Resources) - EC2 instances run on EC2 Hosts. - [Shared Host] or [Dedicated Host],
-u don't pay for instances on Dedicated. u pay for entire host. - AZ Resilience. - can connect to EBS [elastic block store] in the same AZ - No cross sharing to instances in different AZ.
-EC2 [Store, Storage Network, Data Network]:
-primary Elastic Network interface in subnet in the same AZ
-mapped to physical hardware of EC2
-EC2 can have different Network Interface even in different subnets.[SAME AZ].
+# EC2 Architecture: 
+- EC2s are VM (OS+Resources) 
+- EC2 instances run on EC2 Hosts. 
+  - [Shared Host] or [Dedicated Host], u don't pay for instances on Dedicated. u pay for entire host. 
+
+- AZ Resilience, AZ Fails, Host Fails, Instance fails.
+  - can connect to EBS [elastic block store] in the same AZ 
+  - No cross sharing to instances in different AZ.
+
+- EC2 [Store, Storage Network, Data Network]:
+  - when an instance are provisioned into a specific subnet within a VPC, it's primary elastic network interface is provisioned in that subnet which map to physical hardware on EC2 host.
+    - instances can have multiple network interfaces, even in different subnets. but the subnets must be in the same AZ.
+  - Storage  :
+    - ebs, run inside AZ, can be attached to one instance at a time.
 
 - EC2 instance run on the same host unless, host fails [maintainance/failure..]
-  instance stopped the started again. --> will started in the same AZ but
-  in different host.
+  - instance stopped the started again. --> will started in the same AZ but in different host.
+
 - What's EC2 Good for ?
   - traditional OS+Application compute need.
   - Long Running Compute.
@@ -2051,11 +2055,23 @@ EC2 can have different Network Interface even in different subnets.[SAME AZ].
   - Server Style Applciation.
   - Migirated app workload or Disaster Recovery.
   - either [burst] or [steady-state] load.
+- general advice : pick ec2 by default and only move away if u have a specific requirements.
 
-Launch Configurations[LC] & Launch Templates[LT] Recommanded.: - AutoScaling group utilize them . - perform the same task - allow the configurations of ec2 instance to be defined in ADVANCE - documents let us configure : AMI, Instance Type, Storage & KeyPair - Networking configuration and sG the instances use. - Userdata & IAM ROLE - Both are not editable - defined once. LT has versions. - LT provide newer features - including T2/T3 Unlimited, Placement Groups,
-Capacity Reservations, Elastice Graphics.
+<br>
 
-    * LC has one use as part of autoscaling groups. LC provide configurations of ec2 instances.
+# Launch Configurations[LC] & Launch Templates[LT] Recommanded.: 
+- AutoScaling group utilize them . 
+- perform the same task 
+- allow the configurations of ec2 instance to be defined in ADVANCE 
+- documents let us configure : AMI, Instance Type, Storage & KeyPair 
+  - Networking configuration and sG the instances use. 
+  - Userdata & IAM ROLE   
+    - Both are not editable 
+    - defined once. LT has versions. 
+      - LT provide newer features 
+      - including T2/T3 Unlimited, Placement Groups, Capacity Reservations, lastice Graphics.
+
+    - LC has one use as part of autoscaling groups. LC provide configurations of ec2 instances.
       - LT can do the same and can use the same configs to launch ec2 instacnes from cli/console.
 
 ---
@@ -2141,7 +2157,27 @@ a script or other configurations run when the instance is launched.
   - any commands run on CLI tool into the instance will make use of ROLE credentials automatically.
 
 ---
+# Storage Refresher
+  - Direct(lcoal) attached storage - Storage on the EC2 host.
+    - called instance store.
+      - super fast
+      - lost in case:
+        - disk fail
+        - hw failure
+        - migrate ec2 to another host
+  - Network attached Storage - Volume delivered over the network (EBS)
+    - on-permise env use protocols like NFS, iSCSI, SMB.
+    - on ec2 use EBS.
+    - highly resilient
+    - separate from the EC2 host.
+  - Ephemeral Storage - Temporary
+  - Persistent Storage - Permanent - lives on past the lifetime of the instance.
 
+<br>
+
+- Key terms:
+  - Block Storage - u create volume for ex : inside EBS 
+---
 CloudFormation
 
 - Physical and Logical Resources:

@@ -165,6 +165,8 @@
       - domain services can communicate with other domain services if necessary.
       - it's still from the core of the domain layer, so it cannot be reached from outside the domain layer.
         - to communicate with domain service from outside the domain layer, we need to use application service.
+      
+      - some say use case in clean architecture. 
 
     - application services: point of contact with outside the domain, any other layer that wants to communicate with domain layer needs to use application service. we can also have the data mappings, validations and transaction management and security in the application service.
       - load/save the domain state from/to the repository, and pass it to the domain service or entity to perform the business logic.
