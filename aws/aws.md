@@ -182,43 +182,38 @@ JSON
   vals types: [string, object, number, array, boolean, null]
 
 -------------------------------------------------------
-Encryption
-  Encryption At Rest:
-    to protect aganist physical theft and physical tampering. [user with encrepted laptop]
-     common when only one party is involved. one person ;one encryption and decreption key
-     common when one entity involoved.
-  Encryption In Transit:
-    protecting data while it's being transferred between two places.
-      used when multiple system is involved.
+
+# Encryption
+  - Encryption At Rest:
+    - to protect aganist physical theft and physical tampering. [user with encrepted laptop]
+    - common when only one party is involved. one person ;one encryption and decreption key
+    - common when one entity involoved.
+  - Encryption In Transit:
+      - protecting data while it's being transferred between two places.
+      - used when multiple system is involved.
   
-  Concepts:
-    - plaintext: data[image, file, app] u can immediately load into an application and 
-      read that data.
+  - Concepts:
+    - plaintext: data[image, file, app] u can immediately load into an application and read that data.
     - Algorithms: Blowfish, aes, rc4, RSA..
     - Key: password to encrypt 
     - Ciphertext: encrypted data.
-    ---
-    Symmetric Encryption: the same key used in both encryption and decryption process.
-      limitation -> how we will transfer the key between two peer [getting complex very quickly]?
-        because of that limitation, symmetric encryption is great in  local file encryption or disk encryption.
-          but not so useful when data is moved between 2 parties. 
-    Asymmetric Encryption:
-      u have public and private key, when someone need to send me a data, he will encrypt it with
-       my pub key and send it. then I use the private key to decrypt it. used by[SSL, TLS, SSH]
+  
+  - Symmetric Encryption: the same key used in both encryption and decryption process.
+      - limitation -> how we will transfer the key between two peer [getting complex very quickly]?
+        - because of that limitation, symmetric encryption is great in  local file encryption or disk encryption. but not so useful when data is moved between 2 parties. 
+  - Asymmetric Encryption:
+      - u have public and private key, when someone need to send me a data, he will encrypt it with  my pub key and send it. then I use the private key to decrypt it. used by[SSL, TLS, SSH]
     
-    Asymmetric encryption is computationally much more diffcult to do than symmetric. so, 
-     many processes use asymmentric to initially agree and exchange a symmetric key and 
-      then use it in the communication, use symmetric encryption.
+    - Asymmetric encryption is computationally much more diffcult to do than symmetric. so, many processes use asymmentric to initially agree and exchange a symmetric key and then use it in the communication, use symmetric encryption.
     
-    Another way for using asymmetric keys is [signing]: for ID verification: u sign using your
-     Private key and send the request the receiver can verify that is you by using the public key 
-     to validate the signed request.
+    - Another way for using asymmetric keys is [signing]: for ID verification: u sign using your Private key and send the request the receiver can verify that is you by using the public key to validate the signed request.
     
-    --
-    Steganography: hiding that you are encrypt a data, by hiding the encrypted data in another file. 
-      using a certain key, a number or a pattern[hide data in an image, by changing some pixels' val].
+  <hr>
+
+- Steganography: hiding that you are encrypt a data, by hiding the encrypted data in another file. 
+      - using a certain key, a number or a pattern[hide data in an image, by changing some pixels' val].
 -----------
-Digital Signatures:
+# Digital Signatures:
   - verifies integrity (what) & Authenticity(who)
   - HASH of the data is token, original data remains unltered (integrity)
   - this allows normal use without worrying about hashing/keys. 
@@ -230,7 +225,7 @@ Digital Signatures:
   - Trust public key => trust private key => trust entiry => trust data.
   - u can take it step further and encrypt the hash and data with the public
        key of the receiver. so, only the receiver can decrypt it. 
-------------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 Networking:
 
 Layer 1 - Physical
@@ -722,11 +717,11 @@ Elastic Compute Cloud (EC2)[IAAS]:
     to the OS. it determines which volume is the boot volume and which is data volume.
   - the OS expects to receive volumes presented to it as well as an ID, a device ID
     And the block mapping links the volume to the device ID that the OS expects.
-- Connecting to EC2 : - connect to win instances using RDP remote desktop protocol. 3389 port. - to linux instance using ssh port 22.
-  ssh key pairs: u download the private once and keep it safe.
-  public part aws place it on the instanc. u use the private part for authentication.
-  for win instances using private key to gaining access to the local admin pass
-  of the instance and u connect to it using rdp using local admin user and its password.
+    - Connecting to EC2 : 
+      - connect to win instances using RDP remote desktop protocol. 3389 port. - to linux instance using ssh port 22.
+  - ssh key pairs: u download the private once and keep it safe.
+  - public part aws place it on the instanc. u use the private part for authentication.
+  - for win instances using private key to gaining access to the local admin pass  of the instance and u connect to it using rdp using local admin user and its password.
 - ssh client will prevent u from connecting to an instance if the key is too open.
   - u need to change the permissions on the key file to 400.
 
@@ -1127,21 +1122,27 @@ some field can be ignored bec
 
 ---
 
-- CloudWatch Logs
-- public service - usable from AWS or on-premise.
-- store, monitor and access logging data [information + timestamp]
-- AWS Integrations with - EC3, VPC FLow logs, Lambda, CloudTrail, R53 ....
-- can integrate with outside application by setup an agent, development kit.
-- can generate metrics based on logs - metric filter.
-- regional service.
-- logging source inject data as log events. -> stored in log stream
-- log stream : sequence of log events from the same source.
-- Log group: container of multiple log stream from the same type.
+# CloudWatch Logs
+  - public service 
+    - usable from AWS or on-premise. -> assuming u have permission and network connectivity.
+  - store, monitor and access logging data [information + timestamp]
+  - AWS Integrations with 
+    - EC3, VPC FLow logs, Lambda, CloudTrail, R53 ....
+    - any services which integrate with cloud logs can store data directly inside the product.
+  - can integrate with outside application by setup an agent, development kit.
+  - can generate metrics based on logs 
+    - <b>metric filter</b>.
+  - regional service.
+  - logging source inject data as log events. -> stored in log stream
+  - log stream : sequence of log events from the same source.
+    - each log stream is ordered set of log events for specific source for specific thing.
+  - Log group: container of multiple log stream from the same type.
+    - store configuration settings: Retention & Permissions.
+      - apply on all log stream in the group.
+        .
+    - store metric filter{constantly reviewing any log event for any log stream in that log group looking for certain pattern . ex: app error code} --> metric --> fire an alarm based on the value.
 
-  - store configuration settings: Retention & Permissions.
-    - apply on all log stream in the group.
-      .
-  - store metric filter --> metric --> fire an alarm based on the value.
+<hr>
 
 - CloudTrail [regional]
 
@@ -1150,26 +1151,29 @@ some field can be ignored bec
   - log actions as CloudTrail event.
   - by default store Event of last 90 days.
   - To customize the service .. create 1 or more Trails.
-  - Management Events[log of action on aws resource (control-plane)] and
-    Data Events(usage of the resource. upload/access object in S3).
+  - we have two type
+    - Management Events[log of action on aws resource (control-plane)].
+    - Data Events(usage of the resource. upload/access object in S3).
   - by default store Management Events only.
+  - ![cloud-trails](images/cloud-trails.png)
 
-  - CloudTrail trail : unit of configuration within CloudTrail, CloudTrail log
-    events belonging to its region. u can configure trail to operate on its region,
-    or to operate on all regions[think of it as trail for each region but working as one].
+  - CloudTrail trail : unit of configuration within CloudTrail, it's a way u provide configuration to cloudtrail on how to operate, CloudTrail log <br>  events belonging to its region. u can configure trail to operate on its region, or to operate on all regions[think of it as trail for each region but working as one].
     - global service log its event to trail for all regions. [IAM, STS, CLoudFront]
+      - enabled in created trail by default.
     - u can configure a trail to store in a specific S3 to persist it forever.
       - stored in json u can parse a specific information u want.
       - can integrate with (cloudwatch log) and store/monitor data there.
     - u can create a trail for all accounts in the organization. [organizational trail]
 
-  Exam powerup:
+<br>
 
+- Exam powerup:
   - cloud trail enabled by default for 90 days for free.
   - trails are how u configure S3 and CWLogs.
   - Management events only by default.
   - IAM, CLoudFront, STS => global services events [us-east-1]
-  - NOT REALTIME - There is a delay[~15mins].
+  - NOT REALTIME 
+    - There is a delay[~15mins].
 
 ---
 
@@ -1707,6 +1711,27 @@ and to move with the same rule to galcier class u need to wait another 30 days.
   - because in it's own it does nothing because the default is implicit deny.
 ---
 
+# Permission Evaluation
+- same account
+  - <img src="images/permission-evaluation-01.png">
+  - scp check for the account which is containing the identity.
+  - session policy -> if u assuming a role.
+
+
+# CloudHSM
+- create, manage and secure cryptographic keys.
+- ![cloudhsm](images/cloudhsm.png)
+- cloudhsm is not actually deployed inside a vpc u control.
+  - deployed in aws managed cloudhsm vpc.
+- for HA u need to deploy multiple hsm and configure them as a cluster.
+  - once they are configured as acluster they replicate keys ad policies or any other important configuration{u don't need to configure it}
+  - hsm by default is not a high available device.
+
+- HSM is injected to ur custom managed VPC via Elastic Network Interface. one for each device.
+- ![cloudhsm-usage](images/cloudhsm-usage.png)
+- ![cloudhsm-usecases](images/cloudhsm-usecases.png)
+---
+
 # VPC : 
 
 - how to design a scalabe network inside VPC.
@@ -2059,6 +2084,73 @@ NAT and NAT gateway[giving a private resource an outgoing access to internet]:
 
 <br>
 
+# TYPES
+- considerations
+  - ![consideration](images/ec2/considerations.png)
+- categories
+  - ![categories](images/ec2/categories.png)
+  - T -> 
+  - C -> compute
+  - R -> RAM
+  - I -> I/O {}
+  - D -> dense Storage
+  - P -> parallel processing
+  - ![examples](images/ec2/examples.png)
+
+- Decoding EC2 Types:
+  - ![types](images/ec2/types.png)
+  - Additional Capabilities:
+    - may be no letter
+    - a -> amd cpu
+    - d -> nvme ssd
+    ..
+- it's cost effective to scale ur app using multiple smaller instances than one large instance.
+
+# EC2 Network & DNS Architecture
+- EC2 start with one Elastic Network Interface, u can add secondry one or more.
+  - secondary ENI can be detached and attached to another instance.
+  - both must be in the same AZ where the EC2 instance is running.
+  - ip & dns name appeared if they attached to the ec2 instance but they actually properties for the primary network interface.
+    - SGs are on the ENI not on EC2 instance.
+  - if u stop&start the instance, the public ip will change.
+    - if u restart the instance, the public ip will not change.
+  - ![ec2-network-dns-architecture](images/ec2/ec2-network-dns-architecture.png)
+    - src/dst checks need to be disabled in case u will use the instance as NAT gateway.
+  - ENI has a MAC address and it's visible to the OS.
+    - can be used for licensing.
+  - exam power up:
+    - ![ec2-network-dns-architecture-notes](images/ec2/ec2-network-dns-architecture-notes.png)
+ 
+
+# AMI
+- AMI's can be used to launch EC2 instances.
+- AWS or Community Provided.
+- Marketplace (can include commercial software) 
+  - u pay additional fee for the software.
+- Regional..UNIQUE ID e.g. ami-0a313d6098716f372
+- Permissions:
+  - Your Account
+  - Public
+  - Specific AWS Accounts
+- You can create an AMI from an EC2 instance u want to templatize.
+- lifecycle of an AMI:
+  - ![lifecycle](images/ec2/ec2-ami-lifecycle.png)
+- exam power up:
+  - ![exam-power-up](images/ec2/ec2-ami-exam-tips.png)
+
+
+ <hr>
+<br>
+
+# EC2 Purchasing Options (Launch Types)
+- On-Demand:
+  - u don't receive any capacity reservation. if AWS face a major failure, and capacity is limited, u may not be able to launch the instance. RESERVE Purachase option receive higher priority.
+    - not recommended to use for critical components of ur system.
+  - ![ec2-on-demand](images/ec2/ec2-on-demand.png)
+- Spot
+  - u bid for the instance capacity. if the price is higher than ur bid, the instance will be terminated.
+  - ![ec2-spot](images/ec2/ec2-spot.png)
+
 # Launch Configurations[LC] & Launch Templates[LT] Recommanded.: 
 - AutoScaling group utilize them . 
 - perform the same task 
@@ -2170,13 +2262,146 @@ a script or other configurations run when the instance is launched.
     - on ec2 use EBS.
     - highly resilient
     - separate from the EC2 host.
+      - can survive issues which impact ec2 host.
   - Ephemeral Storage - Temporary
+    - instance store
   - Persistent Storage - Permanent - lives on past the lifetime of the instance.
 
 <br>
 
 - Key terms:
   - Block Storage - u create volume for ex : inside EBS 
+    - <b>volume of block storage have #addressable blocks.</b>
+      - presented logically as a volume or as blank physical hard drive.
+        - no structure byond that.
+    - when  u present a unit of block storage to a server, on top of this the Os will create a file system.
+      - ex: ext4, ntfs, xfs, zfs, btrfs, apfs, hfs+.
+  
+    - come in form of spinning disks or SSDs.
+      - phsical media : block storage
+      - logical volume : backed by different types of  physical storage.
+    - Bootable and Mountable.
+    - preferred if u want to install an OS or run a database.
+  - File Storage - Presented as a file share ... has a structure
+    - Mountable
+    - Not Bootable
+    - preferred if u want to share data between multiple instances.
+
+  - Object Storage
+    - collection of objects & metadata, flat.
+      - Not bootable, Not mountable.
+      - super scalable.
+    - preferred if u want to store data for web apps, mobile apps, backups, analytics, etc.
+
+<hr>
+
+# Storage Performance
+- IO (block) size - how much data can be read/written at once.
+  - ex: 4KB, 8KB, 16KB, 32KB, 64KB, 1MEG.
+- IOPS: 
+  - Input/Output Operations Per Second.
+  - how many IO operations can be performed in a second.
+  - ex: 1000 IOPS, 2000 IOPS, 5000 IOPS, 10000 IOPS.
+- Throughput : amount of data that can be transferred in a given second MB/s. 
+- IO size * IOPS = Throughput.
+  - ex: 4KB * 1000 IOPS = 4MB/s.
+
+<hr>
+
+# EBS
+- Block storage 
+  - raw disk allocations(volume) 
+  - can be encrypted using KMS.
+  - instances see block device and create file system on this device (exr3/4,xfs)
+
+- Storage is provisioned in <b>ONE AZ</b> (Resilient in that AZ)
+- Attachhed to *one{one or more}Ec2 instance or other service over a storage network.
+  - multi attached feature allow u to attach the same volume to multiple instances in the same AZ.
+    - ex: for clustering.
+  - u can detach the volume from one instance and attach it to another.
+    - the lifecycle of the volume is independent of the lifecycle of the instance.
+      - if the instance moved to another host, the volume will be moved with it.
+- snapshot (backup) into s3. Create volume from snapshot (migrate between AZs).
+- Different physical storage types, different sizes, different performance characteristics.
+  - ex: gp2, io1, st1, sc1, standard.      
+- Billed based on GB-month (and in some cases performance)
+  - price of 1GB in month = 2 Gb for 15 days = 0.5 GB for 60 days.
+
+- u cannot communicate cross AZs using EBS{EBS in AZ-a cannot be attched to EC2 in AZ-b}.
+- EBS replicates within an AZ. Failure of an AZ means failure of a volume.
+- Architecture of EBS 
+  - ![Architecture of EBS](images/ebs/ebs-arch.png)
+----
+EBS Volume Types
+- gp2
+  - default general purpose ssd
+  - created with IO created allocation
+    - IO is one input/output operation 
+    - IO Credit is 16KB chunck of data
+      - 1 IOPS is 1 IO in 1 second
+  - if u have no credits in this IO bucket u cannot perform any IO on the disk
+  - IO 'credit' bucket capacity is 5.4 million credits. Fills at rate of Baseline Performance.
+    - 3 IOPS per GB of storage.
+      - 3 IO credit per sec per GB.
+        - 100GB volume get 300 IO credits per second refilling the bucket.
+          - anything blow 33.33 GB get 100 IO credit minimum
+          - anything above 33.33 GB get 3 IO credit per second per GB.
+          - by default gp2 can burst up to 3000 IOPS.
+        - IO credit start full capacity 5.4 million IO credit.
+    - every volume has baseline performance base on  its size with a minimum of 100 IOPS.
+    - Bucket fills with min 100 IO Credits per second --> regardless of volume size.
+      - regardless of any thing else u can consume 100 IO Credits per second which 100 IOPS.
+  - ![gp2](images/ebs/gp2.png)
+- gp3
+  - ![gp3](images/ebs/gp3.png)
+
+# HDD
+- ![ebs-hdd](images/ebs/hdd.png)
+
+<hr>
+
+- important for performance questions in the exam:
+  - ![ebs-vs-instance-store](images/ebs/ebs-vs-instance-store-1.png)
+  - ![ebs-vs-instance-store](images/ebs/ebs-vs-instance-store-2.png)
+
+- EBS snapshots:
+  - backup to s3 
+    - u protecting the data aganist AZ issues. data become regionally resilient.
+    - migrate data between AZs.
+    - the first snapshot is a full copy of `data` on the volume.
+    - Future snaps are incremental.
+      - in incremental u have the risk of losting an incremental backup any next one will not work.
+      - EBS is smart enough if u remove an incremental snap it make sure data will move so the next snaps will function. [snap is self-sufficient]
+    - volume can be created(restored) from snaps
+    - snaps can be copied to another region.
+    - ![ebs-snapshot-architecture](images/ebs/ebs-snapshot-architecture.png)
+    - ![ebs-snapshot-notes](images/ebs/ebs-snapshot.png)
+      - to avoid cost of FSR but with additional admin overhead u can force the restoring by using <br>dd{is a versatile command-line utility that can be used to read and write data at the block level} <br> `dd if=<input_file> of=/dev/null bs=<block_size>` <br> by reading each block so it will be restored immediately.
+    - ![ebs-snapshot-exam](images/ebs/ebs-snapshot-consumption-billing.png)
+
+
+<hr>
+
+# EBS Provisioned IOPS SSD(io1/2)
+- IOPS are configurable independent of storage size.
+- ![iops](images/ebs/iops.png)
+
+<hr>
+
+# instance store
+- Block storage Devices : volume attached to the instance presented to OS and used as basis for file system which can be used by the applciations.
+- each ec2 host has its own instance store .
+- highest storage performance because it's directly attached to the host.
+- included in instance price..
+- Attached at launch time only.
+- if instance move to another host, the instance store will be lost.
+  - stopped and started.
+  - changing instance type.
+  - hardware failure.
+
+- size and #instance store volumes depends on instance type.
+- ![instance-store](images/ebs/instance-store.png)
+- ![instance-store-exam](images/ebs/instance-store-exam.png)
 ---
 CloudFormation
 
@@ -2184,92 +2409,117 @@ CloudFormation
 
   - begin with a template [JSON|YAML].
   - .. contains logical resources - the "what" [declarative definiation].
+    - u focus on what, and cfn deals with how.
   - Templates are used to creae Stacks.
-  - .. 1 stack, 100 stacks, 20 .. stacks in each region.
+    - .. 1 stack, 100 stacks, 20 .. stacks in each region.
   - template work in any account and any region can be reffered to as portable template.
   - .. stack create [phuysical resources] from the (logical).
-  - if a stacks template is changed - physical resources are changed.
-  - if a stack is delted, normally, the physical resources are deleted.
+  - if a stacks template is changed 
+    - physical resources are changed.
+  - if a stack is deleted, normally, the physical resources are deleted.
 
-  Resources.Instance.Type
-  .Properties[ImageId, KeyName, InstanceType...]
+- Resources.Instance.Type
+    - .Properties[ImageId, KeyName, InstanceType...]
+    - properties are different for each resource type.
 
-  - once logical resource moves to (create_complete) meaning the physical resource is active
-    it can be queried for attributes of the physical resource within the template
-    [!Ref physical machine id for ec2].
+  - once logical resource moves to (create_complete) meaning the physical resource is active <br> it can be queried for attributes of the physical resource within the template  [!Ref physical machine id for ec2].
+  - cfn aimed to keep the logical and physical resources in sync.
+    - ![cfn-logical-physical](images/cfn/cfn-logical-physical.png)
+  - any change in the template will cause the stack to be updated.
+    - the stack will update the logical resource then the update will reflect on the physical resource.
 
-- Template and Pseudo Parameters
+# Template and Pseudo Parameters
 
-  - (Template Parameters) accept input - console/CLI/API
-    .. when stack is created or updated (ex: size or env[test|dev|prod])
-  - (Parameters) defined inside the template. their values can be refrenced inside the
-    template which allow them to influence the configs of the phyiscal resoures when
-    the template is used to create a stack to provision the resources.
+  - (Template Parameters) accept input 
+    - console/CLI/API
+    - .. when stack is created or updated (ex: size or env[test|dev|prod])
+  - (Parameters) defined inside the template. 
+    - their values can be refrenced inside the template which allow them to influence the configs of the phyiscal <br> resoures when the template is used to create a stack to provision the resources.
   - can be configured with Defaults, AllowedValues, Min and Max length & AllowedPatterns,
-    NoEcho[make the value when be typed not visible (password)] &
-    Type(String|Int| aws specific which allow u to select vpc from a list or subnet from a list).
+    - NoEcho[make the value when be typed not visible (password)] &
+    - Type(String|Int| aws specific which allow u to select vpc from a list or subnet from a list).
 
-  Parameters.Name.[TYPE, Default, AllowedValue, Description..]
+  - Parameters.Name.[TYPE, Default, AllowedValue, Description..]
+    - ![cfn-template-parameter](images/cfn/cfn-template-params.png)
 
-  Pesudo Prameters injected by aws to the stack.
-  AWS::Region region the stack created in.
-  AWS::StackName
-  AWS::StackId
-  AWS::AccountId
-  populated by AWS based on the environment when creating the stack.
+# Pesudo Prameters injected by aws to the stack.
+  - they are exist even you don't define them in the parameter section. injected by aws in the stack.
+  - AWS::Region region the stack created in.
+  - AWS::StackName
+  - AWS::StackId
+  - AWS::AccountId
+  - populated by AWS based on the environment when creating the stack.
 
   - Pseudo and Parameters
-    there are useful and ensuring the tempate is portable and can adjust based on
-    the person or the process that creating the stack.
+    - there are useful and ensuring the tempate is portable and can adjust based on  the person or the process that creating the stack.
 
-- Intrinsic Function:
+# Intrinsic Function:
 
-  - allow us to gain access to data at the runtime, ur template can take actions
-    based on how things are when the template is used to create the stack.
+  - allow us to gain access to data at the runtime, ur template can take actions based on how things are when the template is used to create the stack.
 
   - Ref & Fn::GetAtt
 
     - reference a value from one logical resource or Parameter on another one.
-      -- if u create a VPC in a template and u want to make sure another resource
-      such as subnet goes inside that VPC then u can reference the VPC within
-      other logical resources.
+      - if u create a VPC in a template and u want to make sure another resource such as subnet goes inside that VPC then u can reference the VPC within other logical resources.
     - !Ref return The physical ID of the resource or the value of the parameter.
     - !GetAtt logicalNameOfResource.attributeName
-      return The attribute value.
+      - return The attribute value.
+      - access logical resource attributes.
 
   - Fn::Join & Fn::Split
     - WordpressURL.Value: !Join ['', ['http://', !GetAtt Instance.DNSName]]
+
   - Fn:GetAZs & Fn::Select
     - GetAzs is environmental awareness function
-      !GetAZs region - return list of AZs in the explicit region, or the current.
-      --> return AZs which the default VPC has subnet in.
+      - !GetAZs region 
+        - return list of AZs in the explicit region, or the current.
+          - az which has a subnet in the default VPC.
+          - ![cfn-GetAZs-Select](images/cfn/cfn-GetAZs-Select.png)
     - get a list of az in a given region.
       - select allow us to select element from that list.
         ecample : Instance.Properties.AvailabilityZone: !Select [0, !GetAZs '']
+
   - Conditions(Fn::IF, And, Equals, Not & Or)
+    - create resources based on conditions.
+
   - Fn::Base64 & Fn::Sub
-    sub allow us to substitue thing within text based on runtime information.
-    ${parameter} ${LogicalResource} ${LogicalResource.AttributeName}
-    cannot reference itself
+    - sub allow us to substitue thing within text based on runtime information.
+    - ![cfn-Base64-Sub](images/cfn/cfn-Base64-Sub.png)
+      - ${Instance.InstanceId} is wrong because it's a self reference.
+    - ${parameter} ${LogicalResource} ${LogicalResource.AttributeName}
+    - cannot reference itself
   - Fn::Cidr
-    build cidr blocks automatically
+    - build cidr blocks automatically
+    - ![cfn-Cidr](images/cfn/cfn-cidr.png)
+    - limitations:
+      - based on parent VPC cidr range.
+      - cannot allocate or unallocate ranges. 
   - Later .. Fn::ImportValue, FnLLFindInMap, Fn::Transform
+
+<hr>
 
 - Mappings:
   - template can contain a Mapping object.  
     .. which can contain many Mapping.  
     .. which map keys to values, allowing lookup.
   - can have one key, or Top & Second Level.
+    - ex: mapping of ami id based on top level key of region and second level key of architecture.
   - Mappings use the !FindMap intrinsic Function
   - Common use ... retrieve AMI for given region & architecture.
-  - improve template portability.
-- outputs
+  - improve template portability. {exam powerup}
+    - let u store some data which can be used to influence how template behave for given input. 
+  - ![cfn-mapping](images/cfn/cfn-mapping.png)
 
-  - optional, useful for providing status information or showing how to access svcs which
-    created by the cloudformation stack.
-    ... visible as output when using CLI/console UI
-    ... accessible from a parent stack when using nesting.
-    ... can be exported, allowing cross-stack references.
+<hr>
+
+- outputs{optional}
+  - optional, useful for providing status information or showing how to access svcs which created by the cloudformation stack.
+  - values can be declared in this section:
+    - visible as output when using CLI/console UI
+    - accessible from a parent stack when using nesting.{exam}
+    - can be exported, allowing cross-stack references.{exam}
+  - ![cfn-output](images/cfn/cfn-output.png)
+    
 
 - Conditions [optional ]
   - allows the stack to react to a certain conditions, and change infrastructure which is
