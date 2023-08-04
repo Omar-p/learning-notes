@@ -206,7 +206,9 @@ together with any permissions that identity has over this aws account.
 
 - Steganography: hiding that you are encrypt a data, by hiding the encrypted data in another file. 
       - using a certain key, a number or a pattern[hide data in an image, by changing some pixels' val].
------------
+
+<hr>
+
 # Digital Signatures:
   - verifies integrity (what) & Authenticity(who)
   - HASH of the data is token, original data remains unltered (integrity)
@@ -220,11 +222,11 @@ together with any permissions that identity has over this aws account.
   - u can take it step further and encrypt the hash and data with the public
        key of the receiver. so, only the receiver can decrypt it. 
 ------------------------------------------------------------------------------
-Networking:
 
-Layer 1 - Physical
-  - specifications define the transmission and reception of RAW BIT STREAMS between a device and 
-    a SHARED PHYSICAL MEDIUM. 
+# Networking:
+
+## Layer 1 - Physical
+  - specifications define the transmission and reception of RAW BIT STREAMS between a device and  a SHARED PHYSICAL MEDIUM. 
    it defines things like VOLTAGES LEVELS, TIMING, RATES, DISTANCES, MODULATION, 
     and CONNECTORS. Copper(electrical), Fiber(light) or WIFI(Radio Frequency)
   - to connect two devices you need only a link(point to point) between them.
@@ -238,63 +240,62 @@ Layer 1 - Physical
      cannot detect collision it just transmiting in voltage change.
      No device => device communication. it just broadcast to all connected devices.
 
-Layer 2 - Data Link Layer
-  every thing above this layer rely on device to device communication which the data link 
-  layer provides.
-  Devices at L2 have a unique hardware (MAC 2 part OUI of the company + network interface
-   controller = unique MAC) address. 48 bits, in hex, 
-   24 bits for manufacturer.
-    Frames can  be addressed to a dest or broadcast(ALL F's)
-  	FRAME => [[Preamble 56bits/SFD- 8bits], [DEST MAC ADDRESS(Set 6*ff: to broadcast to all devices in the network)], [SRC MAC ADDRESS], [ET(EtherType) 
-  	 16 BITS: Specify which layer 3 prot put the data in the frame. Ex: IP], [PAYLOAD], [FCS 32bits. check seq to identify any errors in the frame. CRC check]]
+## Layer 2 - Data Link Layer
+  - every thing above this layer rely on device to device communication which the data link  layer provides.
+  - Devices at L2 have a unique hardware (MAC 2 part OUI of the company + network interface controller = unique MAC) address. <br> 48 bits, in hex, 24 bits for manufacturer.
+    - Frames can  be addressed to a dest or broadcast(ALL F's)
+  	- FRAME
+      - ![l2-frame](images/osi/layer2-frame.png)
   	
-  	To avoid collision L2 checks for any sign of a carrier signal.(CSMA:Carrier sese, multiple access) if i doesn't detect a carrier then it pass the frame to L1.
-  	If both transmit in the same time L2 can detect it using CSMA/CD. 
-  	  jam signal is sent by all of the devices, and random backoff occurs(a period of time during which no device will attempt a transmission.) after that period which picked randomly a transimission is retried.
+  	- To avoid collision L2 checks for any sign of a carrier signal
+      - ![l2-csma-cd](images/osi/layer-csma-cd.png)
+  	  - jam signal is sent by all of the devices, and random backoff occurs(a period of time during which no device will attempt a transmission.) after that period which picked randomly a transimission is retried.
   	  
-  	  L1 & L2 
-  	    to connect more than 2 devices and use benefit of L2. a hub won't work because it doesn't understand L2. So we use a SWITCH.
+    - L1 & L2 
+  	   - to connect more than 2 devices and use benefit of L2. a hub won't work because it doesn't understand L2. So we use a SWITCH.
 	    
-	    SWITCH:
-	      - understand frames and MAC. they maintain a MAC ADDRESS TABLE which starts off EMPTY. As the switch recieves frames on its ports, 
-	         it learns which devices are connected and populates the Mac address table.
-	      - STORE and FORWARD ..they don't repeat blindly like hubs. it means that ONLY VALID FRAMES are FORWARDED - collisions is isolated on the port they occurred. 
-	         Every X port switch has X collision domains. It allows switches to scale and be connected together.
+    - SWITCH:
+      - understand frames and MAC. they maintain a MAC ADDRESS TABLE which starts off EMPTY. 
+      - As the switch recieves frames on its ports, it learns which devices are connected and populates the Mac address table.
+      - <b>STORE and FORWARD</b> ..they don't repeat blindly like hubs. it means that ONLY VALID FRAMES are FORWARDED 
+        - collisions is isolated on the port they occurred. 
+	      - Every X port switch has X collision domains. It allows switches to scale and be connected together.
 	    
-	    L2
-	      - identifiable devices
-	      - Mac
-	      - Collision Detection
-	      - Unicast 1:1
-	      - Broadcast 1:All
-	      - 
+  - L2
+    - identifiable devices
+    - Mac
+    - Collision Detection
+    - Unicast 1:1
+    - Broadcast 1:All
+    - 
   
-L3 Network
-  - LAN1 and LAN2 are isolated LOCAL AREA NETWORKS. Using only layer 2, only those networks joined by a direct point to point linnk using the SAME layer 2 protocol could communication.
-  - Ethernet is a L2 used generally for local networks. Long distance point to point links will use other more suitable protocols such as ...PPP/MPLS/ATM[satellite..]
+### L3 Network
+  - LAN1 and LAN2 are isolated LOCAL AREA NETWORKS. 
+    - Using only layer 2, only those networks joined by a direct point to point linnk using the SAME layer 2 protocol could communication.
+  - Ethernet is a L2 used generally for local networks. 
+    - Long distance point to point links will use other more suitable protocols such as ...PPP/MPLS/ATM[satellite..]
   - IP is a L3 protocol which adds cross-network IP addressing and routing to move data between LAN without direct P2P links.
   - Routers(L3) devices remove frame encapsulation and add new frame encapsulation at every hop.
   
-  -protocol field in IPv4: 1 -> TCP , ICMP -> 6, UDP -> 17.
-  TTL in IPv4 -> Hop Limit in IPv6
+  - protocol field in IPv4: 1 -> TCP , ICMP -> 6, UDP -> 17.
+  - TTL in IPv4 -> Hop Limit in IPv6
   
-  IP divided into network part and host part.
-  IP Addresses are assigned by machine(DHCP) or Humans.
+  - IP divided into network part and host part.
+  - IP Addresses are assigned by machine(DHCP) or Humans.
   
-  Subnet Mask
-    It's the Subnet Mask which allows a HOST to determine if an IP address it needs to communicate with is local or remote - which influences if it needs to use a GATEWAY or can communicate locally.
+  - Subnet Mask
+    - It's the Subnet Mask which allows a HOST to determine if an IP address it needs to communicate with is local or remote 
+      - which influences if it needs to use a GATEWAY or can communicate locally.
     
-    L3 - Route Tables & ROuters
+  - L3 
+    - Route Tables & ROuters
       - Router compares packet dest Ip ^ route table for matching destinations.
-        The more specific prefixes are preferred (0 lowest, 32 heights).
-        Packet is forwarded on to Next Hop/Target.
+        - The more specific prefixes are preferred (0 lowest, 32 heights).
+        - Packet is forwarded on to Next Hop/Target.
         
-  	  - Route Tables can be statically populated, or there are protocols such as BGP(Border Gateway Protocol), which allow routers to communicate with each other, 
-  	    to exchange which networks they know about.
+  	  - Route Tables can be statically populated, or there are protocols such as BGP(Border Gateway Protocol),<br> which allow routers to communicate with each other,to exchange which networks they know about.
 	  
-	  ARP used in L3 when u encapsulate the packet and then send it to a MAC address,
-	    u don't know now the MAC address. so we need a protocol which can find the MAC address
-	    for a given IP address. 
+	- ARP used in L3 when u encapsulate the packet and then send it to a MAC address, u don't know now the MAC address. <br> so we need a protocol which can find the MAC address for a given IP address. 
 
 L4 Transport Layer
   L3 problems:
