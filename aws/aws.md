@@ -1,34 +1,35 @@
 # cloud computing
 - On-Demand Self-Service:
-  ...can provision capabilities as needed without requiring human interaction.
+  - ...can provision capabilities as needed without requiring human interaction.
 - Broad Network Access
-  Capabilities are available over the network and accessed through standard mechanisms...[http, https,ssh,vpn..]. no need to visit datacenter.
-  if u need to go to datacenter to provision a new server, then it's not cloud computing.
+  - Capabilities are available over the network and accessed through standard mechanisms...[http, https,ssh,vpn..]. no need to visit datacenter.
+  - if u need to go to datacenter to provision a new server, then it's not cloud computing.
 - Resource Pooling
-  There is a sense of "location independence" ... no "control" or "knowledge: over the exact "location" of the resorces
-  Resources are "pooled" to serve multiple consumers using a "multi-tenant model"
-  Moved from thinking of hardware as value(instead of thinking about hw and servers, it think about it as the host) to thinking of applications and services as things of value that a business offers.
+  - There is a sense of "location independence" ... no "control" or "knowledge: over the exact "location" of the resorces
+  - Resources are "pooled" to serve multiple consumers using a "multi-tenant model"
+  - Moved from thinking of hardware as value(instead of thinking about hw and servers, it think about it as the host) to thinking of applications and services as things of value that a business offers.
 - Rapid Elasticity
-  capabilities can be elastically "provisioned" and "released" to scale "rapidly" outward(horizontal) and inward with demand.
-  To the consumer, the capabilites available for provisioning often "appear" to be "unlimited" 
-  Elasticity -> system automatically system size increase as the load increases, and automatically decrease when the demand decrease.
-    (vendor provide monitoring and auto-scaling)
+  - capabilities can be elastically "provisioned" and "released" to scale "rapidly" outward(horizontal) and inward with demand.
+  - To the consumer, the capabilites available for provisioning often "appear" to be "unlimited" 
+  - Elasticity -> system automatically system size increase as the load increases, and automatically decrease when the demand decrease.
+     - (vendor provide monitoring and auto-scaling)
 - Measured Service
-  before cloud: u buy a server and u pay for it even if u don't use it. u pay in advance
-  Resource usage can be "monitored", "controlled", "reported" .. AND "billed".
+  - before cloud: u buy a server and u pay for it even if u don't use it. u pay in advance
+  - Resource usage can be "monitored", "controlled", "reported" .. AND "billed".
 
-  --through the course keep them in ur mind and for every svc evaluate how that service matches with one of this characteristics.
-    - it help u in exam if the answer make sense or not, help u to design a system.
+  - through the course keep them in ur mind and for every svc evaluate how that service matches with one of this characteristics.
+     - it help u in exam if the answer make sense or not, help u to design a system.
 --------------------------------------------------------
 # Public vs Private vs Hybrid vs Multi:
-- Multi (cloud provider resilience)-> deploy ur app in multiple cloud provider this means that u have got cloud provider level resilience. stay away from single management window
-          to manage multi-cloud because it add  abstraction that make only the common services between each platform are availables and can not use the rest. 
-          and that doesn't make use of each one.  
-- Private -> private cloud on-premises [aws outposts, azure stack, google anthos] provide services dedicated to ur business and run on your-permises. 
-            they must meet the 5 characteristics of cloud computing. but dedicated to you as a business.
-- Hybrid -> use public and private in the same time. with true hyber cloud. you use the same tooling the same 
-           interface to interact with both private and public component.
-           Hybrid Cloud is NOT public cloud + legacy on-permises -> it called hybrid environment or hybrid network.
+- Multi (cloud provider resilience)-> 
+  - deploy ur app in multiple cloud provider this means that u have got cloud provider level resilience. 
+    - stay away from single management window to manage multi-cloud because it add  abstraction that make only the common services between each platform are availables and can not use the rest. and that doesn't make use of each one.  
+- Private -> 
+  - private cloud on-premises [aws outposts, azure stack, google anthos] provide services dedicated to ur business and run on your-permises. 
+  - they must meet the 5 characteristics of cloud computing. but dedicated to you as a business.
+- Hybrid -> 
+  - use public and private in the same time. with true hyber cloud. you use the same tooling the same interface to interact with both private and public component.
+  - Hybrid Cloud is NOT public cloud + legacy on-permises -> it called hybrid environment or hybrid network.
 -----------------------------------------------------------
 Cloud Service model
 - Infrastructure Stack -> collection of things which the application needs all stacked onto each other[Facilities -> infra -> servers -> virtualizations -> os -> container -> Runtime -> Data -> Application]. 
@@ -58,58 +59,49 @@ EC2 uses the IaaS service model.
   - activate iam user access to billing information: 
     - to allow IAM Identity to access billing information.
 ------------------
-  Multi-factor Authentication:(MFA)
-   Factor: different pieces of evidence which prove identity.
-     Knowledge: Something you know, username & password.
-     Possession: Something you have, bank card, MFA device/app. [ATM use possession and knowledge]
-     Inherent: Something you are.. fingerprint, face, voice, iris.
-     Location: A Location (physical), which network (corp or wifi)
-     More Factors means more security & harder to fake.
-   we try to balance between convenience and security.
-   - configuring MFA for aws , aws generate a secret key and other associated info (username & service name).
+# Multi-factor Authentication:(MFA)
+  - Factor: different pieces of evidence which prove identity.
+    -  Knowledge: Something you know, username & password.
+    -  Possession: Something you have, bank card, MFA device/app. [ATM use possession and knowledge]
+    -  Inherent: Something you are.. fingerprint, face, voice, iris.
+    -  Location: A Location (physical), which network (corp or wifi)
+    -  More Factors means more security & harder to fake.
+  - we try to balance between convenience and security.
+    - configuring MFA for aws , aws generate a secret key and other associated info (username & service name).
     - aws give u a QR code to scan with your MFA app (generated from the key & associated info).
     - the secret key is used to generate a 6 digit code which is valid for 30 seconds.
 -------------------------------
-IDentity provider
-Authenticate Identity
-Authorize based on policies associated with the identity I authenticated to.
-NO COST 
-there are limits
-Global service / global resilience
-IAM of your account is trusted fully by your account, can do anything.
-  if IAM allow one identity to do something, the account automatically trust the identity in the same way it trust IAM.
-No direct control on external accounts or users. control only local identities in your account.
-make use of identity federation -->[take identities u have[fb account] and use it indirectly to use aws] and MFA
+- IDentity provider
+  - Authenticate Identity
+  - Authorize based on policies associated with the identity I authenticated to.
+  - NO COST 
+  - there are limits
+- Global service / global resilience
+- IAM of your account is trusted fully by your account, can do anything.
+    - if IAM allow one identity to do something, the account automatically trust the identity in the same way it trust IAM.
+    - No direct control on external accounts or users. control only local identities in your account.
+    - make use of identity federation -->[take identities u have[fb account] and use it indirectly to use aws] and MFA
 
   - every aws account come with its own running copy of IAM, it's own db
   - IAM is globally resilience service, any data is always secure in any 
     aws regions.
-    .IAM u see in each of ur AWS accounts is  your own dedicated instance of IAM
-     separate from other account and from any one else accounts. 
-     .my AWS account trust my  instance of IAM.
-     .IAM is trusted fully by the account, IAM as a service can do as much as the root
-      user.
-      .inside IAM we can create other identities, IAM can allow those identities to
-       do certain things. because a single aws account trust IAM, if IAM allows one of 
-       identity that it manages to do something, the account automatically trust the 
-       identity in the same way it trust IAM.
+    - IAM u see in each of ur AWS accounts is  your own dedicated instance of IAM separate from other account and from any one else accounts. 
+     - my AWS account trust my  instance of IAM.
+     - IAM is trusted fully by the account, IAM as a service can do as much as the root user.
+      - inside IAM we can create other identities, IAM can allow those identities to <br> do certain things. because a single aws account trust IAM, if IAM allows one of identity that it manages to do something, the account automatically trust the identity in the same way it trust IAM.
        
        
- IAM ---> User --> Identities which represent humans or applications that need access 
-                   to your account.
-     --> Group --> Collections of related users e.g. development team, finance or HR
-     --> Role ---> Can be used by aws services, or for granting external access to your
-                   account. [when you want to grant access to services in your account 
-                   to an uncertain number of entities]. 
-    Example for IAM ROLE -> if you want all EC2 instances in your account to be able to access
-     the simple storage service, then you can create a role which grants access to the simple
-      storage service, and then allow instances to use that role.
+ - IAM ---> 
+  - User --> Identities which represent humans or applications that need access to your account.
+  - Group --> Collections of related users e.g. development team, finance or HR
+  - Role ---> Can be used by aws services, or for granting external access to your account. [when you want to grant access to services in your account to an uncertain number of entities]. 
+      - Example for IAM ROLE -> if you want all EC2 instances in your account to be able to access the simple storage service, then you can create a role which grants access to the simple storage service, and then allow instances to use that role.
 
- In Brief: 
-    you pick IAM users when you can identify the individual thing that will log in to that user.
-    Roles tend to get used when the number of things is uncertain.
+ - In Brief: 
+    - you pick IAM users when you can identify the individual thing that will log in to that user.
+    - Roles tend to get used when the number of things is uncertain.
   
-  IAM policy(iam let u create it) [object or document]: used to allow or deny access to aws services when and only
+  - IAM policy(iam let u create it) [object or document]: used to allow or deny access to aws services when and only
    when they're attached to IAM USERS, GROUPS OR ROLES.
   policy on their own do nothing they simply define, allow or deny rights to a certain 
   services when you attach the policies to other identities. so users, groups and roles 
@@ -124,16 +116,16 @@ make use of identity federation -->[take identities u have[fb account] and use i
     3- Authorize: allow or deny access to resource based on policies associated 
       with the identity that I authenticate with
   
-  IAM 
-    - NO COST
-    - Global service/Global resilience
-    - No direct control external accounts or users. only control local identities in your account.
-    - allow or deny its identities on it AWS account
-    - Identity federation and MFA
-      - take identities that u're already have, and use this indirectly to access aws 
-        resources
-  
-  IAM Access Keys:
+  ### IAM 
+      - NO COST
+      - Global service/Global resilience
+      - No direct control external accounts or users. only control local identities in your account.
+      - allow or deny its identities on it AWS account
+      - Identity federation and MFA
+        - take identities that u're already have, and use this indirectly to access aws 
+          resources
+    
+  ### IAM Access Keys:
     Long-Term Credentials ...[don't change regularly or automatically](for IAM user only)
     IAM USER
       has 1 username and 1 password[u can create Iam user to used only in cli or api access 
@@ -237,7 +229,7 @@ Layer 1 - Physical
   - but when we need to connect multiple one. we need a hub[anything recieved on any port, is
     transmitted on every other port] including errors & collisions.
   - At the stage of layer one networking:
-     No INDIVIDUAK ADDRESSES, At layer 1, one laptop can not address traffic directly at another.
+     - No INDIVIDUAK ADDRESSES, At layer 1, one laptop can not address traffic directly at another.
       it's a broadcast medium.
      If multiple devices transmit at once. a collision occurs.
      L1 has No media access control and no collision detection.[which devices can transmit]
