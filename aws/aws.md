@@ -310,39 +310,44 @@ together with any permissions that identity has over this aws account.
   	- L3 has no communication channels - packets have a Source and Destination IP but no mthod of splitting by APP or CHANNEL.
 	  - No flow control if src is faster than dest. dest can be overwhelmed.
   
-  TCP segments:
-    segments don't have SRC or DEST IP's
-    Options - Padding
-    SRC PORT  -		DEST PORT : provides the ability of having multiple streams of data at the same time between 2 devices
-    SEQUENCE NUMBER: increment after sending each segment. unique, can be used for error correction. used in reordering.
-    ACKNOWLEDGEMENT: 
-    FLAGS 'N' things: used to control over the connection[[flags]FIN: finish the connection, 
-     ACK: acknowledgement, SYN: sync seq numbers]. 1-close the connection.    2-synchronize sequence numbers. 
-    	data-offset. reserved space.
-  	WINDOW: #of bytes u are willing to recieve between acknowledgements. [flow-control use it]
-  	CHECKSUM: detect error
-  	URGENT POINTER: to detect segments of controlling the traffic to take priority of processing. separate between 
-  	app segments and traffic segments.
+  - TCP segments:
+    - segments don't have SRC or DEST IP's
+    - Options - Padding
+    - SRC PORT  
+    - DEST PORT : provides the ability of having multiple streams of data at the same time between 2 devices
+    - SEQUENCE NUMBER: increment after sending each segment. unique, can be used for error correction. used in reordering.
+    - ACKNOWLEDGEMENT: 
+    - FLAGS 'N' things: used to control over the connection[[flags]FIN: finish the connection, ACK: acknowledgement, SYN: sync seq numbers]. 
+      - 1 -close the connection.    
+      - 2-synchronize sequence numbers. 
+    	- data-offset. reserved space.
+  	- WINDOW: #of bytes u are willing to recieve between acknowledgements. [flow-control use it]
+  	- CHECKSUM: detect error
+  	- URGENT POINTER: to detect segments of controlling the traffic to take priority of processing. separate between 	app segments and traffic segments.
+    - ![tcp-segment](images/osi/tcp-segment.png)
 	
-	TCP is a connection based protocol. A connection is established between 2 devices using random port on 
-	client[EPHEMERAL PORT] and a [WELL-KNOWN PORT] on the server. Once esablished the connection is bi-directional.
-	 reliable, provided via the segments encapsulated in IP packet.
+	- TCP is a connection based protocol. 
+      - A connection is established between 2 devices using random port on client[EPHEMERAL PORT] and a [WELL-KNOWN PORT] on the server.
+      - Once esablished the connection is bi-directional.
+	  - reliable, provided via the segments encapsulated in IP packet.
 	
-	-way handshake:
-	  to esablish the connection between client and server. they need to agree on the sequence number the client choose one randomly and then increment it for 
-	   the next packets. the server also choose one to start with it for the packet will be sent to the client.
+	- 3-way handshake:
+	  - to esablish the connection between client and server. 
+      - they need to agree on the sequence number the client choose one randomly and then increment it for the next packets. 
+      - the server also choose one to start with it for the packet will be sent to the client.
 	
-	SESSSION & STATE:
-	  A Stateless firewall would see two things.
-			Outbound .. client to server
-			Response ..
-			TWO RULES will be required... OUT & IN
-			Networ ACL(AWS): access control list   - need 2 rules for each TCP connection.
+#### SESSSION & STATE:
+- ![fw-session-state](images/osi/fw-session-state.png)
+- A Stateless firewall would see two things.
+  - Outbound .. client to server
+  - Response ..
+  - TWO RULES will be required... OUT & IN
+  - Networ ACL(AWS): access control list   - need 2 rules for each TCP connection.
 	
-	 A Stateful firewall views sees one thing [aware of tcp protocol]
-	   Outbound .. Allowing the outbound implicitly allows the inbound response.
-	   In AWS this is how a security groups works.
-	   stateful firewall understand layer four and the state the traffic.
+- A Stateful firewall views sees one thing [aware of tcp protocol]
+  - Outbound .. Allowing the outbound implicitly allows the inbound response.
+  - In AWS this is how a security groups works.
+  - stateful firewall understand layer four and the state the traffic.
 --------------------------------
 
 ### Elastic Beanstalk [ ur code, app service, http service, os, interpreter, host]
