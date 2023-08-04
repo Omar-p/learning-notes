@@ -269,6 +269,9 @@ together with any permissions that identity has over this aws account.
     - Broadcast 1:All
     - 
   
+
+<hr>
+
 ### L3 Network
   - LAN1 and LAN2 are isolated LOCAL AREA NETWORKS. 
     - Using only layer 2, only those networks joined by a direct point to point linnk using the SAME layer 2 protocol could communication.
@@ -297,17 +300,18 @@ together with any permissions that identity has over this aws account.
 	  
 	- ARP used in L3 when u encapsulate the packet and then send it to a MAC address, u don't know now the MAC address. <br> so we need a protocol which can find the MAC address for a given IP address. 
 
-L4 Transport Layer
-  L3 problems:
-		L3 provides no ordering mechansim.
-		L3 is not guaranteed to be reliable.
-		L3 diff packets can experience diff delays.
-  	L3 has no communication channels - packets have a Source and Destination IP but 
-  	  no mthod of splitting by APP or CHANNEL.
-	  No flow control if src is faster than dest. dest can be overwhelmed.
+<hr>
+
+### L4 Transport Layer
+  - L3 problems:
+		- L3 provides no ordering mechansim.
+		- L3 is not guaranteed to be reliable.
+		- L3 diff packets can experience diff delays.
+  	- L3 has no communication channels - packets have a Source and Destination IP but no mthod of splitting by APP or CHANNEL.
+	  - No flow control if src is faster than dest. dest can be overwhelmed.
   
   TCP segments:
-    segments don'y have SRC or DEST IP's
+    segments don't have SRC or DEST IP's
     Options - Padding
     SRC PORT  -		DEST PORT : provides the ability of having multiple streams of data at the same time between 2 devices
     SEQUENCE NUMBER: increment after sending each segment. unique, can be used for error correction. used in reordering.
@@ -340,37 +344,44 @@ L4 Transport Layer
 	   In AWS this is how a security groups works.
 	   stateful firewall understand layer four and the state the traffic.
 --------------------------------
-Elastic Beanstalk [ ur code, app service, http service, os, interpreter, host]
-  - Paas - allows quick deployment of ur app.
-  Keeps control in ur hands:
-    - choose ur instance type - choose ur database - set and adjust auto scaling
-    - update ur app - access server log files - Enable Https on load balancer.
-    * support a large range of platform.
+
+### Elastic Beanstalk [ ur code, app service, http service, os, interpreter, host]
+  - Paas 
+  - allows quick deployment of ur app.
+  - Keeps control in ur hands:
+    - choose ur instance type 
+    - choose ur database 
+    - set and adjust auto scaling
+    - update ur app 
+    - access server log files 
+    - Enable Https on load balancer.
+  - support a large range of platform.
 ----------------------
-  ..TLS ...asymmetric and then symmetric.
-  TLS start when that a TCP connection is active between the client & server..
-   so this is layer 4 and ath the end of the 3 phases.
+### TLS ...asymmetric and then symmetric.
+  - TLS start when that a TCP connection is active between the client & server..
+    - so this is layer 4 and ath the end of the 3 phases.
    
-   1 - Cipher suites : is a set of protocols used by tls[a key exchange algorithm, a bulk encryption algorithm, message authentication code algorithm]
-   *begin with established Tcp connection. client send ssl/tls version, list of supported cipher suites, session id, extensions. 
-   * server respond with its ssl/tls version, a selected cipher suite from the client list, server certificate[contain a 'public key'].
+   - 1 - Cipher suites : is a set of protocols used by tls[a key exchange algorithm, a bulk encryption algorithm, message authentication code algorithm]
+    - begin with established Tcp connection. client send ssl/tls version, list of supported cipher suites, session id, extensions. 
+    - server respond with its ssl/tls version, a selected cipher suite from the client list, server certificate[contain a 'public key'].
    
-   2 - Authentication: the client trust the public CA - it makes sure that the certificate 
+   - 2 - Authentication: the client trust the public CA - it makes sure that the certificate 
        is valid (date, annd hasn't revoked) and that the DNS name matches the name/names on the cert.
-     - the client verfies the server has the private key.
+       - the client verfies the server has the private key.
      
-   3 - Key Exchange:  - the client generate the pre-master key, encrypt it
-                        with the servers public key and sends it to the server.
+   - 3 - Key Exchange:  
+      - the client generate the pre-master key, encrypt it with the servers public key and sends it to the server.
                       
-                      - the server decrypt the pre-master key using its private key.
-                      
-                      - both sides use the same pre-master-key to generate the master secret  
-                        which is used to generate the ongoing session keys which encrypt and 
-                        decrypr data.
-                      - Both sides confirm the handshake and from them on,
-                        communications between client <=> server are encrypted   
+      - the server decrypt the pre-master key using its private key.
+      
+      - both sides use the same pre-master-key to generate the master secret  
+        which is used to generate the ongoing session keys which encrypt and 
+        decrypr data.
+      - Both sides confirm the handshake and from them on,
+        communications between client <=> server are encrypted   
 ----------
-DDoS Attacks
+
+### DDoS Attacks
   - Attacks designed to overload websites
   - compete against 'legitimate connections' and overload hardware & software provide the svc
   - Distributed - hard to block individual IPs/Ranges
@@ -382,20 +393,23 @@ DDoS Attacks
       - A Botnets generate a huge #of spoofed SYN's (connection initiations) the server sees
         these as normal and sends SYN-ACK's back to the spoofed IPs.
       - the servers will wait for an ACK ..which will never happens as the remote IPs will never 
-        respond.   servers will consume available network resources attempting to establish 
+        respond.   
+      - servers will consume available network resources attempting to establish 
         connections and won't be able to service legitimate connections.
-    - Volumetric - DNS Amplification  
-       - An attackers controls network of compromised devices(botnet) via a control
-         location(often using vpn to digest real location)  
-       - A botnet exploits a protocol where a response is significantly larger than the
-         request. in this case making a spoofed request to DNS.
+    - Volumetric 
+      - DNS Amplification  
+        - An attackers controls network of compromised devices(botnet) via a control
+          location(often using vpn to digest real location)  
+        - A botnet exploits a protocol where a response is significantly larger than the
+          request. in this case making a spoofed request to DNS.
          
-         .The DNS servers respond to the `spoofed IP`, the frontend servers for our application,
+        - The DNS servers respond to the `spoofed IP`, the frontend servers for our application,
           which is overwhelmed by the amount of data. this prevents legimate customers accessing 
           services. 
     - ..often involve large armies of compromised machines(botnets) 
 --      ---
-Network Address Translation(NAT):
+
+### Network Address Translation(NAT):
   - designed to address the growing shortage of IPv4 addresses.
       - IPv4 addresses:
         - publicly routable: assigned by central agency & regional agencies, which in turn 
