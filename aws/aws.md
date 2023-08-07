@@ -1155,6 +1155,7 @@ some field can be ignored bec
       - apply on all log stream in the group.
         .
     - store metric filter{constantly reviewing any log event for any log stream in that log group looking for certain pattern . ex: app error code} --> metric --> fire an alarm based on the value.
+    - ![cwlogs](images/cwlogs.png)
 
 <hr>
 
@@ -2535,116 +2536,181 @@ CloudFormation
   - ![cfn-output](images/cfn/cfn-output.png)
     
 
-- Conditions [optional ]
-  - allows the stack to react to a certain conditions, and change infrastructure which is
-    deployed or specific configuration for that infrastructure based on those conditions.
-  - ..Processed before resoueces are created.
+### Conditions [optional ]
+  - allows the stack to react to a certain conditions, and change infrastructure which is deployed or specific configuration for that infrastructure based on those conditions.
+  - created in the optional `Conditions` section of a template.
+    - <b>..Processed before resoueces are created.</b>
   - Use other intrinsic functions AND, EQUALS, IF, NOT, OR.
-  - ..associated with logical resources to control if they are created or not.
-  - e.g.. based on parameters: ONEAZ,TWOAZ,THREEAZ - how many AZs to create resource in.
-  - PROD,DEV - control the size of instances created within a stack.
-- DependOn
+    - ..associated with logical resources to control if they are created or not.
+  - e.g.. based on parameters: ONEAZ,TWOAZ,THREEAZ 
+    - how many AZs to create resource in.
+  - e.g.. PROD,DEV 
+    - control the size of instances created within a stack.
+  - ![cfn-conditions](images/cfn/cfn-condition.png)
 
+### DependOn
+  - allows to establish formal dependencies between resources with cfn template.
   - cfn tries to be effiecient.
-    ..does things in parallel (create , update & delete)
-    ...tries to determine a dependency order (VPC => subnet => EC2)
-    .. (references or functions create these) if a ref b then create b first.
+    - .. does things in parallel (create , update & delete)
+    - .. tries to determine a dependency order (VPC => subnet => EC2)
+    - it determines this using (references or functions create these) if a ref b then create b first.
   - DependOn lets u explicitly define these
-    ..If Resources B and C denpend on A
-    ..both for A to complete before starting.
+    - ..If Resources B and C denpend on A
+    - ..both for A to complete before starting.
+  - ![dependon](images/cfn/cfn-dependon.png)
 
-- Cloudformation provisioning
+<hr>
+
+### Cloudformation provisioning
+  - simulate creation ec2 instance with userdata to bootstrap wordpress. 
   - after the physical resource report that it is created -> Create_COMPLETE?
-    what if fail in the bootstraping
+    - what if fail in the bootstraping
+    - when ec2 tell cfn that it is created, cfn will report back to the console that the stack is created. and it has no way to know what is going on inside the ec2 instance.
   - wait conditions & cfn_signal provide a way to get around that limitation
     - Signal
-      included in aws-cfn-bootstrap package.
+      - included in aws-cfn-bootstrap package.
       - configure cfn to hold, wait for 'x' #of success signals.
       - wait for Timeout H:M:S for those signals (12 hrs max).
       - If success signals recieved before the timeout.. CREAE_COMPLETE .
       - If failure signal recieved .. creation fails.
       - If timeout is reached .. creation fails.
+      - cfn-signal is a utility running on the instance itself actually sending a signal back to cfn service.
+        - can send success or fail signal.
+      - the actual thing which is being signaled using cfn-signal is a logical resource .
+      - logical resource which has CreationPolicy or WaitCondition.  
       - .. CreationPolicy[EC2, autoscaling group] or WaitCondition[integrated with external ]
-      - when needing additional functionality ; pass data back to cfn,
-        put general wait state in the template which can be passed until the
-        signal is recieved; use [WaitCondition: specific logical resource
-        not defined in other resource can depend on other and vs]
-        .
-        .
-        .
-        .
-- Nested Stacks:
-  AWS::CloudFormation::Stack Properties.TemplateURL
-  --any parameters without default val should provided in the parent
-  whole templates can be reused in other stack.
+      - ![creationPolicy-signal-cfn](images/cfn/cfn-creationPolicy-signal-cfn.png)
+
+      - when needing <b>additional functionality ;</b> 
+        - passing data back to cfn,
+        - put general wait state in the template which can not be passed until the signal is recieved; use [WaitCondition: specific logical resource not defined in existence resource can depend on other and vs]
+        - waitCondition rely on WaithHandle
+          - another logical resource whose job is to create presigned url which can be used to send signal  to .
+          - u can access the data sent to the wait condition using Fn::GetAtt
+            - useful in licensing , or to get additional status info.
+          - ![waitCondition](images/cfn/cfn-waitCondition.png)
+     
+     
+### Nested Stacks:
+  - resources inside a stack are isolated , updated together, deleted together.
+  
+  - AWS::CloudFormation::Stack Properties.TemplateURL
+    - any parameters without default val should provided in the parent whole templates can be reused in other stack.
 
   - single isolated Stack:
     - Resources in a single stack share the same lifecycle.
     - Stack resource limits (500)
     - can't easily reuse resource e.g. A VPC
       - u can ref resources from the same stack
-    -
+    - cannot easily reuse resource
+    
+
   - Multi-stack architecture:
-    - nested stack - cross stack referencing
+    - nested stack and cross stack referencing
 
-  * Root Stack [created first manually]& Parent Stack
-    [a parent of any stack it immediately create; any stack has nested one]
-  * nestStack Outputs can be referenced in the parent stack nestedName.Outputs.[xxx]
-  * nested stack can make dependencies on each other within the same parent.
-  * outputs of nestedStack can be injected as parameters to another nested one.
-  * Use nested stack when the stacks form part of one solution - lifecycle linked.
-    - when resources will not be existed without the other,  
-       all created together operate together, deleted together.
-  * Overcome the 500 Resource Limit of one Stack
-  * Module templates ... code reuse.
-  * Make the installation process easier
+  - Root Stack [created first manually]& Parent Stack
+    - [a parent of any stack it immediately create; any stack has nested one]
+    - nestStack Outputs can be referenced in the parent stack nestedName.Outputs.[xxx]
+    - nested stack can make dependencies on each other within the same parent.
+    - outputs of nestedStack can be injected as parameters to another nested one.
+    - Use nested stack when the stacks form part of one solution 
+      - lifecycle linked.
+      - when resources will not be existed without the other, all created together operate together, deleted together.
+    - Overcome the 500 Resource Limit of one Stack
+    - Module templates ... code reuse.
+    - Make the installation process easier
     - root stack orchestrate the creation of the nested one.
-  * USE ONLY WHEN EVERYTHING IS LIFECYCLE LINKED [created, deleted, updated together]
-    - if u want to use the actual stack not the template between other stacks -> Cross-stack
-  * CFN stacks are designed to be isolated and self-contained [by default cannot reference
-    resource in another stack]
+    - USE ONLY nested-stack WHEN EVERYTHING IS LIFECYCLE LINKED [created, deleted, updated together]
+      - if u want to use the actual stack not the template between other stacks -> Cross-stack
+    - CFN stacks are designed to be isolated and self-contained [by default cannot reference resource in another stack]
+    - with nested stack u can reuse the template. not the actual stack.
+    - ![nestedStack](images/cfn/cfn-nested-stack.png) 
+    - if u want to make frequent change to one part of the app  and not others , it's probably better to have individual non-nested stack and use cross stack referencing
 
-- CF Cross-Stack Reference:
+### CF Cross-Stack Reference:
   - Outputs are normally not visible from other stacks.
+  - cannot use !REF to reference a resource in another stack.
   - Nested stack can reference them...
-  - Outputs can be exported .. making them visible from other stacks
-  - Exports must have [unique name] in the region
-  - Fn::ImportValue can be used instead of Ref.
-    that's how to use values from one stack to another.
+  - Outputs can be exported .. making them visible from other stacks [exam]
+    - example create a shared VPC to setup env for testing any new commit. instead of creating a new one each time.
+  - Exports must have [unique name] in the region [exam]
+  - Fn::ImportValue can be used instead of Ref. [eam]
+      - that's how to use values from one stack to another.
   - cross stack referencing work when they are in the same region via exported vals.
-    ...different lifecycle resources. implement soa. stack reuse.
-- StackSet
-  - feature of cfn which allow u to create, update, or delete infrastructure across
-    many regions in many AWS accounts.
-  - deploy cfn across many accounts & regions. rather having to authenticate
-    to each account individually and switch to each region u will let cfn to do it.
-  - StackSets are containers in an admin account[distinguish where stackset
-    is applied from the accounts where resources is created]....
-    - contain [stack instances; ref to actual running stack in aws region in account] ..
-      which [reference stacks].
+      - ...different lifecycle resources. implement soa. stack reuse.
+  - export list per region all names must be unique.
+  - ![cross-stack](images/cfn/cfn-cross-stack.png)
+
+<hr>
+
+### StackSet
+  - feature of cfn which allow u to create, update, or delete infrastructure across many regions in many AWS accounts.
+  - deploy cfn across many accounts & regions. rather having to authenticate to each account individually and switch to each region u will let cfn to do it.
+  - StackSets are containers in an admin account[distinguish where stackset is applied from the accounts where resources is created]....
+    - contain [stack instances; ref to actual running stack in aws region in account] ..which [reference stacks].
+      - stack instance : ref to actual running stack in one particular region in one particular account.
+        - if stack fail , stack instance will remain to keep track of the failure.
   - Stack instances & stack are in 'target accounts'
   - Each stack = 1 region in 1 account.
   - Security = self-managed or service-managed.
+    - self-managed role is where we use cfn in conjunction with aws organizations. all roles are created on ur behalf by the product behind the scence.
+    - ![stackset](images/cfn/cfn-stackset.png)
   - Term: Concurrent Accounts
-    - option can be set when creating a StackSet, define how many individual aws accounts
-      can be used at the same time. 2 val for 10 acc u will do 5 set.
+    - option can be set when creating a StackSet, define how many individual aws accounts    can be used at the same time. 2 val for 10 acc u will do 5 set.
   - Term: failure Tolerance
     - amount of individual deployments to fail to mark the whole stackset as failed.
   - Term: Retain Stacks,
-    - remove stack instacne from a stackset and by default it will delete
-      any of the stacks that are in the target accounts, but you can set it
-      so that you can remove stack instances from different AWS accounts and
-      different OUs in different regions, and it will retain any of the
-      CloudFormation stacks within those regions, within those accounts.
-      So by default, it will delete the actual stacks, but you can set it to
-      retain them.
+    - remove stack instacne from a stackset and by default it will delete <br>  any of the stacks that are in the target accounts, but you can set it <br>  so that you can remove stack instances from different AWS accounts and <br> different OUs in different regions, and it will retain any of the <br>  CloudFormation stacks within those regions, within those accounts. <br>  So by default, it will delete the actual stacks, but you can set it to <br>  retain them.
   - Scenario: Enable AWS config
-  - Scenario: create AWS Config Rules - MFA, EIPS, EBS Encryption.
-  - Scenario: Create IAM Roles for cross-account access..
-    you might want to use StackSets to create IAM roles that are used
-    for cross account access at scale. So instead of having to create
-    them in individual accounts one by one, you can define a CloudFormation
-    template to create an IAM Role and then deploy it as part of a StackSet.
+  - Scenario: create AWS Config Rules 
+    - MFA, EIPS, EBS Encryption.
+  - Scenario: Create IAM Roles for cross-account access.. you might want to use StackSets to create IAM roles that are used for cross account access at scale. So instead of having to <br> create them in individual accounts one by one, you can define a CloudFormation  template to create an IAM Role and then deploy it as part of a StackSet.
+
+<hr>
+
+### DeletionPolicy
+- if u delete a logica resource from a template .. by default , the physical resource will be deleted as well.
+- this can cause data loss
+  - RDS, EC2 with attached EBS volume
+- with deletion policy u can control the behavior of the physical resource when the logical resource is deleted.
+  - DELETE(Default), Retain or (if supported) Snapshot.
+    - snapshot supported in EBS Volume, ElastiCache, RDS, Redshift, Neptune.
+    - snapshots continue on past stack lifetime - u have to clean up ($$).
+- <b> ONLY APPLIES TO DELETE .. NOT REPLACE.
+  - delete the stack, delete the logical resource from the template. 
+- ![deletionPolicy](images/cfn/cfn-deletionPolicy.png)
+
+
+### CFN Stack Roles
+- by default, cfn uses the role of the user who is creating the stack.
+- so the identity that create the stack need to have the permission to create all the resources in the stack.
+  - but u may want to restrict the permission of the user who is creating the stack. to just creating the stack.
+- cfn stack roles let u implement role separation,
+  - the identity creating the stack .. doesn't need resource permission. - Only PassRole.
+  - ![cfn-passrole](images/cfn/cfn-passrole.png)
+- ![cfn-stack-role](images/cfn/cfn-stackrole.png)
+
+### CFN-Init
+- another feature to provide configurations to ec2 alternative to bootstraping using UserData.
+- native to cfn.  AWS::CloudFormation::Init part of ec2 logical resource.
+- UserData was Procedural u define HOW
+- CFN-Init is Declarative u define WHAT
+  - which make it portable can used with different OS.
+  - Idempoent 
+    - if the instance os already in the desired state no effect.
+- accessing cfn-init data done via a helper script - installed on EC2 OS.
+- cfn-init helper is executed from UserData.
+  - config key is under Metadata: AWS::CloudFormation::Init:
+    - configKey of configurations directives.
+- it runs only once when the instance is created. if the the CloudFormation::Init is updated it will not run again.
+- ![cfn-inti](images/cfn/cfn-init.png)
+
+#### cfn-hub
+- u can install and configure it on ec2.
+ - it detects changes in resource metadata.
+  - it run configurable actions when  a change is detected.
+- UpdateStack => update config on ec2 instance
+- ![cfn-hub](images/cfn/cfn-hub.png)
 
 ---
 

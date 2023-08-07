@@ -399,3 +399,81 @@ some of the best practices that were learned the hard way over 2 decades during
 which the web evolved. - WINNER: simple solution for devs to understand and work with, works well with
 existing deployed swf, and don't require individual devs to make licensing
 arrangements to use it.
+
+---
+# DB
+
+- ![db-vertical-scaling](images/system-design/db-vertical-scaling.png)
+
+- Replication
+  - db-read-replica-api
+    - ![db-read-replica-api](images/system-design/db-read-replica-api.png)
+
+  - ![db-read-replica](images/system-design/db-read-replica.png)
+  - replica modes:
+    - 1-Synchronous
+      - ![db-replica-sync](images/system-design/db-replica-sync.png)
+    - 2-asynchronous
+      - write to master and return to client. and then async write to replica.
+      - replica preiodically sync with master.
+        - replica pull from master.
+        - replica lag : time between master write and replica sync.
+- Sharding
+  - Because one node cannot handle the data/load we split it into multiple exclusive subsets .
+  - write on a particular row/document will go to one particular shard.
+  - some db has a proxy that take care of routing
+  - each shard can have its own replcia
+  help me to write a review for an interview. after applying. I got email on 
+8 Jun that i passed the screening phase and got an assessment it was mcqs divide into 4 sections: ruby, ror, golang focused on currency, and some db questions mostly focused on indexing.  with time limit 3 hours.
+on 16 Jun I received an email tells that I haved passed phase one in the technical challenge. with link to a second round of MCQs  time limit was 1 hours the questions were about some concurrency concepts in OS; difference between concurrency and parallelism, critical path, scenario with shared resources and #threads with question about deadlocks.   
+
+# Cache
+-  cache helps u to avoid an expensive operations {network, db, cpu, etc}
+  - API call to get profile info of a user.
+  - doing multiple table join
+- cache are not restricted to RAM based storage.
+  - any storagem that is <b> nearer </b> and help u to avoid expensive operations.
+- examples:
+  - caching last 10 mins of livestream on CDN.
+  - Auth token
+  - most recent posts on a social media feed.
+
+- population
+  - lazy 
+    - ![caching-lazy-population](images/system-design/caching-lazy-population.png)
+    - set expiration time on cache. to avoid stale data and memory leak.
+  - egar
+    - 1 write go through db and cache.
+      - ![caching-egar-write-population](images/system-design/caching-egar-write-population.png)
+      - 
+    - 2 proactively populate cache.
+      - ![caching-egar-proactive-write](images/system-design/caching-egar-proactive-write.png)
+
+### Scaling Cache
+  - cache is just like a database. hence scaling cache is similar to scaling database.
+    - Vertical Scaling
+      - increase the size of the cache server.
+    - Horizontal Scaling
+
+
+------
+# OOD
+
+- Conceptual Design
+  - Represent important objects and the relationships between them.
+- to identify objects we go through all our use cases and user stories to pick out the nouns.
+  - now we have a list of candidate objects, we can start to indicate the main relationships between them.
+  - to identifies responsabilities we go through all our use cases and user stories to pick out the verbs.
+    - it's orientied about who is initiating the action.
+    - an object should be responsible for itself.
+      - if obj A will initate an action on obj B, then obj A should ask obj B to do it.
+  - in oo the object who knows too much or does too much is  called the god object.
+  - focus on what object should do rather than viewing them as data containers/structure.
+
+### UML
+  - static members are underlined.
+  - aggregation <>
+    - lifetime of objects with aggregation relationship are independent.
+  - composition ♦
+    - specific form of aggregation but it implies ownership. part has no meaning without the whole.
+  - ![relationships](images/uml-relationships.png)

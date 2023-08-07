@@ -298,3 +298,23 @@ using interfaces:
   - postProcessBeforeInitialization method are called after calling constructor and setters but before calling  afterPropertiesSet.
 - u can also register bean definiation by implementing BeanFactoryPostProcessor->BeanDefinitionPostProcessor and override 
    postProcessBeanDefinitionRegistry method.
+---
+
+<hr>
+
+- in spring to inject config from properties file to config @PropertySource("classpath:app.properties")
+- ApplicationRunner run() & CommandLineRunner run() will get executed, just after applicationcontext is created and before spring boot application startup.
+  - difference in (String[] args) and (ApplicationArguments args)
+- not use public by default and communicate between different packages using events & interfaces.
+- WebServerInitializedEvent is published after the WebServer is ready.
+- AvailabilityChangeEvent is published when the AvailabilityState of the application changes.
+  - 
+- u can publish an event when u update/insert a record in the db, and have a listener which update the cache.
+
+- https://steeltoe.io/
+
+----
+- create ur own autoconfiguration:
+  - https://stackoverflow.com/questions/75313425/unable-to-create-custom-spring-boot-starter-autoconfiguration
+  - https://www.baeldung.com/spring-boot-custom-auto-configuration
+  - https://www.baeldung.com/spring-boot-custom-starter
