@@ -721,14 +721,16 @@ Elastic Compute Cloud (EC2)[IAAS]:
    Running - Stopped[cost storage] - Terminated - Stopping(u'll charge for ebs storage) - Pendding - shutting down
   Terminating an instance[terminated] : is a non-reversible action.
 - AMI Amzon machine Image \*\*  
-  --Permissions: control which accounts can/cannot use the ami
-  - public - everyone allowed [linux/win]
+  - Permissions: control which accounts can/cannot use the ami
+  - public 
+    - everyone allowed [linux/win]
   - Owner Implicit allow
-  - Explicit - specific AWS accounts allowed
-    -- Root Volume: can contain other volume but at least one(boot volume)
-    -- Block Device Mapping:
-    configuration which links the volumes that the AMI has and how they're presented
-    to the OS. it determines which volume is the boot volume and which is data volume.
+  - Explicit 
+    - specific AWS accounts allowed
+  - Root Volume: can contain other volume but at least one<b>(boot volume)</b>
+    - <b>Block Device Mapping:</b>
+        - configuration which links the volumes that the AMI has and how they're presented
+          to the OS. it determines which volume is the boot volume and which is data volume.
   - the OS expects to receive volumes presented to it as well as an ID, a device ID
     And the block mapping links the volume to the device ID that the OS expects.
     - Connecting to EC2 : 
@@ -844,13 +846,13 @@ CloudWatch{}:
   - ![cw-concepts](images/cw-concepts.png)
     - using dimension u can aggregate metrics data in different ways.[per region, ASG..]
   ### Resolutions:
-    - when u pub datapoints into cw u do so with certain resolution. Standard(60s granularity).. High(1s)
-      - 42% / 60s will appear 42 for the entire 60s duration.
-      - Resolution determines the minimum period u can get one datapoint for.
-      - percentile : indicate the relative standing for a value in a dataset. 95p of data that lower than a specific value.
-        - get a better understanding of distrubutaion of ur metrics data, eliminate outliers.
-      - ![cw-data](images/cw-data.png)
-      - ![cw-data-arch](images/cw-data-arch.png)
+  - when u pub datapoints into cw u do so with certain resolution. Standard(60s granularity).. High(1s)
+    - 42% / 60s will appear 42 for the entire 60s duration.
+    - Resolution determines the minimum period u can get one datapoint for.
+    - percentile : indicate the relative standing for a value in a dataset. 95p of data that lower than a specific value.
+      - get a better understanding of distrubutaion of ur metrics data, eliminate outliers.
+    - ![cw-data](images/cw-data.png)
+    - ![cw-data-arch](images/cw-data-arch.png)
   #### Alarms
   - ![cw-alarm](images/cw-alarm.png)
   - metrics resolution affect the alarm resolution.
@@ -1533,17 +1535,17 @@ Key Polices and security
 
 # S3 Object Storage class
 # S3 standard
-    - object store across at least 3 AZs in the aws region.
-      return HTTP/1.1 200 OK
-    - provide 11 9s durability for 10m objects, 1 object loss per 10k years.
-    - Replication over 3AZ's & Content-MD5 Checksums and Cyclic Redundancy Checks (CRCs)
-      are used to detect and fix any data corruption.
-    - billed GB/m fee for data stored. No specific retrieval fee, no minimum duration, no
-      minimum size.
-    - S3 standard has a 'milliseconds' first byte latency and objects can be made publicly
-      available.
-    - used for frequently accessed data which is important and Non replaceable.
-    - <img src="./images/s3-standard.png" width="850" height="500"
+- object store across at least 3 AZs in the aws region.
+  return HTTP/1.1 200 OK
+- provide 11 9s durability for 10m objects, 1 object loss per 10k years.
+- Replication over 3AZ's & Content-MD5 Checksums and Cyclic Redundancy Checks (CRCs)
+  are used to detect and fix any data corruption.
+- billed GB/m fee for data stored. No specific retrieval fee, no minimum duration, no
+  minimum size.
+- S3 standard has a 'milliseconds' first byte latency and objects can be made publicly
+  available.
+- used for frequently accessed data which is important and Non replaceable.
+- <img src="./images/s3-standard.png" width="850" height="500"
 # S3 standard-IA infrequent access.
   - same as S3 standard but,
     a new cost component, which a retrieval fee for each GB of data retrieved from
@@ -2075,7 +2077,7 @@ range of ephemeral ports to any destinations.
 
 ---
 
-NAT and NAT gateway[giving a private resource an outgoing access to internet]: 
+## NAT and NAT gateway[giving a private resource an outgoing access to internet]: 
   - A set of processes , remapping SRC or DST IPs.
   - AZ resilient.
   - (IP Masquerading) 
@@ -2092,6 +2094,18 @@ NAT and NAT gateway[giving a private resource an outgoing access to internet]:
   - IPV6
     - <img src="images/vpc/natgw-ipv6.png" width=800 height=320>
 ---
+
+# AWS System Manager Parameter Store - SSM Parameter Store{public service}
+- storage for system and app configurations. and secrets.
+- String, StringList, SecureString.
+  - u can store 
+    - License codes, db connection strings, passwords, config values.
+  - allow Hierachies & Versions
+- store in PlainText or Cipher.
+- Public Parameters - Latest AMIs per region.
+  - parameters that are publicly available and created by AWS.
+- ![ssm-theory](images/ssm-theory.png)
+<hr>
 
 ====
 # EC2
@@ -2120,6 +2134,10 @@ NAT and NAT gateway[giving a private resource an outgoing access to internet]:
       - <b>SR-IOV virtualization</b> aware on the devices level [Network interfaces..], now, even in intensive I/O the VM will perform well.        - EC2 enhanced networking.
 
 ---
+# Horizontal Scaling:
+  - ![horizontal-scaling](images/ec2/horizontal-scaling.png)
+# Vertical Scaling:
+  - ![vertical-scaling](images/ec2/vertical-scaling.png)
 
 # EC2 Architecture: 
 - EC2s are VM (OS+Resources) 
@@ -2201,8 +2219,13 @@ NAT and NAT gateway[giving a private resource an outgoing access to internet]:
 - You can create an AMI from an EC2 instance u want to templatize.
 - lifecycle of an AMI:
   - ![lifecycle](images/ec2/ec2-ami-lifecycle.png)
+    - 3- create image: when u create an AMI for any EBS volume which attached to that ec2 instance we have ebs snapshot created for those volumes.
+    - snapshots are refrenced inside the AMI using block device maping
+      - link snapshot id with and a device id linked to the ec2 instance.
 - exam power up:
   - ![exam-power-up](images/ec2/ec2-ami-exam-tips.png)
+
+
 
 
  <hr>
@@ -2216,6 +2239,70 @@ NAT and NAT gateway[giving a private resource an outgoing access to internet]:
 - Spot
   - u bid for the instance capacity. if the price is higher than ur bid, the instance will be terminated.
   - ![ec2-spot](images/ec2/ec2-spot.png)
+- Reserved
+  - particular type and locked to an AZ specifically or a region.
+  - ![ec2-reserved-option](images/ec2/ec2-reserved-option.png)
+- Dedicated Hosts
+  - u pay for a host itself which is designed for a particular family of instances. 
+  - reason to use :
+    - u may have a swf which is licensing based on Sockets/Cores.
+  - ![ec2-reserved-option](images/ec2/ec2-dedicated-option.png)
+
+<hr>
+
+- Reserved Instance
+  - Scheduled Reserved Instances 
+    - if u don't need full time period.
+    - specific time in day/week/month.
+    - ![scheduled-reserved-instances](images/ec2/scheduled-reserved-instances.png)
+- Capacity Reservations (AWS priority in case of capacity issues)
+  - 1- reserved 
+  - 2- on-demand
+  - 3- spot
+  - situation when u need to reserve capacity but u cannot satisfy long-term commitment as in reserved instances.
+  - ![capacity-reservations](images/ec2/capacity-reservations.png)
+##### Savings Plans
+- ![savings-plan](images/ec2/savings-plan.png)
+
+<hr>
+
+## System and Application Logging on EC2
+- CW and CW LOGs cannot capture data inside an instance.
+  - to provide visiability u need CW Agent and configs + permissions.
+
+
+- ![ec2-cw-agent.png](images/ec2/ec2-cw-agent.png)
+- one log group for each metric and one log stream for each instance. 
+- u can use cfn to configure the agent.
+<hr>
+
+## EC2 Placement Groups
+- allow u to influence placement of ec2 instances.
+- Cluster: 
+  - Pack instances close together inside a single AZ.
+- Spread: 
+  - Spread instances across underlying hardware. {keep them separated}
+- Partition:
+  - for distributed and replicated workloads which have infrastructure awarness.
+
+
+<hr>
+
+## Instance Status Checks and Auto Recovery
+- 2 Instance checks in launch time:
+  - System Status Checks
+    - check the underlying hardware of the instance.
+      - System Power
+      - network connectivity
+      - software issues
+      - hardware issues
+    - in fail u can create status check alarm:
+      - some action{recover} is to  move it to other host.
+  - Instance Status Checks
+    - check the instance itself.
+      - Corrupted file system
+      - Incorrect networking or startup configuration
+      - OS kernel Issues
 
 # Launch Configurations[LC] & Launch Templates[LT] Recommanded.: 
 - AutoScaling group utilize them . 
@@ -2256,6 +2343,21 @@ NAT and NAT gateway[giving a private resource an outgoing access to internet]:
 - ![ecs](images/ecs.png)
 - ![ecs-concepts](images/ecs-concepts.png)
 
+### ECS Cluster Types:
+- Management Component{exist in the two mode}:
+    - handle schedulingandOrchestration, ClusterManager, PlacementEngine{where to run container}.
+- EC2 Mode
+  - ![ecs-ec2-mode](images/ecs-ec2-mode.png)
+  - u can use dedicated host or spot instances but u need to configure the cluster to use them.
+- Fargate Mode
+  - Fargate Shared Infrastructure:
+    - aws maintain a shared infrastructure for fargate. offer to all users for fargate.
+  - each service has it's own ENI. 
+  - injected to ur VPC via ENI.
+  - ![ecs-fargate-mode](images/ecs-fargate-mode.png)
+- ![ecs-fargate-vs-ec2](images/ecs-fargate-vs-ec2.png)
+  - Large workload - Price conscious - EC2 mode
+    - u can use spot instances. or dedicated host.
 ----
 
 AutoScaling group
@@ -2323,6 +2425,7 @@ ASG + LBs - ASG can use LB healthchecks rather than EC2 status checks [Applciati
   - Can be modified when instance stopped.
   - But only executed once at launch. [post launch configuration].
 - Boot-Time-To-Service-Time (the time required to launch an instance and make it available for use  )
+  - ![boot-time-to-service-time](images/ec2/boot-time-to-service-time.png)
   - how long it takes from allocating the instance, and setup configurations.
   - u can bake the bootstraping with AMI to reduce post launch time.
     - after aws provision the instance it will be able to be used immediately.
@@ -2477,6 +2580,20 @@ EBS Volume Types
 
 <hr>
 
+
+### EBS Encryption
+- when u created an encrypted ebs volume initially, ebs uses KMS and KMS key.
+  - ebs default aws managed key aws/ebs. or
+  - customer managed key.
+
+- that key is used by ebs when encrypted volume is created. specifically it's used to generate encrypted  data encryption key known as dek.
+  - snapshot of encrypted volume is encrypted using the same dek.
+  - the dek in plaintext only in memory of the ec2 instance.
+- ![ebs-encryption](images/ebs/ebs-encryption.png)
+  - OS see only plaintext data because the encryption/decryption is done between the ec2 host & ebs volume.
+ 
+
+
 # instance store
 - Block storage Devices : volume attached to the instance presented to OS and used as basis for file system which can be used by the applciations.
 - each ec2 host has its own instance store .
@@ -2491,6 +2608,8 @@ EBS Volume Types
 - size and #instance store volumes depends on instance type.
 - ![instance-store](images/ebs/instance-store.png)
 - ![instance-store-exam](images/ebs/instance-store-exam.png)
+
+
 ---
 CloudFormation
 
@@ -2786,13 +2905,44 @@ CloudFormation
 - UpdateStack => update config on ec2 instance
 - ![cfn-hub](images/cfn/cfn-hub.png)
 
+### Change Set
+- before u update a stack u can create a change set.
+- ![cfn-change-set](images/cfn/change-set-theory.png)
+- ![cfn-change-set](images/cfn/change-set.png)
+- u see a visual list for the changes that will be made to the stack.
+  - and list of json array of objects. one per change.
 
-
+### Custom Resources
+- let cfn integrate with anythig it doesn't yet, or doesn;t natively support. ex: populate s3 bucket with obj when u create it.
+  - ex: delete objes from s3 bucket before u delete it.
+    - ![custom-resource-s3-delete](images/cfn/custom-resource-s3-delete.png)
+    - ex: request configuration information from external system as part of setting up an ec2 instance.
+- ![cfn-custom-resource](images/cfn/custom-resource.png)
 # R53
 -
 
 # CloudFront
--
+- a content delivery network (CDN) is a globally distributed network of proxy servers, serving content from locations closer to the user.
+  - reduce latency
+  - improve performance
+- Terms:
+  - Origin : the source location of ur content
+    - S3 Origin
+    - Custom Origin
+    - for one cloudfront distribution u can have multiple{1*} origins.
+  - Distribution:
+    - unit of <mark>configuration</mark> within cloudfront.
+      - everything is configured within the distributation in/directly.
+        - ![cloudfront-distribution-indirect-configs](images/r53-cloudfront/cloudfront-distribution-indirect-configs.png)
+  - Edge Location:
+    - location where content will be cached{local cache}.
+    - usually in or around captial cities.
+  - Regional Edge Cache: 
+    - Larger version of an edge location. Provides another layer of caching.
+    - hold more data that is accessed less frequently than edge locations.
+  - ![cloudfront-architecture](images/r53-cloudfront/cloudfront-architecture.png)
+  
+  
 
 
 # Kenesis
