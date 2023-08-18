@@ -2277,17 +2277,47 @@ range of ephemeral ports to any destinations.
 <hr>
 
 ## EC2 Placement Groups
-- allow u to influence placement of ec2 instances.
+- allow u to influence placement of ec2 instances. {physically close together or not}
+- used when u want to achieve the absolute highest level of performance possible within ec2.
+
 - Cluster: 
   - Pack instances close together inside a single AZ.
+  - u create a group, best practice to launch all instances at the same time with the same type.
+    -  generally the instances use the same rack sometimes the same host.
+
+  - cons: if hw fails it will impact all instances in the group.
+  - ![ec2-cluster-placement-group](images/ec2/cluster-placement-group.png)
+  - ![ec2-cluster-placement-group](images/ec2/cluster-placement-group-exam.png)
 - Spread: 
   - Spread instances across underlying hardware. {keep them separated}
+  - ensure maximum amount of resiliency and availability.
+  - span across multiple AZs.
+  - each instance is located on isloated rack.
+  - 7 instances per AZ.
+  - use cases: mirrors of file server.
+  - ![ec2-spread-placement-group](images/ec2/spread-placement-group-exam.png)
+  - all handled for u by aws.
 - Partition:
   - for distributed and replicated workloads which have infrastructure awarness.
-
+  - when have more than 7 instances per AZs but u want to keep them separated across AZs.
+  - 7 partitions per AZ.
+  - huge scale parallel processing system.
+  - u choose #instances per partition.
+    - u can share which instances in which partition to pass this info to the topology aware app. {HDFS, HBASE, CASSANDRA} to make intelligent data replication decision.
+  - u and ur app adminsiter the partition placement.
+  - ![partition-placement-group](images/ec2/partition-placement-group.png)
+  - ![partition-placement-group](images/ec2/partition-placement-group-exam.png)
 
 <hr>
 
+### Enhanced Networking & EBS Optimized
+- Enhanced Networking: improve the overall performance of ec2 networking .
+  - required for placement groups.
+  -  Uses SR-IOV - NIC is virtualization aware.
+  - ![enhanced-networking](images/ec2/ec2-enhanced-networking.png)
+- EBS Optimized
+  -  ![ebs-optimized](images/ebs/ebs-optimized.png)
+  - Dedicated Network Capacity: EBS-optimized instances have a dedicated network channel for communication with EBS volumes, ensuring that the I/O operations do not compete with other network traffic.
 ## Instance Status Checks and Auto Recovery
 - 2 Instance checks in launch time:
   - System Status Checks
@@ -2918,8 +2948,65 @@ CloudFormation
     - ![custom-resource-s3-delete](images/cfn/custom-resource-s3-delete.png)
     - ex: request configuration information from external system as part of setting up an ec2 instance.
 - ![cfn-custom-resource](images/cfn/custom-resource.png)
+
+<hr>
+
 # R53
--
+- 2 types : public and private
+- a hosted zone is DNS database for a domain.
+  - contains records which map domain names to IP addresses.
+- Globally Resilient (multiple DNS Servers)
+- ![r53-hosted-zone](images/r53-cloudfront/r53-hosted-zone.png)
+- when u register a domain ns record for that domain are entered into top level domain zone. and this point to ur name servers. and then ur name servers and zone they are host become authoritative for that domain..
+
+### public hosted zone 
+ - a dns database(zone file) hosted by R53(Public Name Servers).
+ - Accessible from the internet & VPCs{using R53 Resolver}.
+ - when u create a public Hosted zone R53 on allocate "4" nameserver specific for the zone.
+   - to integrate with public DNS system u change the "NS records" to point at these NS(connect to global DNS).
+ - inside public hosted zone u create Resource Records (RR){the actual items of data which dns uses} created within the Hosted Zone.
+ - Externally registered domains can point at R53 public hosted zone.
+   - ex: u can use godaddy to register a domain and u can create a public hosted zone in R53 get fullname service which allocated  to that hosted zone and via godaddy interface u can add those nameservers into  dns for your domain.
+  - ![r53-public-hosted-zone](images/r53-cloudfront/r53-public-hosted-zone.png)
+
+
+### private hosted zone
+- ![r53-private-hosted-zone](images/r53-cloudfront/r53-private-hosted-zone.png)
+- to be able to access a private hosted zone u need to be within a VPC and that VPC need to be associated with the private hosted zone.
+- ![r53-private-hosted-zone-visually](images/r53-cloudfront/r53-private-hosted-zone-visually.png)
+- ![r53-split-view](images/r53-cloudfront/r53-split-view.png)
+
+<hr>
+
+## R53 CNAME vs ALIAS
+-  CNAME record cannot mapped naked/apex domain.
+- ![r53-cname-limitation](images/r53-cloudfront/r53-cname-limitation.png)
+- Alias Record map a name to AWS resource.
+  - can be used both for naked/apex domain and normal domain.
+  - u should use the same record type as the record u are aliasing.
+  - ![r53-alias-record](images/r53-cloudfront/r53-alias-record.png)
+  - alias is implemented by aws and it's outside standard dns. only can ve used if the R53 is hosting ur domain.
+
+
+# R53 Health Checks
+- health check are separate from, but are used by records.
+- health check happen by a fleet of health checkers distributed around the world.
+- check happen every 30s by default. u can change that to 10s with additional cost.
+- TCP{10s}, HTTP/HTTPS{4s}, HTTP/HTTPS with String Matching. 2** 3**
+  - establish with 4s response in 2s. match first 5120 bytes of response body with a string .
+  - Endpoint, CloudWatch Alarm{agent}, Checks of Checks{check app component, then check the app itself}
+  - u specify failure threshold.
+  - u can notify failure by cw alarm via SNS.
+  - ![r53-health-check](images/r53-cloudfront/r53-health-check.png)
+## Routing Policy
+### Simple Routing.
+- no check for resources that pointed at by the record that is actually operational.
+- ![r53-simple-routing](images/r53-cloudfront/r53-simple-routing.png)
+
+### Failover Routing
+- u can add multiple record with the same name primary and secondary.
+- ![r53-failover-routing](images/r53-cloudfront/r53-failover-routing.png)
+<hr>
 
 # CloudFront
 - a content delivery network (CDN) is a globally distributed network of proxy servers, serving content from locations closer to the user.
@@ -2942,9 +3029,30 @@ CloudFormation
     - hold more data that is accessed less frequently than edge locations.
   - ![cloudfront-architecture](images/r53-cloudfront/cloudfront-architecture.png)
   
-  
+#### cloudfront behavior
+- Distribution level
+  - price class {all edge localtion or some}
+  - AWS WAF integration
+  - adding alternate domain name and then u can use a custom ssl cert.
+  - security policy - balance between the more secure and the more compatible.
+  - most recent version may not supported by all users' browsers.
+  - supported http  
+- Behaviors {cache control, restrictions}
+  - a distribution can have multiple behaviors.
+    - priority order
+  - path pattern : default is * which mean all request.
+  - origin : the origin to use for this behavior.
+  - viewer protocol policy : https only, http and https, or redirect http to https.
+  - Allowed HTTP Methods : GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE... cache..ttl
+  - restrict viewer access : yes or no.
+    - <b>trusted signers</br> : who can access the content.
+      - accounts that are able to generate signed urls or cookies.
+      - if restricted, u can use signed urls or cookies to access the content.
+  - u can associate a lambda function with a behavior.
+    - lambda function can be used to modify the request or response.
 
-
+#### cloudfront TTL and cache invalidation
+- ![cloudfront-stale](images/r53-cloudfront/cloudfront-stale.png)
 # Kenesis
 -
 
