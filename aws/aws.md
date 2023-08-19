@@ -1545,7 +1545,7 @@ Key Polices and security
 - S3 standard has a 'milliseconds' first byte latency and objects can be made publicly
   available.
 - used for frequently accessed data which is important and Non replaceable.
-- <img src="./images/s3-standard.png" width="850" height="500"
+- <img src="./images/s3-standard.png" width="850" height="500">
 # S3 standard-IA infrequent access.
   - same as S3 standard but,
     a new cost component, which a retrieval fee for each GB of data retrieved from
