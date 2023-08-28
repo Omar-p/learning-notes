@@ -2334,82 +2334,133 @@ range of ephemeral ports to any destinations.
       - Incorrect networking or startup configuration
       - OS kernel Issues
 
+
+---
+
+----
+# Regional and Global AWS Architecture
+- Global Service Location & Discovery
+  - domain resolution
+  - CDN
+  - Global health checks & Failover
+  - ![aws-globally-architecture](images/aws-globally-architecture.png)
+- Regional entry point
+  - scaling & resilience
+  - App services and compnenets
+  - ![aws-regional-architecture](images/aws-regional-architecture.png)
+
+<hr>
+
+# Evolution of Elastic Load Balancers(ELB)
+- 3 Types of LB available within AWS
+- v1(avoid/migrate) and v2
+- Classic LB(CLB v1) - introduced in 2009
+  - not really L7, lacking feature, 1 ssl per CLB - big deployment will require huge #CLB.
+- ALB - v2 -HTTP/s and Websocket
+- NLP L4 - v2 - TCP, TLS & UDP
+- V2 = faster, cheaper, support target group and rules.
+---
+
+# Elastic Load Balancer (ELB) 
+- it's job is to accept incoming traffic and distribute it to a group of targets.
+- user is abstracted away from the underlying targets.
+  - the amount of targets can be changed without impacting the user.
+- configurations:
+  - ip
+    - v4 only
+    - dualstack
+  - pick AZs which the LB will use
+    - specificly u pick subnets within those AZs.
+    - ![elb-archictecture](images/elb/elb-architecture.png)
+  - internet facing or internal
+    - internal LB can only be accessed from within the VPC.
+    - internal is generally used to separate different tiers of an app.
+  - need minimum /28 subnet| preferres /27 for each subnet the node is in.
+- ![elb-decouple-app-tiers](images/elb/elb-decouple-app-tiers.png)
+  - without LB each instance need to be aware of the other instances.
+  - u cannot scale up/down without impacting the user./ changing config/code in other instances.
+- CROSS-ZONE LB
+  - originally the LB is restricted on how to distribute traffic they have received.
+    - each node will distribute traffic to the instances in the same AZ.
+  - it's a feature allow LB node to distribute traffic to instances in other AZs.
+  - ![elb-cross-zone](images/elb/elb-cross-zone.png)
+- exam-notes
+  - ![elb-exam-notes](images/elb/elb-exam.png)
+---
+
 # Launch Configurations[LC] & Launch Templates[LT] Recommanded.: 
 - AutoScaling group utilize them . 
 - perform the same task 
 - allow the configurations of ec2 instance to be defined in ADVANCE 
 - documents let us configure : AMI, Instance Type, Storage & KeyPair 
-  - Networking configuration and sG the instances use. 
+  - Networking configuration and SG the instances use. 
   - Userdata & IAM ROLE   
-    - Both are not editable 
-    - defined once. LT has versions. 
-      - LT provide newer features 
-      - including T2/T3 Unlimited, Placement Groups, Capacity Reservations, lastice Graphics.
+- Both are not editable 
+  - defined once. LT has versions. 
+  - LT provide newer features 
+  - including T2/T3 Unlimited cpu options, Placement Groups, Capacity Reservations, lastice Graphics.
 
-    - LC has one use as part of autoscaling groups. LC provide configurations of ec2 instances.
-      - LT can do the same and can use the same configs to launch ec2 instacnes from cli/console.
-
----
-# ECS
-- aws fully/partially manage the underlying infrastructure(container-host).
-- ECS uses clusters which run in 2 modes:
-  - EC2 mode: use Ec2 instances as container hosts.
-  - Fargate mode: use serverless compute to run containers.
-
-- Container definitation tells ECS where ur image is> 
-  - ports & images
-- Task definition represents self-contained application. has 1 or more container definition. it doesn't scale on its own and it is not by itself is HA.
-  - resources.
-  - modes.
-  - <b>task roles</b> the role the task assume which the app will use to interact with aws.
-- when u create task def in console ui u actually create container def with it.
-- Service definition: 
-  - how many tasks to run.
-  - how to scale.
-  - how to load balance.
-  - how to update.
-  - how to monitor.
-  - how to interact with other aws services.
-- ![ecs](images/ecs.png)
-- ![ecs-concepts](images/ecs-concepts.png)
-
-### ECS Cluster Types:
-- Management Component{exist in the two mode}:
-    - handle schedulingandOrchestration, ClusterManager, PlacementEngine{where to run container}.
-- EC2 Mode
-  - ![ecs-ec2-mode](images/ecs-ec2-mode.png)
-  - u can use dedicated host or spot instances but u need to configure the cluster to use them.
-- Fargate Mode
-  - Fargate Shared Infrastructure:
-    - aws maintain a shared infrastructure for fargate. offer to all users for fargate.
-  - each service has it's own ENI. 
-  - injected to ur VPC via ENI.
-  - ![ecs-fargate-mode](images/ecs-fargate-mode.png)
-- ![ecs-fargate-vs-ec2](images/ecs-fargate-vs-ec2.png)
-  - Large workload - Price conscious - EC2 mode
-    - u can use spot instances. or dedicated host.
-----
-
-AutoScaling group
-used with ELB, LT to deliver elastic architecture - automatic scaling & self-healing for EC2. - Use configs defined in LT to know that to provision. - Has a [MINIMUM], [DESIRED] and [MAXIMUM] size e.g 1:2:4. - Keep running instances at the DESIRED capacity by provisioning
-or terminating instances. - SCALING POLICIES automate based on metrics.  
- Scaling Policies: - MANUAL scaling - Manually adjust the desired capacity. - in testing & urgent env. or in more cost control env. - SCHEDULED scaling - Time based adjustment - e.g. Sales.. [known high traffic time] - Dynamic Scaling - SIMPLE - "Cpu above 50%+1", "CPU blow 50-1" <- may need cloudwatch agent. - STEPPED Scaling - Bigger +/- based on instance change in traffic. - from 50%:60% do a specific action from 60:70 another ..etc - take more control than simple scaling. - adjust different load changing - TARGET TRACKING - desired aggregate CPU = 40% .. ASG handle it. [#of req for ELB, IN/OUt NEtwork] - Scaling Based on SQS - ApproximateNumberOfMessagesVisible. - Cooldown Period in seconds.. how long to wait for scaling action before doing the next one.
-
-- Trick [ec2 ASG]
-
-  - if u create a LT which can automatically build an instacne
-    then create ASG using this LT. set ASG to use multiple subnets
-    in different AZs. the set ASG 1:1:1 then u have a simple instance recovery.
-    cheap, simple, effective HA
-
+- LC has one use as part of autoscaling groups. LC provide configurations of ec2 instances.
+- LT can do the same and can use the same configs to launch ec2 instacnes from cli/console.
+  - LT can be used to save time when Provisioning ec2 instances from cli/UI
+  - ![LC-LT](images/ec2/LT-LC.png)
 ---
 
-ASG + LBs - ASG can use LB healthchecks rather than EC2 status checks [Applciation AWARENESS]
+# AutoScaling group
+- used with ELB, LT to deliver elastic architecture 
+- automatic scaling & self-healing {as part of that scaling or in isolation} for EC2. 
+- Use configs defined in LT or LC to know what to provision. 
+- Has a [MINIMUM], [DESIRED] and [MAXIMUM] size e.g 1:2:4. 
+- one foundational job: Keep running instances at the DESIRED capacity by provisioning or terminating instances. 
+  - Desired capacity is always has to be more than minimum capacity and less than maximum capacity.
+- ASG : define where the instances are launched. they are linked to a VPC and subnet within that VPC are configured on ASG.
+ - there are tempt to keep #instances in each AZ even.
+- SCALING POLICIES automate based on metrics.  
+-  Scaling Policies: 
+  - MANUAL scaling 
+    - based on minimum, desired, maximum capacity.
+    - Manually adjust the desired capacity. 
+    - in testing & urgent env. or in more cost control env. 
+  - SCHEDULED scaling 
+    - Time based adjustment 
+    - e.g. Sales.. [known high traffic time] 
+  - scaling out means adding more instances, scaling in means removing instances.
+  - Dynamic Scaling
+    - SIMPLE {pair of values{one to provision, one to terminte}}
+      - "Cpu above 50%+1", "CPU blow 50-1" <- may need cloudwatch agent. 
+      - Scaling Based on SQS - ApproximateNumberOfMessagesVisible. 
+      - u may require to install CW agent to get the metrics.
+    - STEPPED Scaling 
+      - Bigger +/- based on instant change in traffic. 
+      - from 50%:60% do a specific action from 60:70 another ..etc 
+      - take more control than simple scaling. 
+      - adjust different load changing 
+      - allow u to act quickly on sudden changes.
+    - TARGET TRACKING 
+      - desired aggregate CPU = 40% .. ASG handle it. [#of req for ELB, IN/OUt NEtwork] 
+      - average network in/out..
+      
+    
+  - Cooldown Period in seconds.. how long to wait for scaling action before doing the next one.. remember there is a minimum billable time for each instance.
+  - use ec2 status health check -> self healing.
 
-- Be careful when u setting the HealthCheck of the app. don't depend on DB or static content.
-  Scaling Process[functions performed by asg]:
+#### Trick [ec2 ASG]
+- if u create a LT which can automatically build an instacne then create ASG using this LT. 
+  - set ASG to use multiple subnets in different AZs. 
+  - then set ASG 1:1:1 
+  - then u have a simple instance recovery.
+    - cheap, simple, effective HA
 
-- LANUCH and TERMINATE - vals ->[SUSPEND: asg cannot launch/terminate and RESUME].
+---
+## ASG + LBs 
+- ASG can use LB healthchecks rather than EC2 status checks [Applciation AWARENESS]
+  - Be careful when u setting the HealthCheck of the app. don't depend on DB or static content.
+  - ![asg-and-elb.png](images/elb/asg-and-elb.png)
+
+
+## Scaling Process[functions performed by asg]:
+- <mark>LANUCH</mark> and <mark>TERMINATE</mark> 
+  - [SUSPEND: asg cannot launch/terminate and RESUME].
 - AddToLoadBalancer - add to LB on Launch
 - AlarmNotification - accept notification from CW alarms.
 - AZRebalance - balances instances evenly across all of the AZs.
@@ -2417,10 +2468,9 @@ ASG + LBs - ASG can use LB healthchecks rather than EC2 status checks [Applciati
 - ReplaceUnhealthy - Terminate unhealthy and replace.
 - ScheduledActions - Scheduled on/off.
 - StandBy - use this for instances `Inservice vs StandBy`
-  allow to suspend any of activities of ASG on a specific instance, useful
-  when u want to perform a maintainance on a specific EC2 instacne [set TO standBY]
-  --
-  Final Points:
+  - allow to suspend any of activities of ASG on a specific instance, useful when u want to perform a maintainance on a specific EC2 instacne [set TO standBY]
+
+## Final Points:
 - ASGs are free.
 - Only the resources created are billed.
 - use cooldown to avoid rapid scaling
@@ -2428,9 +2478,9 @@ ASG + LBs - ASG can use LB healthchecks rather than EC2 status checks [Applciati
   - may 2 large instance to scale to 3 will cost more than 20 small instacnes to 21.
 - Use with ALB's for elasticity - abstraction.
 - ASG defines WHEN and WHERE, LT define WHAT.
-  --  
-  ASG Scaling Policies:
-  ASGs don't need scaling policies - they can have none
+ 
+- ASG Scaling Policies:
+  - ASGs don't need scaling policies - they can have none
 
 ---
 #### adding automation to the solution we design.
@@ -2554,7 +2604,7 @@ ASG + LBs - ASG can use LB healthchecks rather than EC2 status checks [Applciati
 - Architecture of EBS 
   - ![Architecture of EBS](images/ebs/ebs-arch.png)
 ----
-EBS Volume Types
+# EBS Volume Types
 - gp2
   - default general purpose ssd
   - created with IO created allocation
@@ -2578,7 +2628,7 @@ EBS Volume Types
   - ![gp3](images/ebs/gp3.png)
 
 # HDD
-- ![ebs-hdd](images/ebs/hdd.png)
+- ![ebs-hdd](images/ebs/ebs-hdd.png)
 
 <hr>
 
@@ -2641,7 +2691,48 @@ EBS Volume Types
 
 
 ---
-CloudFormation
+# ECS
+- aws fully/partially manage the underlying infrastructure(container-host).
+- ECS uses clusters which run in 2 modes:
+  - EC2 mode: use Ec2 instances as container hosts.
+  - Fargate mode: use serverless compute to run containers.
+
+- Container definitation tells ECS where ur image is> 
+  - ports & images
+- Task definition represents self-contained application. has 1 or more container definition. it doesn't scale on its own and it is not by itself is HA.
+  - resources.
+  - modes.
+  - <b>task roles</b> the role the task assume which the app will use to interact with aws.
+- when u create task def in console ui u actually create container def with it.
+- Service definition: 
+  - how many tasks to run.
+  - how to scale.
+  - how to load balance.
+  - how to update.
+  - how to monitor.
+  - how to interact with other aws services.
+- ![ecs](images/ecs.png)
+- ![ecs-concepts](images/ecs-concepts.png)
+
+### ECS Cluster Types:
+- Management Component{exist in the two mode}:
+    - handle schedulingandOrchestration, ClusterManager, PlacementEngine{where to run container}.
+- EC2 Mode
+  - ![ecs-ec2-mode](images/ecs-ec2-mode.png)
+  - u can use dedicated host or spot instances but u need to configure the cluster to use them.
+- Fargate Mode
+  - Fargate Shared Infrastructure:
+    - aws maintain a shared infrastructure for fargate. offer to all users for fargate.
+  - each service has it's own ENI. 
+  - injected to ur VPC via ENI.
+  - ![ecs-fargate-mode](images/ecs-fargate-mode.png)
+- ![ecs-fargate-vs-ec2](images/ecs-fargate-vs-ec2.png)
+  - Large workload - Price conscious - EC2 mode
+    - u can use spot instances. or dedicated host.
+----
+
+---
+# CloudFormation
 
 - Physical and Logical Resources:
 
@@ -2769,7 +2860,7 @@ CloudFormation
     - how many AZs to create resource in.
   - e.g.. PROD,DEV 
     - control the size of instances created within a stack.
-  - ![cfn-conditions](images/cfn/cfn-condition.png)
+  - ![cfn-conditions](images/cfn/cfn-conditions.png)
 
 ### DependOn
   - allows to establish formal dependencies between resources with cfn template.
@@ -3008,6 +3099,37 @@ CloudFormation
 - ![r53-failover-routing](images/r53-cloudfront/r53-failover-routing.png)
 <hr>
 
+### Multi Value Routing
+- ![r53-multi-value-routing](images/r53-cloudfront/r53-multi-value-routing.png)
+
+
+### Latency-Based Routing
+- used when u try to optimize the performance and user experience.
+- the db aws maintain isn't real time.
+
+- ![r53-latency-based-routing](images/r53-cloudfront/r53-latency-based-routing.png)
+
+### Geolocation Routing
+- if no match or no default, it return a no answer.
+- ![r53-geolocation-routing](images/r53-cloudfront/r53-geolocation-routing.png)
+
+### Weighted Routing 
+- it can be used when u're looking for simple form load balancing or when u want tot est new software version.
+- ![r53-weighted-routing](images/r53-cloudfront/r53-weighted-routing.png)
+
+### Geoproximity Routing
+- provide record as close as possible to the user.
+- by distance vs latency-based route based on aws db. 
+- rules: aws region pr lat & long for external service.
+- ![r53-geoproximity-routing](images/r53-cloudfront/r53-geoproximity-routing.png)
+
+# R53 interoperability
+- using it to register a domain or host a zone file.
+- ![r53-register-and-host](images/r53-cloudfront/r53-register-and-host.png)
+- ![r53-register-and-host](images/r53-cloudfront/r53-register-and-host-visually.png)
+- not common: because r53 register is not providing a special features.
+  - ![r53-register-only](images/r53-cloudfront/r53-register-only.png)
+- ![r53-host-only](images/r53-cloudfront/r53-host-only.png)
 # CloudFront
 - a content delivery network (CDN) is a globally distributed network of proxy servers, serving content from locations closer to the user.
   - reduce latency
@@ -3054,8 +3176,318 @@ CloudFormation
 #### cloudfront TTL and cache invalidation
 - ![cloudfront-stale](images/r53-cloudfront/cloudfront-stale.png)
 # Kenesis
--
+- a scalable streaming service. designed to ingest and process large amounts of data from multiple sources.
+- real time ~200ms.
+- Producers send data into a kenesis stream.
+  - streams can scale from low to near infinite data rates.
+  - Stream stores data for 24 hours moving window of data.
+    - can be increased to a maximum of 365 days. (additional cost)
+  - stream divided into shards, each one has an ingestion and consumption capacity. 1mb .. 2mb
+    - data stored in shards as ordered sequence of records. (max 1MB size)
+  - data in shard can be moved to S3 via firehose.
+  - more shards ..more cost
 
+- public service, and highly available in region by design.
+  - u don't need to worry about replication, providing access from network prespective.
+- multiple consumers can read from the stream.
+
+### SQS vs Kinesis (for exam)
+- is the question is about ingestion of data, work decoupling, asynchronous communication 
+  - Kenisis
+    - ingestion
+  - SQS
+    - other
+- SQS 1 production group(of thing, same type, web tier), 1 consumption group(same, work tier).
+  - Decoupling and Asynchronous communication
+  - No persistence of message, no window. once consumed it's gone.
+- Kinesis designed for huge scale ingestion.
+  - .. multiple consumers with different rate.. rolling window
+-  Data ingestion, Analytics, Monitoring, App Clicks.
+
+## Kinesis Firehose
+- a service which can be used to move data from kenisis stream to data lakes, data stores and analytics services.
+  - S3, ElasticSearch, Splunk, Redshift: delivery to it uses s3 as an intermediate storage and then run redshift copy command to load data into redshift.
+- Automatic scaling.. fully serverless...resilient.
+- <b>Near RealTime</b> not realtime ~ delivery ~60s
+  - data is buffered for a period of time (60s) or size in MB (1) fills before it's delivered to the destination.
+  - firehose can receive data in realtime from producers but it will deliver it to the destination in near realtime.
+- supports transformation of data on the fly (lambda).
+  - can add latency depending on the complexity of the transformation.
+- Billing - pay as u go - volume passed  through firehose
+- it can directly accept data from producers or data can be obtained from kenisis stream.
+  - but remebers stream is realtime and firehose is near realtime.
+  - stream cannot natively send data to s3, redshift, elastic search, splunk.
+  - to take the best of 2 worlds u can use firehose to move data from stream to s3, redshift, elastic search, splunk.
+- use cases:
+  - u need to persist data from kenisis stream .
+  - store data in different format.
+  - for realtime requirement u can use kenisis stream with lambda to do what u want.
+## Kinesis DATA Analytics
+- realtime data processing product 
+- .. using SQL. 
+- allow large scale ingestion of data into aws and consumption of that data by other compute resources.
+- Firehose is a delivery service. data in and out in near realtime.
+- ingest from kenisis stream, firehose.
+- after data is processed it can be sent in realtime to FireHose(indirectly to supported destination by it) now become near realtime, AWS Lambda, Kenisis Stream.
+- ![kinesis-data-analytics](images/kinesis-data-analytics.png)
+- complex data manipulation in realtime using SQL.
+- ![kinesis-data-analytics](images/kinesis-data-analytics-usecases.png)
+### supported destination for firehose
+- HTTP
+- SPlunk
+- Redshift
+- ElasticSearch
+- S3 Bucket
+
+<hr>
+
+# NOSQL categories:
+- Key-Value
+  - No schema
+  - No Structure
+  - value is opque to the db, it could be anything.
+- Wide Column Store
+  - all records in the same table must have the same key layout. [partition key + other key]
+  - records can have different columns|attributes.
+  - ![wide-column-db](images/wide-column-db.png)
+- Document
+  - json, xml..
+  - schemaless
+  - Ideal scenarios: Interacting with whole documents, or deep attribute interactions.
+- Column
+  - ![column-vs-row-db](images/column-vs-row-db.png)
+- Graph
+  - relationships are formally defined and stored with the data.
+  - ![graph-db](images/graph-db.png)
+# RDS
+- DBaaS -> it's better to call database server as a service.
+- Managed Database instances (1+ Databases)
+- support multiple database engines.
+- same as ec2 u can choose the size of the instance. but types are prefixed with db.
+  - same charge model as ec2.
+  - on-demand and reserved only available.
+- in single AZ or multiple AZs.
+  - if u choose single AZ, any failure in that AZ will take the database offline.
+  - u can backup and restore the database.
+- u can attach to it security groups.
+- u can access it using database CName.
+- Storage option 
+  - General Purpose SSD (gp2)
+  - Provisioned IOPS SSD (io1)
+  - Magnetic (standard)
+- SG that can control access to the database.
+  - VPC SG
+  - EC2 SG
+  - DB SG
+
+## RDS MultiAZ
+- when u enable it a standby replica instance is created in a different AZ.
+- aws enable synchronous replication from primary to standby.
+  - create almost zero lag between the 2 instances.
+- CNAME by default point to primary.
+  - if aws detect a failure in the primary instance it will automatically failover to the standby instance. making the CNAME point to the standby instance.
+  - failover occurs within 60s to 100s. provide HA not FT.
+- ![rds-multiAZ](images/rds/multiaz-rds.png)
+<hr>
+
+### EXAM - multi AZ RDS
+- No Free-tier for MultiAZ RDS - EXTRA cost for standby instance. (2* cost of single AZ)
+- Standby can't be directly used. - only accessed in case of failure. no performance gain. it's an availability improvement.
+- the standby in the same region as the primary. (other AZs in the same VPC).
+- Backups taken from Standby (remove performance impact on the primary)
+- failover happen in a certain situation : AZ Outage, Primary Failure, Manual failover, Instance type change, Storage type change, Software patching, DB engine upgrade.
+- Sync replication between primary and standby. 
+
+## RDS Backups and Restore
+- Automatic backup
+  - retention period 0-35 days.
+    - to retain backup after deletion of the database. u need to create a final snapshot.
+  - u define a backup window.
+  - every 5 minutes transaction logs are backed up. rpo is 5 minutes.
+- manual snapshot.
+  - entire database server storage is backed up.
+  - don't expire . u have to clean them up. even if u delete the database.
+- S3 managed buckets won't be visible to u within s3 console.
+
+##### RTO{Recovery time objective} vs RPO{Recovery point objective}
+- ![rpo-rto](images/rds/rpo-rto.png)
+
+
+### EXAM - RDS Backups and Restore
+- when aws handle restore, it creates a NEW RDS instance with a new endpoint.
+  - u need to update db url in ur app.
+- in automated backup. the backup is stored and transaction logs are 'replayed' to bring DB to desired point in time.
+- Restore aren't fast - think about RTO.
+  - read replica can be used to improve RTO.
+  - any form of replication can in theory replicate data corruption. the only way to protect against this is to have a backup.
+
+### RDS Read Replicas
+- provide performance benefits and availability benefits.
+- u can use standby instance for read replica.
+  - use Async replication.
+  - a small amout of lag between primary and standby.
+  - it can be created in other region.
+  - [cross-region-read-replica]'s  fully encrypted in transit and u don't have exposure to configuration. 
+  - u can have up to 5 direct-read replicas per DB instance.
+- RR can have read-replicas - but lag start to be a problem.
+#### AVAILABILITY IMPROVEMENT - RR
+- RTO's are problem - RR's offer near 0 RPO
+- RR's can be promoted quickly - low RTP
+- data corruption can be replciated so it help in failure only.
+- Read only until promoted can decrease latency.
+- Global availability improvement.. global resilience
+
+
+# RDS security
+- SSL/TLS is available for RDS, can be mandatory.
+- RDS support EBS volume encryption - KMS
+  - handled by HOST/EBS
+- AWS or Customer Managed CMK generates data keys which are used to encrypt the data.
+- Storage, Logs, Snapshots & replicas are encrypted with the same keys.
+- ... encryption can't be removed from existing RDS instances.
+- RDS MSSQL and RDS Oracle support TDE
+  - .. Transparent Data Encryption.
+  - handled within the DB engine.
+  - RDS Oracle supports integration with CloudHSM
+  - Much stronger key controls (even from AWS).
+- ![rds-encryption-at-rest](images/rds/rds-encryption-at-rest.png)
+- IAM Authentication
+  - allow authentication using AWS Authentication Token.
+  - we have IAM USER AND ROLE : policies attached to it map that IAM identity to a database user.
+    - this allow them to generate a token which can be used to authenticate to the database.
+  - ![aws-iam-authentication](images/rds/aws-iam-authentication.png)
+
+# Aurora
+- use a base entity of a 'CLUSTER'
+  - a single primary instance + 0 or more replicas. {provide both benefit of RDS multiAZ and RR} - up to 15 replicas. failover is quicker because no need for storage modifications.
+  - no local storage - uses cluster volume - shared between all instances in the cluster.
+    - provide Faster provisioning & improved availability & performance.
+    - replication happens at storage level . no extra resources on primary or replication is consumed during replication.
+    - ![aurora-storage-architecture](images/rds/aurora-storage-architecture.png)
+    - Cluster Endpoint : point to primary instance.
+    - Reader Endpoint : load balanced endpoint for read replicas and primary.
+      - u can create custom endpoint to make one for each replica.
+    - All SSD BASED - High IOPS, Low Latency.
+    - u don't specify the amount of storage u need. it's based on what u consume.
+    - <b> High Water mark </b> - billed for the most used - u reach 5tb then go to 1 tb u will be billed for 5 tb.
+      - if u will not need that amount of storage for a long time u can delete the cluster and create a new one.
+      - this approach [high water mark] is being changed by aws.
+    - replicas can be added and removed without requiring storage provisioning.
+
+- COST
+  - No free-tier option
+  - Byond RDS singleAZ(micro) Aurora offers better value
+  - Compute - hourly charge, per second, 10 min minimum.
+  - Storage - per GB per month., IO Cost per request.
+  - 100% DB size in backup are included
+
+- Restore, Clone & Backtrack
+  - backup in Aurora work in the same way as RDS
+  - Restores create a new cluster
+  - Backtrack - allows u to rewind the database to a point in time without creating a new cluster.
+  - Fast Clone make a new database MUCH faster than copying all the data - copy-on-write. 
+    - keep track of changes to the data and only copy the changes. changes in ur clone or original will be copied to the other.
+
+
+
+# DynamoDB DBaaS
+- nosql, wide column, key/value & Document.
+- No Self-managed servers or infrastructure
+- {taking full control}Manual / Automatic{set & forget} provisioned performance  IN/OUT or On-Demand
+
+- Highly Resilient .. across AZs and Optionally global
+  - data is replicated across multiple storage nodes by default.
+- Really fast .. single-digit milliseconds (SSD based)
+- Backups, Point-in-time recovery, and encryption at rest.
+- support Event-Driven Integrations configure action based on data change.
+
+
+### DynamoDB Tables
+- the base entity inside dynamodb.
+  - dynamoDB shouldn't be designed as DBaaS it's more like Database Table as a service.
+  - a group of items which share the same primary key.
+  - no limit on #items in the table
+- when u create a table u need to pick a primary key.
+  - (simple) partition key
+  - (Composite) partition key + sort key
+- u can configure a table with a provisioned capacity or on-demand capacity.
+  - capacity{speed} is measured in read/write capacity units.
+    - on-demand capacity is measured in request/operation units.
+    - provisioned capacity is measured in read{RCU = 4KB per second}/write {WCU=1KB} capacity units.
+      - most ops have a minimum consumption of 1 RCU or 1 WCU.
+      - reserved allocation of capacity so if u know u will have a requirements for a long term capacity on dynamodb table-> u can purchase reservations and u'll get a cheaper rate.
+- the item in table MAX SIZE IS 400KB. including key & values.
+  - Each ITEM have a unique value for PK and SK.
+    - can have NONE, ALL, MIXTURE or different attributes (has no rigid attributes schema)
+### DynamoDB On-Demand Backups
+- similar to have a manual snapshot of rds.
+- u are responsible for performing the backup or removing them.
+- ![dynamodb-ondemand-backup](images/dynamodb/dynamodb-ondemand-backup.png)
+
+### Point-in-time Recovery(PITR)
+- u need to enable PITR on the table.
+- Not Enabled by default.
+- it results in continuous stream of backups.
+- u can create a new table by restoring this backup from any [unit of time] interval in the duration of day recovery window.
+- ![dynamodb-pitr](images/dynamodb/dynamodb-pitr.png)
+
+- ![dynamodb1-exam](images/dynamodb/dynamodb1-exam.png)
+
+### DynamoDB Reading and Writing
+- u can switch between capacity modes even if u add data to the table but with some restrictions.
+- with On-Demand u don't have admin overhead of managing capacity. but, u pay more which can be 5x more expensive.
+- with provisioned  u set rcu and wcu per table basis. 
+- Every Opertation consumes at least 1 RCU/WCU(*)
+- 1 RCU is 1 * 4 KB read operation per second(*)
+- 1 WCU is 1 * 1 KB write operation per second
+- Every table has a RCU and WCU burst pool(300 seconds)
+  - when u set rcu and wcu u set for sustained average but try to dep in burst pool as infrequently as possible. because other table modification task can use this pool as well.
+
+- WCU calculation
+  - ![dynamodb-wcu](images/dynamodb/wcu-calculation.png)
+  - get single item size and calc its WCU and multiply by the number of items u want to write per second. 
+- RCU calculation
+  - ![dynamodb-rcu](images/dynamodb/rcu-calculation.png)
+  - get single item size and calc its RCU and multiply by the number of items u want to read per second.
+### Query
+- Query is used to retrieve items from a table using the partition key.
+  - reading and writing the entire item{row}.
+  - if u have to perform a query which operate on single item as a minimum u're going to consume the capacity   that whole item uses.
+  - u charge for whole item even if u read a single attribute.
+  - ![dynamodb-query](images/dynamodb/query.png)
+
+### scan
+- least efficient way to read data from dynamodb but more flexible.
+- consume the whole table .
+- ![dynamodb-scan](images/dynamodb/scan.png)
+
+### Consistency Model
+- Eventual Consistency is easier to implement from infrastructure prespective and it scale better.
+- Strong Consistency is more expensive and it's harder to implement.
+- Eventual Consistent Read is half the price of Strong Consistent Read.
+- ![dynamodb-consistency](images/dynamodb/consistency-model.png)
+  - strong read vs eventual read
+
+## DynamoDB Indexes
+- Query is the most effiient operation in DDB
+ - but it has the limitation of only specifying 1 pk val at a time. [exam]
+    - and optionally a single, or range of SK value.
+- Indexes are alternative views on table data
+  - with it the query can work in ways that it couldn't otherwise
+- Different SK (LSI) or Different PK and SK (GSI) [exam]
+- Some or all attributes (projection) [exam]
+
+### Local Secondary Indexes(LSI)
+- LSI an alternative views for a table
+- LSI must be created with the table creation, u can create up to 5 LSI's per base table.
+- Alternative SK [sort key with the same partition key]
+- Shares the RCU and WCU with the table.
+  - in case of using provisioned capacity mode.
+- Attributes in the index - ALL, KEYS_ONLY & INCLUDE[u specify which to include]
+
+<hr>
+
+### Global Secondary Indexes(GSI)
 ### Lambda Environment Variables
 - every lambda func can have 0 or more env var.
 - envs associtated with a version (immutable // fixed)
@@ -3142,6 +3574,13 @@ CloudFormation
 - ![openapi-def2](images/openapi-def2.png)
   - u can use it with api gateway as backup method or migrating configurations between different api.
   
+### SQS
+- Unlimited throughput, unlimited number of messages in queue.
+- Default retention of messages: 4 days, maximum of 14 days
+- Low latency (<10 ms on publish and receive) . Limitation of 256KB per message
+- Can have duplicate messages (at least once delivery, occasionally) 
+- Can have out of order messages (best effort ordering)
+- consumer can poll up to 10 messages at a time.
 ----
 udacity temp :
 
@@ -3514,3 +3953,6 @@ through a sampling algorithm to determine which requests get traced. The default
 only recording the first request each second, and 5% of any additional requests. While this ensures that you're getting
 at least one sample per second, you also have the ability to configure X-Ray to modify the default sampling rule,
 and configure additional rules that apply sampling based on properties of the service or request.
+
+
+REST APIs are intended for APIs that require API proxy functionality and API management features in a single solution. HTTP APIs are optimized for building APIs that proxy to Lambda functions or HTTP backends, making them ideal for serverless workloads. HTTP APIs are a cheaper and faster alternative to REST APIs, but they do not currently support API management functionality. Unlike a REST API, which receives and responds to requests, a WebSocket API supports two-way communication between client apps and your backend. The backend can send callback messages to connected clients.
