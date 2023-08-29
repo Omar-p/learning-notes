@@ -32,6 +32,6 @@
 - <img src="images/problems-with-large-api.png" width="450">
 - refactoring to messaging api
   - <img src="images/message-model.png" width="450">
-  - we can have logically indepent routing for each of these messages, u can prioritize them differently, this is gone go over higher priority network, this is gone go over lower priority network...
+  - we can have logically independent routing for each of these messages, u can prioritize them differently, this is going to go over higher priority network, this is going to go over lower priority network...
   - we can separate out the handling logic for each of these messages, we don't neccessarily have the single service implementation like before to handle all of them.
   - don't share classes or types, share schema.
