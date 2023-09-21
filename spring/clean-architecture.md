@@ -194,3 +194,47 @@
 - https://altarek.notion.site/Discovering-Domain-knowledge-And-Bounded-Context-9b3efaec630a45d1be0be4f4272460eb
 - https://altarek.notion.site/Bounded-Context-And-Domain-Modeling-38e0786016274c408e151f9df66ccd0f
 - https://altarek.notion.site/Context-Mapping-05b8ccf8d1324879845ad691a27b101e
+
+----
+## notes 
+- we create event in the domainService and the firing responsibility is on the applicationService.
+  - domain created in domain core to make sure that the underlying business operation should be persisted in the database. before firing the event.
+- naturally domain entities are responsible for creating the domain events.
+  - in DDD using domain service is not mandatory. it's required when u have access to multiple aggregate in business logic or have a complex business logic that cannot be handled by  aggregate root. 
+- author follow a personalized approach : always integrate a domain service infront of the domain. so app service will never talk to entities directly.
+- domain service can match use cases in clean architecture because use case def is driving the business entities and domain service is similar to use case.
+  - app service is not because it has no business logic, and it's exposed to outside through interface, while use cases are not exposed.
+
+
+
+------
+### DDD & REST - Domain Driven APIs for the web - Oliver Gierke
+  - value object is better than using primitive type.
+    - need custom serializers.
+    - using string for everything may cause issues like miss the order of the parameters and how u can validate the data.
+      - use EmailAddress type instead of String. 
+  - aggregate : is one in a set of entity which control business and consistency rules over the set of entity
+    - the key thing to refer to.
+  - don't get trapped by datastore thinking.  don't think the model is meant to be persisted in database as a first place.
+    - the model is meant to be used to implement the business logic.
+  - Bound context : is a boundary around a subdomain.
+    - no conflicts between bounded contexts.
+    - each term has a unique meaning in each bounded context.
+    - some actor will be spread across multiple bounded context. ex: customer.
+    - some data will be duplicated across multiple bounded context. ex: customer name.
+      - ex: description of the product will be duplicated in the order bounded context. because we don't want it to change when it's updated in the catalog bounded context.
+  - Domain Event
+    - domain events as state transition.
+    - as a maturity levels:
+      - Level 0: No events at all
+      - Level 1: Explicit Operation
+      - Level 2: Some operations as events
+      - Level 3: Event Sourcing
+        - storing the events that happened in the system instead of the current state.
+        - With CQRS, the write side can generate events that represent changes to the application's state. These events are then stored in an event store as part of the Event Sourcing pattern. The read side can subscribe to these events and build optimized read models for different query needs.
+  - if u're calling two setters in a row, u're probably missing a concept.
+    - set address fields -> move()
+    - make the ops explicit and give it a name.
+  - REST != CRUD via HTTP
+    - Representation design matters.
+      - 1to1 mapping between ur entities and db tables and u don't think about aggregate at all is not a good idea.

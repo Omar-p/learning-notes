@@ -318,3 +318,31 @@ using interfaces:
   - https://stackoverflow.com/questions/75313425/unable-to-create-custom-spring-boot-starter-autoconfiguration
   - https://www.baeldung.com/spring-boot-custom-auto-configuration
   - https://www.baeldung.com/spring-boot-custom-starter
+---
+
+## @Controller :
+- it's a sterotype annotation, which means it's a specialization of @Component.
+- a compnent that set on the path between a request coming from external protocol {http, grqphql, soap, rsocket, ...} and your business logic.
+
+<hr>
+
+- u can implement ur own view View.
+
+rest : data + consistent way to understand it.
+- if u will give up all http rest features and u will couple the client with the server, then don't use rsocket to get the benefit of the performance.
+  - use http with rest for open web, internally u can use rsocket to get the benefit of the performance.
+
+
+---
+- handlerAdapter
+  - https://stackoverflow.com/a/19009601
+# DispatcherServlet
+- doDispatch method
+  - check if the request is multipart
+  - determine the handler for the request
+    - if null -> noHandlerFound method
+  ----
+- RequestResponseBodyMethodProcessor
+  - Resolves method arguments annotated with <br> @RequestBody and handles return values from methods annotated with @ResponseBody by reading  <br> and writing to the body of the request or response with an HttpMessageConverter.
+    - writeWithMessageConverter match requested content type with compatible media-types.
+    - iterate over the converters and find the first one that can write the response.

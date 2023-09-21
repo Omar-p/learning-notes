@@ -544,7 +544,7 @@ Route53 Fundamentals:
 
   - ex: www.amazon.com => www.amazon.co.uk 
   - CNAME ftp, CNAME mail, CNAME www all point to the same server.
-   - <img src="images/dns-cname.png" width="800"height="500">
+   - ![dns-cname](./images/dns-cname.png)
    - cannot point to ip address, only to another name.
 - MX 
   - mx-record is for how server can find mail server for a specific domain.
@@ -2107,6 +2107,23 @@ range of ephemeral ports to any destinations.
 - ![ssm-theory](images/ssm-theory.png)
 <hr>
 
+# Secret Manager
+- id does share responsibilities with SSM Parameter Store.
+- store, rotate, manage secrets.
+- secrets are encrypted using KMS. (API KEY, PASSWORD)
+- rotation happens automatically using lambda.
+- directly integrated with RDS, Redshift, DocumentDB, Aurora.
+
+# FSx for Windows File Server
+- fully managed native windows file servers/shares
+  - file shares as a unit of consumption
+- Designed for integration with windows environments.
+- Integrate with Directory services or Self-managed AD
+  - running inside AWS or on-permises
+- Single or Multi-AZ within a VPC
+- On-Deman and Scheduled Backups.
+- Accessible using VPC, Peering, VPN, Direct Connect.
+
 ====
 # EC2
 ====
@@ -2387,7 +2404,31 @@ range of ephemeral ports to any destinations.
 - exam-notes
   - ![elb-exam-notes](images/elb/elb-exam.png)
 ---
+## LB Consolodation
+- ![elb-consolodation](images/elb/lb-consolodation.png)
 
+## ALB
+- alb:
+  - ![alb](images/elb/elb-alb.png)
+-  alb -rules - theory:
+  - ![alb](images/elb/elb-alb-rules-theory.png)
+- alb - rules - diagram:
+  - ![alb](images/elb/elb-alb-rules.png)
+
+## NLB
+- ![nlb](images/elb/elb-nlb.png)
+
+## ALB vs NLB
+- ![alb-vs-nlb](images/elb/elb-alb-vs-nlb.png)
+
+## ASG Life Cycle Hooks
+- ![asg-life-cycle-hooks](images/elb/asg-life-cycle-hooks-01.png)
+- ![asg-life-cycle-hooks](images/elb/asg-life-cycle-hooks-02.png)
+
+
+## ASG Health Checks
+- grace period : time to wait before the health check start. [choose based on the time it takes to configure the machine and to start the app]
+- ![asg-health-checks](images/elb/asg-health-checks.png)
 # Launch Configurations[LC] & Launch Templates[LT] Recommanded.: 
 - AutoScaling group utilize them . 
 - perform the same task 
@@ -3175,6 +3216,19 @@ range of ephemeral ports to any destinations.
 
 #### cloudfront TTL and cache invalidation
 - ![cloudfront-stale](images/r53-cloudfront/cloudfront-stale.png)
+
+## Cloudfront Signed URLS
+-  ![signed-url](images/r53-cloudfront/signed-url.png)
+
+## Cloudfront Signed Cookies
+-  ![signed-url](images/r53-cloudfront/signed-cookies.png)
+
+## Origin ACCESS IDENTITY - deprecated
+- useful only when u want to restrict access to s3 origin to be only via cloudfront.
+- ![origin-access-identity](images/r53-cloudfront/origin-access-identity.png)
+
+## Origin ACCESS CONTROL
+- ![origin-access-control](images/r53-cloudfront/origin-access-control.png)
 # Kenesis
 - a scalable streaming service. designed to ingest and process large amounts of data from multiple sources.
 - real time ~200ms.
@@ -3387,8 +3441,20 @@ range of ephemeral ports to any destinations.
   - Backtrack - allows u to rewind the database to a point in time without creating a new cluster.
   - Fast Clone make a new database MUCH faster than copying all the data - copy-on-write. 
     - keep track of changes to the data and only copy the changes. changes in ur clone or original will be copied to the other.
-
-
+- u can create read replica policy based on :
+  - #requests
+  - cpu utilization in percent
+## Aurora Serverless 
+- u still require to create a cluster.
+  - but Aurora use ACU - aurora capacity unit.
+  - acu : a certain amount of compute and corresponding amount of memory. 
+  - u can set a MIN and MAX ACU.
+  - aurora will automatically scale up and down between the min and max acu.
+  - can go to 0 and paused. - u pay only for storage.
+- billing per-seconds
+- same resilience as Aurora (6 copies across AZs)
+- ![aurora-serverless](images/rds/aurora-serverless.png)
+- ![aurora-serverless-usecases](images/rds/aurora-serverless-usecases.png)
 
 # DynamoDB DBaaS
 - nosql, wide column, key/value & Document.
@@ -3400,6 +3466,16 @@ range of ephemeral ports to any destinations.
 - Really fast .. single-digit milliseconds (SSD based)
 - Backups, Point-in-time recovery, and encryption at rest.
 - support Event-Driven Integrations configure action based on data change.
+- datatypes:
+  - Scalar Types - String, Number, Binary, Boolean, Null
+  - Document Types - List, Map
+  - Set Types - String Set, Number Set, Binary Set
+- [HASH|RANGE] - [Partition Key|Sort Key]
+  - HASH - Partition Key - must be unique
+    - used to distribute data across partitions
+    - choose a value that has a wide range of values| highest cardinality.
+    
+  - RANGE - Sort Key - optional
 
 
 ### DynamoDB Tables
@@ -3412,10 +3488,17 @@ range of ephemeral ports to any destinations.
   - (Composite) partition key + sort key
 - u can configure a table with a provisioned capacity or on-demand capacity.
   - capacity{speed} is measured in read/write capacity units.
-    - on-demand capacity is measured in request/operation units.
+    - on-demand capacity is measured in request/operation units. 2.5x more expensive.
+      - unknown workload, unpredictable traffic, new application.
     - provisioned capacity is measured in read{RCU = 4KB per second}/write {WCU=1KB} capacity units.
       - most ops have a minimum consumption of 1 RCU or 1 WCU.
       - reserved allocation of capacity so if u know u will have a requirements for a long term capacity on dynamodb table-> u can purchase reservations and u'll get a cheaper rate.
+      - if u exceed the provisioned capacity temporarily u can use burst capacity.
+        - burst capacity is a pool of capacity that u can use to exceed the provisioned capacity for a short period of time.
+        - burst capacity is consumed when u exceed the provisioned capacity.
+        - burst capacity is replenished at a rate of 1
+        - if burst capacity is consumed, u'll get a "ProvissionedThroughputExceededException" error.
+          - it's then advised to do an exponential backoff rety.
 - the item in table MAX SIZE IS 400KB. including key & values.
   - Each ITEM have a unique value for PK and SK.
     - can have NONE, ALL, MIXTURE or different attributes (has no rigid attributes schema)
@@ -3434,7 +3517,7 @@ range of ephemeral ports to any destinations.
 - ![dynamodb1-exam](images/dynamodb/dynamodb1-exam.png)
 
 ### DynamoDB Reading and Writing
-- u can switch between capacity modes even if u add data to the table but with some restrictions.
+- u can switch between capacity modes even if u add data to the table but with some restrictions. - once within 24 hours.
 - with On-Demand u don't have admin overhead of managing capacity. but, u pay more which can be 5x more expensive.
 - with provisioned  u set rcu and wcu per table basis. 
 - Every Opertation consumes at least 1 RCU/WCU(*)
@@ -3449,6 +3532,12 @@ range of ephemeral ports to any destinations.
 - RCU calculation
   - ![dynamodb-rcu](images/dynamodb/rcu-calculation.png)
   - get single item size and calc its RCU and multiply by the number of items u want to read per second.
+
+##
+- for strongly consistenct read: 
+  - Set 'ConsistentRead' to true. in API call.(GetItem, Query, Scan, BatchGetItem)
+- ![wcu-rcu-partition](images/dynamodb/wcu-rcu-partition.png)
+- ![dynamodb-throttling](images/dynamodb/dynamodb-throttling.png)
 ### Query
 - Query is used to retrieve items from a table using the partition key.
   - reading and writing the entire item{row}.
@@ -3469,7 +3558,7 @@ range of ephemeral ports to any destinations.
   - strong read vs eventual read
 
 ## DynamoDB Indexes
-- Query is the most effiient operation in DDB
+- Query is the most efficient operation in DDB
  - but it has the limitation of only specifying 1 pk val at a time. [exam]
     - and optionally a single, or range of SK value.
 - Indexes are alternative views on table data
@@ -3481,13 +3570,62 @@ range of ephemeral ports to any destinations.
 - LSI an alternative views for a table
 - LSI must be created with the table creation, u can create up to 5 LSI's per base table.
 - Alternative SK [sort key with the same partition key]
+  - allow for alternative sort key but sam partition key.
 - Shares the RCU and WCU with the table.
   - in case of using provisioned capacity mode.
 - Attributes in the index - ALL, KEYS_ONLY & INCLUDE[u specify which to include]
-
+- Indexes are sparse, only row which have a value in the index alternative sprt key are added to the index. u can take the advantage and use scan op because u know the table only have the row u interested in.
 <hr>
 
 ### Global Secondary Indexes(GSI)
+- can be created at any time
+- default limit of 20 per base table
+- Alternative PK and SK
+- GSI's have their own RCU and WCU allocations
+- Attributes in the index - ALL, KEYS_ONLY & INCLUDE[u specify which to include]
+- ![dynamodb-gsi](images/dynamodb/gsi.png)
+#### LSI and GSI considerations
+- careful with projection (KEY_ONLY, INCLUDE, ALL)
+  - Queries on attributes not in the index are slow.
+- Use GSIs as default, LSI only when strong consistency is required.
+- Use index for alternative access patterns.
+
+### DynamoDB Streams
+- Time ordered list of item changes in a table.
+- 24-hrs rolling window
+  - use kensis data stream under the hood.
+- enabled on a per-table basis.
+- Records Insert, Updates and Deletes
+- Different view types influence what is in the stream
+  - what information is added to the stream every time a record is changed.
+  - KEYS_ONLY
+    - only the key attributes of the item are written to the stream.
+  - NEW_IMAGE
+    - the entire item, as it appears after it was modified, is written to the stream.
+    - in case of deletion the record in stream will be empty.
+  - OLD_IMAGE
+    - the entire item, as it appeared before it was modified, is written to the stream.
+    - in case of insertion the record in stream will be empty.
+  - NEW_AND_OLD_IMAGES
+    - both the new and the old images of the item are written to the stream.
+- ![dynamodb-trigger](images/dynamodb/dynamodb-trigger.png)
+
+## DAX - DynamoDB Accelerator
+- in memory cache for dynamodb.
+- ![dynamodb-dax](images/dynamodb/dax-vs-regular-cache.png)
+- dax is not ideal in application which require strong consistency.
+- dax is not ideal for write heavy application .
+- ![dax-consideartion](images/dynamodb/dax-consideration.png)
+- ![dax-architecture](images/dynamodb/dax-architecture.png)
+- elastic cache is good for caching data produced from a complex logic in
+  
+## DynamoDB Global Tables
+- Multi-Region, Multi-Master
+## DynamoDB TTL
+- u can create a stream dedicated to TTL deletions.
+- ![dynamodb-ttl](images/dynamodb/ttl.png)
+
+
 ### Lambda Environment Variables
 - every lambda func can have 0 or more env var.
 - envs associtated with a version (immutable // fixed)
@@ -3581,26 +3719,198 @@ range of ephemeral ports to any destinations.
 - Can have duplicate messages (at least once delivery, occasionally) 
 - Can have out of order messages (best effort ordering)
 - consumer can poll up to 10 messages at a time.
+
+## codebuild
+- fully manged
+- pay for the resource u use
+- alternative to part of jenkins, jenkins require an overhead to maintain and configure.
+- used for builds and test
+- uses docker for build environment, can be customized. [u can provide ur custom image, or customize via buildspec]
+- integrated with other aws service: cloudtrail, kms, vpc, s3..
+- get source from github, codecommit
+- customized via buildspec.yml file (in root of source)
+- logs => s3 and CW logs
+- metrics => cw
+- Events => EventBridge
+- buildspec
+  - 4 main phases
+    - install - install package in the build environment{runtime}
+    - pre_build - install dependencies  or sign-in
+    - build - build the app
+    - post_build - packaging , push artifact , explict notification
+  - environment vars - can integrate with parameter store and secret manager
+  - Artifacts - what stuff to put where
+- ![codebuild](images/ci-cd/codebuild.png)
+
+
+## CodeDeploy
+- deploy code not resources.
+  - Code, Web, Config, EXE, Packages, Scripts, media
+  - EC2, On-premises, Lambda, ECS.
+  - on-premises/ec2
+    - ![code-deploy](images/ci-cd/code-deploy-ec2.png)
+  - lambda
+    - ![code-deploy](images/ci-cd/code-deploy-lambda.png)
+  - ECS
+    - ![code-deploy](images/ci-cd/code-deploy-ecs.png)
+- 
+- Appspec
+  - Manage Deployments - config + lifecycle event hooks
+  - Files,Permissions(EC2/On-premises), Resource(ECS/Lambda)
+    - Permissions: 
+    - Files
+      - provide info to CD about which file should be install on the instance
+    - Resources
+      - for lambda contain name + alias + current version + target version.
+      - for ECS : task def, container and port details for routing traffic.
+  - hooks:
+    - if ur target ec2/on-premises it can run scripts in each one of the hooks.
+    - if ur target is ecs/lambda it can run lambda function in each one of the hooks.
+    - ApplicationStop
+    - DownloadBundle
+    - BeforeInstall
+    - Install
+    - AfterInstall
+    - ApplicationStart
+    - ValidateService*
+
+## ECR
+- fully managed docker container registry
+- Each AWS account has a public  and private Registry
+  - inside each registry u can have many repos
+  - each repo can have many images
+  - each image can have many tags - 
+- public anyone can read but for write need permission.
+- ![ecr](images/ci-cd/ecr.png)
+# Step Function
+- orchestration service that allows you to model workflows as state machines.
+  - u can design it using json.
+  - u can execute it in parallel
+  - u can invoke it using api gateway, sdk, cw events.
+- u can track execution using aws console
+  - execution event history
+  - u charged per state transition.
+    - 25$ per million state transitions.
+- pros
+  - visualization tool 
+     - it's more useful for collaboration with team members who are not engineers.
+     - Make it easy for anyone to identify and debug application error
+  - error handling and retries.
+    - moving error handling and retries into the state machine itself. make it easier to manage and maintain. and you focus on the happy path in the lambda function.
+  - audit
+- cons
+  - cost
+- recommanded business scenarios
+  - for business critical workflows
+    - stuff that make money, e.g. payment processing, subscription flows.
+    - why ? more robust error handling worth the cost.
+  - complex workflows that involves many states, branching logic, etc.
+  - workflow that cannot complete in 15 minutes (lambda max timeout)
+  - [transcript] I often see workflows within the same bounded context of a single microservice. there often orchastered using a series of lambda function with kensis streams and sns topic in between. this a really bad idea here when done in same bounded contrext because the workflow itself doesn't exist as a standalone concept anywhere but exist as a some of loosly connected functions with event sources  and this make the workflow very diffcult to reason about and debug and there is no an easy way to implement workflow level timeout either. if this what u have today then consider to refactor it into a step function.  
+
+- state types 7:
+  - Task
+    - Resource doesn't have to be lambda function, it can be Activity, AWS Batch, ECS task, r/w to dynamodb, sns, sqs, aws glue, SageMaker
+    - ![step-function-task](images/step-function/task-state.png)
+  - Pass
+    - pass state is used to transform the input to the output. modify the execution state without calling a lambda function.
+  - Wait
+    - wait state is used to delay the execution of the state machine for a fixed time or until a specified time.
+      - u can decide that based on the input.
+    - ![step-function-wait](images/step-function/wait-state.png)
+  - Choice
+    - choice state is used to implement branching logic in the state machine.
+    - u need to specify default case.
+    - ![step-function-choice](images/step-function/choice-state.png)
+  - Parallel
+    - the state complete when all branches complete or any branch fails.
+  - Succeed
+    - the state machine will complete successfully.
+  - Fail
+    - the state machine will complete with a
+  - Map 
+    - Dynamically iterate over a list of steps.
+- Error Handling
+  - retries and catch (transition to failure path) only allowed on Taskk and Parallel states.
+  - ![predefined-errors](images/step-function/predefined-errors.png)
+  - ![step-function-error-handling](images/step-function/retry-example.png)
+    - u can set MaxAttempts to zero to disable retry for certain error.
+- wait task token [push]
+  - ![step-function-wait-task-token](images/step-function/wait-task-token.png)
+- Activity Task [pull]
+  - ![step-function-activity](images/step-function/activity.png)
+- Express vs Standard
+  - ![step-function-express](images/step-function/express-vs-standard.png)
 ----
+## AppSync
+- overview
+  - ![appsync-overview](images/appsync/overview.png)
+- Security
+  - ![appsync-security](images/appsync/security.png)
+----
+ #### APP CONFIG
+ - create,manage, and deploy application configurations
+ - capability of AWS Systems Manager
+  - 
+- A configuration is a collection of settings that influence the behavior of your application
+- Reduce errors associated with configuration changes and streamlines deployment.
+- Configs can be stored in:
+  - S3
+  - AWS AppConfig
+  - Systems Manager Parameter Store
+  - Systems Manager Document Store
+  - Bitbucket or GitHub via CodePipeline
+- Applications must be updated to check for and retrieve configuration data
+- API actions include:
+  - StartConfigurationSession
+  - GetLatestConfiguration
+
+- ![app-config](images/app-config.png)
+
+
+### AWS Systems Manager
+- Manages many AWS resources including EC2, S3, RDS...
+- Components
+  - Automation
+    - ![automation](images/automation.png)
+  - Run Command
+    - ![run-command](images/run-command.png)
+  - Patch Manager
+    - ![patch-manager](images/patch-manager.png)
+  - Inventory
+  - Session Manager
+    - ![session-manager](images/session-manager.png)
+    - bastion host is not required to connect to private instance.
+  - Parameter Store
+  - Compliance
+    - ![compliance](images/compliance.png)
+-----
+# ElasticCache
+- Managed Redis or Memcached .. as a service.
+- Can be used to cache data - for READ HEAVY workloads with low latency requirements.
+- Reduce databasse (workload){cost effective}.
+- can be used to store session data (stateless servers)
+- Require Application code changes !!
+
+### Redis vs Memcached
+- ![memecached vs redis](./images/memcached-vs-redis.png)
+
+
+
 udacity temp :
 
-- why allocation of IP is important ? why not to let the NATG to pick any ?
-  - because any aws resource is disposable, if we let NAT choose random IP,
-    and for any reason the resource restart it will pick another IP and
-    any resources depend on the IP will break. so to make sure that the IP
-    will remain the same we need EIP.
 
 Resources:
-NatGateway1EIP:
-Type: AWS::EC2::EIP
-DependsOn: InternetGatewayAttachment
-Properties:
-Domain: vpc
-NatGateway1:
-Type: AWS::EC2::NatGateway
-Properties:
-AllocationId: !GetAtt NatGateway1EIP.AllocationId
-SubnetId: !Ref PublicSubnet1
+  NatGateway1EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+    Domain: vpc
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+    AllocationId: !GetAtt NatGateway1EIP.AllocationId
+    SubnetId: !Ref PublicSubnet1
 
 ---
 
@@ -3608,23 +3918,6 @@ Type: AWS::EC2::SubnetRouteTableAssociation
 Properties:
 RouteTableId: String
 SubnetId: String
-
----
-
-Security groups - Security group specify firewall rules.
-We will create two of them, one for a load-balancer and another for a web server.
-
-AutoScaling group - An autoscaling group ensures that a desired
-number of servers (EC2 instances) are always up and running. If an instance goes
-down due to any reason, such as bad health, a substitute instance with a similar configuration will spin up automatically.
-
-Launch configuration - The configuration of the EC2 instance that
-spins up automatically, if required, as a part of autoscaling group resides
-in a launch configuration.
-
-Load balancer - A load balancer distributes the incoming traffic
-uniformly across multiple servers (target group) within the same or different AZs.
-We will also create a listener and target group for the load balancer.
 
 ---
 
@@ -3793,35 +4086,9 @@ been granted access
 
      - API Gateway is validating the incoming request against the model.
 
----
 
-serverless:
-
-- a cloud computing execution model in which the cloud provider allocates machine Resources
-  on demand. taking care of the servers on behalf of their customers.
-- No more servers u think about.
 
 ---
-
-EC2: still requires management and maintenance by its users, like
-operating system updates or security patching.
-
-Good Reasons for Choosing EC2 over Serverless
-1-Computation- workloads that require a high level of (parallel) computing power.
-
-2-Flexibility & Control- With EC2, you have complete control over the operating system, libraries,
-and every software that runs on your instance.
-
-3- Cost Control , you’ll be billed for your chosen instances that can be a perfect fit
-for your needs in regard to instance types and sizes.
---
-Amazon Machine Images (AMI)
-AWS-maintained configurations that are required to launch an instance. It contains: - OS - Architecture - launch permissions - storage
-
-Elastic Block Storage (EBS):
-
-- block storage volumes that can be mounted to instances. Their persistence is i
-  ndependent of your instance’s lifetime.
 
 Elastic File System (EFS) - scalable file storage that can scale based on workload requirements.
 Use it for any workload that can suddenly increase or decrease storage needs.
@@ -3830,27 +4097,10 @@ It can also be used for shared volumes.
 depending on the operating system that is running on your EC2 instance, you may have to use another user name.
 For example, the user name for Amazon Linux instances is ec2-user while the user name for Ubuntu instances is ubuntu.
 
-you won’t be billed for the instance while it’s stopped, but you’ll still pay for the storage of any EBS volume.
 
 Hibernate: If supported by the OS, the instance can save its RAM contents to the EBS root volume.
 
-security Groups - A security group can be viewed as a virtual, stateful firewall for your instances.
-It controls the traffic to and from each instance, allowing you to specify which inbound and outbound
-network traffic is allowed.
 
-Network ACLs - NACLs are another layer of security that allows you to control traffic to and from subnets
-in your VPC. Contrary to security groups, NACLs are stateless, meaning that you explicitly need to configure
-outbound allow rules, for your service to be able to answer requests. The stateful security groups allow such
-responses by default, if the requesting (inbound) direction was allowed.
-
-Gateways - There are two important gateway types in AWS: the Internet and the NAT gateway. On the one hand,
-the internet gateway allows communication between instances in your public subnet and the internet.
-A NAT gateway on the other hand enables instances in a private subnet to connect to the internet or other
-AWS services but prevents the Internet from initiating connections to those instances.
-
-EC2 is the key service for applications that require a high level of customization and control,
-while serverless services like Lambda are a good choice for applications that need to run code
-in response to specific events or triggers.
 
 --AuthN & AuthZ--------------
 For the REST API type, the mechanisms for API Gateway to do authentication and authorization,
@@ -3956,3 +4206,10 @@ and configure additional rules that apply sampling based on properties of the se
 
 
 REST APIs are intended for APIs that require API proxy functionality and API management features in a single solution. HTTP APIs are optimized for building APIs that proxy to Lambda functions or HTTP backends, making them ideal for serverless workloads. HTTP APIs are a cheaper and faster alternative to REST APIs, but they do not currently support API management functionality. Unlike a REST API, which receives and responds to requests, a WebSocket API supports two-way communication between client apps and your backend. The backend can send callback messages to connected clients.
+-----
+## Notes for the exam:
+- InvalidParameterValueException exception while creating lambda -> You provided an IAM role in the CreateFunction API which AWS Lambda is unable to assume.
+- err code : 504 in api gateway -> Timeout.
+- CodeStorageExceededException -> you have exceeded your maximum total code size per account
+- ResourceConflictException -> the resource already exists
+- ServiceException -> AWS Lambda service encountered an internal error

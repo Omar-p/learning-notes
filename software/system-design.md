@@ -1,0 +1,36 @@
+## Gathering Requirements
+- ask about the functionallity
+  - ex: youtube. {comment section, search ..}
+  - ex: fb newsfeed {posts{iamge|videos}, comments}
+- the scale of the system
+  - ex: {location of the users, number of users, number of requests per second}
+  - ex google drive {number of users, number of files, storage size}
+- characteristics of the system
+  - ex: {consistency, availability, latency, durability, scalability}
+
+## Planning 
+- after gathering the requirements, we need to plan the system
+- divide it into stages
+  - ex: instagram
+    - stage 1: storage
+        - storage of images/videos
+        - storage of user data
+    - stage 2: core functionallity
+        - profile creation
+        - follow/unfollow
+    - stage 3: posting
+    - stage 4: explore
+    - stage 5: newsfeed
+  - ex: ebay
+    - stage 1: user side
+        - search
+        - filter
+        - sort
+        - add to cart
+        - checkout
+    - stage 2: seller side
+        - add product
+        - edit product
+        - delete product
+        - view orders
+        - ship orders
