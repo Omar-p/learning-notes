@@ -20,63 +20,77 @@ Spring Integration: Getting Started.
 - basis of other spring projects [cloud stream
   for building highly scalably event-driven microservice]
 - integrate different system have challenges such as :
+  - 1- each system may produce different data format.
+  - asynchronous adv. 
+    - 1- . More responsive system because sender does not have to wait. 
+    - 2- Messages buffering makes the system resilient to failure:
+    after the receiver recover from failure, the receiver will find msgs in the Q 
+    - 3- Receiver processes messages at its own rate.  
+  - 2- a typical spring integration app will has a multiple MessageChannel,
+    so when we inject it. we may need to use @Qualifier("beanName") to
+    explicitly specify what we want.
 
-  1. each system may produce different data format
+- use classes from org.springframework.messaging over org.springframework.integration:\
 
-- asynchronous adv. 1. More responsive system because sender does not have to wait. 2. Messages buffering makes the system resilient to failure:
-  after the receiver recover from failure, the receiver will find msgs in the Q - 3. Receiver processes messages at its own rate.  
-  2
-  a typical spring integration app will has a multiple MessageChannel,
-  so when we inject it. we may need to use @Qualifier("beanName") to
-  explicitly specify what we want.
+  - historical they were in integration package, people find them so useful <br>  so they add them to spring core. for backward competability they don't remove <br>  it from ..integration
 
-use classes from org.springframework.messaging over org.springframework.integration:\
+### dsl
+- give us a set of builders to configure spring integration flo <br> IntegrationFlow initializ set of spring integration compnents and wire <br> them together. 
+  - IntegrationFlow.from(startingPoint).handle([class and method want service activator to call])
 
-- historical they were in integration package, people find them so useful
-  so they add them to spring core. for backward competability they don't remove
-  it from ..integration
+## Channels
+  ### subscribable channel:
+  - implement event-driven consumer pattern, push msgs to rec, Non-buffering
+    - Implementation:
+      - Unicasting dispatcher[DirectChannel, ExectuorChannel] (pattern: p2p)
+      - broadcasting dispatcher[PublishSubscribeChannel] (pattern (pub-sub))
+      - DirectChannel: 
+        - call one of its subscriber when the msg is sent on the same thread.
+      - ExectuorChannel: 
+        - p2p that delegates to an instance of TaskExecutor to perform msg dispatching, <br> shouldn't be used for transactions that span channel calls doesn't need to block the sender.
 
-dsl
-give us a set of builders to configure spring integration flow,
-IntegrationFlow initializ set of spring integration compnents and wire
-them together. IntegrationFlow.from(startingPoint).handle([class and method want service activator to call])
-
-subscribable channel:
--implement event-driven consumer pattern, push msgs to rec, Non-buffering
-Implementation:
-_ Unicasting dispatcher[DirectChannel, ExectuorChannel] (pattern: p2p)
-_ broadcasting dispatcher[PublishSubscribeChannel] (pattern (pub-sub))
-DirectChannel: - call one of its subscriber when the msg is sent on the same thread.
-ExectuorChannel: - p2p that delegates to an instance of TaskExecutor to perform msg dispatching,
-shouldn't be used for transactions that span channel calls doesn't need to block the sender.
-
-Pollabl Channel: - Polling Consumer create a separate thread and periodically poll the channel for msgs, Pull, Buffering. - QueueChannel
-default: usie linked blocking queue with unbounded capacity. [u can configure type or capacity]
-if q is empty thee receiver block until the sender send msg or timeout.
--RendezvousChannel
-ZeroCapacity Queue channel, Block until sender and receiver meet. - Backed by SynchronizeQueue - p2p, synchronize sender and receiver[check availability of something], best use for the request-reply pattern. - PriorityQueue
-Default oredering by "priority" header, can be overrided[by definig ur own Comparator] - - pollable and buffered - stored message in PriorityBlockingQueue - Potential to starve message with low priority.
-DirectChannel - p2p subscribable that enables a single thread to perform operations on both sides of the channel. - when the pub invokes its send method, it forwards the msg in that same thread to its msg
-dispatcher, which invokes the subscriber's handleMsg method. when sub completes, the the
-response is returned to the pub. -> supporting transaction. - Motivation: Transaction Integrity: - support transactions that must span across the channel while still benefiting from the abstraction
-and loose coupling that channel provides. - sender block on the send() until receiver complete msg processing - - best choice for transactional calls that span across a channel, while retaining loose coupling.
+  ### Pollabl Channel: 
+    - Polling Consumer create a separate thread and periodically poll the channel for msgs, Pull, Buffering. 
+    - QueueChannel
+    - default: use linked blocking queue with unbounded capacity. [u can configure type or capacity] <br>  if q is empty thee receiver block until the sender send msg or timeout.
+  ### RendezvousChannel
+    - ZeroCapacity Queue channel, Block until sender and receiver meet. 
+      - Backed by SynchronizeQueue 
+      - p2p, synchronize sender and receiver[check availability of something], best use for the request-reply pattern. 
+      - PriorityQueue
+         - Default oredering by "priority" header, can be overrided[by definig ur own Comparator] 
+- pollable and buffered - stored message in PriorityBlockingQueue - Potential to starve message with low priority.
+- DirectChannel 
+  - p2p subscribable that enables a single thread to perform operations on both sides of the channel. 
+  - when the pub invokes its send method, it forwards the msg in that same thread to its msg dispatcher, <br> which invokes the subscriber's handleMsg method. when sub completes, the the response is <br> returned to the pub. -> supporting transaction. 
+  - Motivation: Transaction Integrity: 
+    - support transactions that must span across the channel while still benefiting from the abstraction <br> and loose coupling that channel provides. 
+    - sender block on the send() until receiver complete msg processing  
+    - best choice for transactional calls that span across a channel, while retaining loose coupling.
 
 3
 
-- to send msg to mq we need to convert it to suitable format - java serialization drawbacks:
-  1-a serialized java obj is a binary blob of data which is not easily human readable.
-  2-tightly coupled with a specific version of java class.
-  if u make change to the class, then u might get an incompatible class change error when u read
-  an obj that was serialized with an older version. - json : need to use object-to-json-transformer [need input-channel, output-channel, ]
-  Message Broker : - an intermediary computer program module that translates a message from the formal messaging
-  protocol of the sender to the formal messaging protocol of the receiver. - decouple sender from the receiver.
-  ex : [to configure in spring]
-  [sender(input-channel, output-channer, transformer, adapter)]
-  adapter: a glue between spring integration msg channels and other compnents
-  and systems. - spring has many impl to it, allowing spring to connect easily with different systems.
-  4
-  Errors in Asynchronous Applications: - an error occurred in the receiver, what does receiver do with the msg? - in request-reply pattern > standards exception handling. - Direct channel - RendezvousChannel - execute gateway in try-block. spring make it easy: u can handle error gracefully. - in directChannel u don't have to define return type for gateway. because directChannel use 1 thread to
-  handle sending/receiving u can just wrap gateway execution with try-catch even if it's void.
+- to send msg to mq we need to convert it to suitable format 
+  - java serialization drawbacks:
+    - 1-a serialized java obj is a binary blob of data which is not easily human readable.
+    - 2-tightly coupled with a specific version of java class.
+      - if u make change to the class, then u might get an incompatible class change error when u read = > an obj that was serialized with an older version.
+  - json: need to use object-to-json-transformer [need input-channel, output-channel, ]
+  - Message Broker : 
+    - an intermediary computer program module that translates a message from the formal messaging  protocol of the sender to the formal messaging protocol of the receiver. 
+    - decouple sender from the receiver.
+    - ex: [to configure in spring]
+      - [sender(input-channel, output-channer, transformer, adapter)]
+        - adapter: a glue between spring integration msg channels and other components and systems. 
+          - spring has many impl to it, allowing spring to connect easily with different systems.
+  
+---
+# Errors in Asynchronous Applications: 
+  - an error occurred in the receiver, what does receiver do with the msg? 
+    - in request-reply pattern > standards exception handling. 
+    - Direct channel - RendezvousChannel 
+      - execute gateway in try-block. spring make it easy: u can handle error gracefully. 
+      - in directChannel u don't have to define return type for gateway. because directChannel use 1 thread to <br>  handle sending/receiving u can just wrap gateway execution with try-catch even if it's void.
 
 ---
 
