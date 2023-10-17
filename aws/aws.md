@@ -5,47 +5,47 @@
   - Capabilities are available over the network and accessed through standard mechanisms...[http, https,ssh,vpn..]. no need to visit datacenter.
   - if u need to go to datacenter to provision a new server, then it's not cloud computing.
 - Resource Pooling
-  - There is a sense of "location independence" ... no "control" or "knowledge: over the exact "location" of the resorces
+  - There is a sense of "location independence" ... no "control" or "knowledge: over the exact "location" of the resources
   - Resources are "pooled" to serve multiple consumers using a "multi-tenant model"
-  - Moved from thinking of hardware as value(instead of thinking about hw and servers, it think about it as the host) to thinking of applications and services as things of value that a business offers.
+  - Moved from thinking of hardware as value (instead of thinking about hw and servers, it thinks about it as the host) to thinking of applications and services as things of value that a business offers.
 - Rapid Elasticity
   - capabilities can be elastically "provisioned" and "released" to scale "rapidly" outward(horizontal) and inward with demand.
-  - To the consumer, the capabilites available for provisioning often "appear" to be "unlimited" 
-  - Elasticity -> system automatically system size increase as the load increases, and automatically decrease when the demand decrease.
+  - To the consumer, the capabilities available for provisioning often "appear" to be "unlimited" 
+  - Elasticity -> system automatically system size increases as the load increases, and automatically decreases when the demand decreases.
      - (vendor provide monitoring and auto-scaling)
 - Measured Service
-  - before cloud: u buy a server and u pay for it even if u don't use it. u pay in advance
-  - Resource usage can be "monitored", "controlled", "reported" .. AND "billed".
+  - before cloud: u buy a server, and u pay for it even if u don't use it. u pay in advance
+  - Resource usage can be "monitored," "controlled," "reported." AND "billed."
 
-  - through the course keep them in ur mind and for every svc evaluate how that service matches with one of this characteristics.
-     - it help u in exam if the answer make sense or not, help u to design a system.
---------------------------------------------------------
+  - through the course, keep them in your mind and for every svc evaluate how that service matches with one of these characteristics.
+     - it helps u in exam if the answer makes sense or not, help u to design a system.
+---
 # Public vs Private vs Hybrid vs Multi:
 - Multi (cloud provider resilience)-> 
   - deploy ur app in multiple cloud provider this means that u have got cloud provider level resilience. 
-    - stay away from single management window to manage multi-cloud because it add  abstraction that make only the common services between each platform are availables and can not use the rest. and that doesn't make use of each one.  
+    - stay away from a single management window to manage multi-cloud because it adds abstraction that makes only the common services between each platform are availables and can not use the rest. and that doesn't make use of each one.  
 - Private -> 
   - private cloud on-premises [aws outposts, azure stack, google anthos] provide services dedicated to ur business and run on your-permises. 
   - they must meet the 5 characteristics of cloud computing. but dedicated to you as a business.
 - Hybrid -> 
-  - use public and private in the same time. with true hyber cloud. you use the same tooling the same interface to interact with both private and public component.
-  - Hybrid Cloud is NOT public cloud + legacy on-permises -> it called hybrid environment or hybrid network.
------------------------------------------------------------
+  - use public and private in the same time. with true hyper cloud. you use the same tooling the same interface to interact with both private and public component.
+  - Hybrid Cloud is NOT public cloud + legacy on-premises -> it is called hybrid environment or hybrid network.
+---
 Cloud Service model
 - Infrastructure Stack -> collection of things which the application needs all stacked onto each other[Facilities -> infra -> servers -> virtualizations -> os -> container -> Runtime -> Data -> Application]. 
 - Parts "You" manage, Parts managed by the "vendor".
-Unit of consumption.[what you pay for, what you consume].
+Unit of consumption.[what you pay for, what you consume]
 
-- on-permises vs data-center hosting
+- on-premises vs data-center hosting
   data-center: provide racks, building and security. you manage the rest.
 - IaaS: manage [Facilities, Infra, Servers, Virtualization] you consume the OS and mange the above layers. you pay per min ,secs, hours or virtual machine.
 EC2 uses the IaaS service model.
 - PAAS: u consume the Runtime and manage the above layers[Data, Application]
-  if java app, u pay for a java runtime. PAAS mainly used by developers.
+  if java app, u pay for a java runtime. Developers mainly use PAAS.
 - SAAS: u consume the application. Netflix, Dropbox, Email.
 
 # SECTION 2
-- aws accounts and users inside of those accounts.
+- aws accounts and users inside those accounts.
   - AWS Accounts is a container for identities (users) and Resources.
      - users -> log into that account and provision services in that account.
      - a unique root user for each account.
@@ -58,18 +58,18 @@ EC2 uses the IaaS service model.
 
   - activate iam user access to billing information: 
     - to allow IAM Identity to access billing information.
-------------------
-# Multi-factor Authentication:(MFA)
+---
+# Multifactor Authentication:(MFA)
   - Factor: different pieces of evidence which prove identity.
     -  Knowledge: Something you know, username & password.
     -  Possession: Something you have, bank card, MFA device/app. [ATM use possession and knowledge]
-    -  Inherent: Something you are.. fingerprint, face, voice, iris.
-    -  Location: A Location (physical), which network (corp or wifi)
-    -  More Factors means more security & harder to fake.
+    -  Inherent: Something you are...fingerprint, face, voice, iris.
+    -  Location: A Location (physical), which network (corp or Wi-Fi)
+    -  More Factors mean more security & harder to fake.
   - we try to balance between convenience and security.
-    - configuring MFA for aws , aws generate a secret key and other associated info (username & service name).
+    - configuring MFA for aws, aws generates a secret key and other associated info (username & service name).
     - aws give u a QR code to scan with your MFA app (generated from the key & associated info).
-    - the secret key is used to generate a 6 digit code which is valid for 30 seconds.
+    - the secret key is used to generate a six-digit code which is valid for 30 seconds.
 -------------------------------
 - IDentity provider
   - Authenticate Identity
@@ -78,22 +78,22 @@ EC2 uses the IaaS service model.
   - there are limits
 - Global service / global resilience
 - IAM of your account is trusted fully by your account, can do anything.
-    - if IAM allow one identity to do something, the account automatically trust the identity in the same way it trust IAM.
+    - if IAM allows one identity to do something, the account automatically trusts the identity in the same way it trust IAM.
     - No direct control on external accounts or users. control only local identities in your account.
     - make use of identity federation -->[take identities u have[fb account] and use it indirectly to use aws] and MFA
 
-  - every aws account come with its own running copy of IAM, it's own db
-  - IAM is globally resilience service, any data is always secure in any 
+  - every aws account comes with its own running copy of IAM, its own db
+  - IAM is a global resilience service, any data is always secure in any 
     aws regions.
-    - IAM u see in each of ur AWS accounts is  your own dedicated instance of IAM separate from other account and from any one else accounts. 
-     - my AWS account trust my  instance of IAM.
+    - IAM u see in each of your AWS accounts is your own-dedicated instance of IAM separate from another account and from any one else account. 
+     - my AWS account trusts my instance of IAM.
      - IAM is trusted fully by the account, IAM as a service can do as much as the root user.
-      - inside IAM we can create other identities, IAM can allow those identities to <br> do certain things. because a single aws account trust IAM, if IAM allows one of identity that it manages to do something, the account automatically trust the identity in the same way it trust IAM.
+      - inside IAM, we can create other identities, IAM can allow those identities to <br> do certain things. because a single aws account trust IAM, if IAM allows one of identity that it manages to do something, the account automatically trust the identity in the same way it trust IAM.
        
        
 - IAM ---> 
   - User --> Identities which represent humans or applications that need access to your account.
-  - Group --> Collections of related users e.g. development team, finance or HR
+  - Group --> Collections of related users e.g., development team, finance or HR
   - Role ---> Can be used by aws services, or for granting external access to your account. [when you want to grant access to services in your account to an uncertain number of entities]. 
       - Example for IAM ROLE -> if you want all EC2 instances in your account to be able to access the simple storage service, then you can create a role which grants access to the simple storage service, and then allow instances to use that role.
 
@@ -103,7 +103,7 @@ EC2 uses the IaaS service model.
   
   - IAM policy(iam let u create it) [object or document]: 
     - used to allow or deny access to aws services when and only when they're attached to IAM USERS, GROUPS OR ROLES.
-    - policy on their own do nothing they simply define, allow or deny rights to a certain  services when you attach<br> the policies to other identities. so users, groups and roles do they have any effect.
+    - policy on their own do nothing they simply define, allow or deny rights to certain services when you attach<br> the policies to other identities. so users, groups and roles do they have any effect.
   
   - IAM has 3 main jobs:
     - 1- Manage Identities- And ID Provider(IDP)
@@ -252,7 +252,7 @@ together with any permissions that identity has over this aws account.
   	  - jam signal is sent by all of the devices, and random backoff occurs(a period of time during which no device will attempt a transmission.) after that period which picked randomly a transimission is retried.
   	  
     - L1 & L2 
-  	   - to connect more than 2 devices and use benefit of L2. a hub won't work because it doesn't understand L2. So we use a SWITCH.
+  	   - to connect more than two devices and use benefit of L2. a hub won't work because it doesn't understand L2. So we use a SWITCH.
 	    
     - SWITCH:
       - understand frames and MAC. they maintain a MAC ADDRESS TABLE which starts off EMPTY. 
@@ -3575,7 +3575,8 @@ range of ephemeral ports to any destinations.
   - in case of using provisioned capacity mode.
 - Attributes in the index - ALL, KEYS_ONLY & INCLUDE[u specify which to include]
 - Indexes are sparse, only row which have a value in the index alternative sprt key are added to the index. u can take the advantage and use scan op because u know the table only have the row u interested in.
-<hr>
+
+<hr />
 
 ### Global Secondary Indexes(GSI)
 - can be created at any time
@@ -3685,7 +3686,8 @@ range of ephemeral ports to any destinations.
 - from client prespective there is no difference between ALB and req/response to Backend EC2.
 - ![lambda-alb](images/lambda-alb.png)
 - ![lambda-alb-translation](images/lambda-alb-event-req-response.png)
-- MultiValueHeaders - if u have multiple headers|queryString with the same name.
+- MultiValueHeaders  
+  - if u have multiple headers|queryString with the same name.
   - ![lambda-multi-value-header](images/lambda-multi-value-header.png)
 
 ## Lambda Resource Policy 
@@ -4204,12 +4206,21 @@ only recording the first request each second, and 5% of any additional requests.
 at least one sample per second, you also have the ability to configure X-Ray to modify the default sampling rule,
 and configure additional rules that apply sampling based on properties of the service or request.
 
+---
 
-REST APIs are intended for APIs that require API proxy functionality and API management features in a single solution. HTTP APIs are optimized for building APIs that proxy to Lambda functions or HTTP backends, making them ideal for serverless workloads. HTTP APIs are a cheaper and faster alternative to REST APIs, but they do not currently support API management functionality. Unlike a REST API, which receives and responds to requests, a WebSocket API supports two-way communication between client apps and your backend. The backend can send callback messages to connected clients.
------
+##### REST APIs are intended for APIs that require API proxy functionality and API management features in a single solution. HTTP APIs are optimized for building APIs that proxy to Lambda functions or HTTP backends, making them ideal for serverless workloads. HTTP APIs are a cheaper and faster alternative to REST APIs, but they do not currently support API management functionality. Unlike a REST API, which receives and responds to requests, a WebSocket API supports two-way communication between client apps and your backend. The backend can send callback messages to connected clients.
+
+---
+
+# Stratospheric
+- Declarative Deployments
+  - organizations realize if the dev team has the power to deploy themselves, this will improve performance <br> metrics like deployment frequencies/time from idea to deploy.
+- Programmable Deployments
+---
+
 ## Notes for the exam:
 - InvalidParameterValueException exception while creating lambda -> You provided an IAM role in the CreateFunction API which AWS Lambda is unable to assume.
-- err code : 504 in api gateway -> Timeout.
+- err code: 504 in api gateway -> Timeout.
 - CodeStorageExceededException -> you have exceeded your maximum total code size per account
 - ResourceConflictException -> the resource already exists
 - ServiceException -> AWS Lambda service encountered an internal error
