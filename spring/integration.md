@@ -349,3 +349,196 @@ rabbitmq:
 - other option : AMQP
   - AMQP is a protocol, and RabbitMQ is an implementation of that protocol.
   - any broker that implements a AMQP implements the same protocol, and we can use any client to talk to any broker.
+
+---
+---
+
+# Introduction to Kafka with Spring Boot
+- 12. Synchronous & Asynchronous Communication
+  - in request/response blocking
+    - latency subject to chaining, it's very diffcult to determine the latency you will be exposed to<br> unless you have an insight into the internals of other services
+  - in asynchronous non-blocking 
+    - the client can continue to do other things while waiting for the response.
+    - it comes with complexity:
+      - error handling
+      - matching response to request
+  - Event Driven
+    - Asynchronous
+    - No Response
+      - service fire the event and forget about it.
+    - Loosly Coupled
+      - service don't need to know about each other.
+    - Kafka doesn't need to know that you want to get data.
+---
+- 13. Kafka vs ActiveMQ (JMS) vs Rabbit (AMQP)
+  - JMS
+    - Java Message Service
+    - API
+    - Push mechanism for distributing messages and provide transactionality for inter-process communication.
+    - ActiveMQ, IBM MQ, RabbitMQ, WebSphere MQ, JBoss
+    - no common protocol
+      - you could have JMW implementation with AMQP
+    - Queus & Topic
+      - Queue - p2p, message is delivered to one consumer, queue can retain message until consumer is ready to process it.
+      - Topic - pub/sub, message is delivered to all consumers, topic doesn't retain message, if consumer is not ready to process it, it will be lost.
+      - ActiveMQ has another messaging model called Virtual Topic, which is a combination of Queue and Topic.
+        - it's a queue that has multiple consumers, and each consumer will receive a copy of the message.
+        - it's a good fit for microservices, because it's a queue, and it's a good fit for event driven architecture, because it's a topic.
+  - AMQP
+    - based around push notifications
+    - RabbitMQ is a message broker that associated with AMQP
+      - uses the concept of exchanges for messages distribution using rules called bindings. It is exchange type and the binding rules that determine the routing behavior of messages.
+        - Direct Exchange
+          - routing key is used to determine which queue the message will be delivered to.
+        - Fanout Exchange
+          - message is delivered to all queues that are bound to the exchange. 
+    - AMQP RabbitMQ has been seen to be more performant than JMS due to features such as batching messages, binary message format, and advanced routing exchanges.
+  - Kafka
+  ### PUSH vs PULL
+  - Push
+    - <img src="./images/integration/push.png" width="550" height="250" />
+    - there is some backoff pattern that can help the consumer being overwhelmed, but these can be quite complicated.
+  - Pull
+    - <img src="./images/integration/pull.png" width="550" height="250" />
+    - kafka implement long polling, which means that the consumer will hold the connection open for a period of time, and if there is no message, it will return empty response.
+  ### Retention
+    - JMS message retention
+      - JMS topics drop messages if there is no active consumer. In this case, we should use the term "queue" instead of "topic".
+    - Kafka message retention
+      - Kafka uses an append-only log to record messages and consumer maintain a consumer read position in the log using a pointer called an offset. This means that all messages can be retained for as long as configured, even if there is no active consumer.
+
+    ##### Benefits of Kafka message retention
+
+    - Retaining messages opens up the possibility of message replay. Message replay means that you can process some or all of the previous messages. This leads to being able to recreate system states based on past events.
+
+    ##### Scenarios where message replay is useful
+    - Creating a new service instance
+    - Replaying data to help diagnose system issues
+    - Examples:
+
+      - A company wants to create a new service instance to handle increased traffic. The new instance can be created with the same state as the existing instance by replaying the latest messages.
+      - A company is experiencing system issues and wants to diagnose the problem. They can replay the messages that were processed around the time of the issue to see what went wrong.
+    
+
+    - Kafka's message retention feature is a powerful tool that can be used to improve the resilience and scalability of distributed systems.
+  ### Ordered messaging in distributed systems
+
+  - It is sometimes important to process messages in the order in which they were produced, especially in distributed systems. This can be challenging, as multiple consumers may be reading from the same message queue.
+
+  - Ordering in JMS, RabbitMQ, and Kafka
+
+    - In JMS, ActiveMQ will preserve the order of messages sent by a single producer to all consumers on a topic. If there is a single consumer on a queue then the order of messages sent by a single producer will be preserved as well.
+    - In RabbitMQ, ordering is guaranteed only when a message is published to a single channel, passes through a single exchange, and is routed to a single queue. This is also possible, but not when involving multiple consumers.
+    - In Kafka, ordering is guaranteed within partitions. Partitions are immutable logs of messages, and each message is assigned to a single partition based on its key. Messages on the same partition are always processed in order. Kafka can have multiple consumers for a topic, but each consumer will only read from a single partition. This means that order is maintained within partitions, even though multiple consumers are reading from the same topic.
+  - Benefits of using Kafka for ordered messaging:
+    - Kafka can combine ordering with scaling, which is not possible with other distributed messaging systems.
+    - Kafka is highly reliable and fault-tolerant.
+    - Kafka has a high throughput and low latency.
+  - Conclusion:
+    - Kafka's support for ordered messaging is a powerful feature that can be used to ensure that data is processed correctly, even in distributed systems with multiple consumers.
+
+  - Examples of where Kafka's ordered messaging feature is used:
+    - Stock trading
+    - Website analytics
+    - Fraud detection
+    - Order processing
+    - Event sourcing
+---
+- 14. What is Kafka?
+  - partitions is how we parallelize the topic, if topic have huge data, you partitions it to put it on multiple machines to get more resources.
+  - inside a partition each message will has offset id. so  if the consume fail it can rejoin from the last message it received
+  - The message which partition event is written to is down to a specified partition strategy or the message key.
+    - The same key on multiple messages will mean that that so same messages are placed on the same partition.
+
+  - kafka preserve order per partition
+
+  - kafka has a retention policy determine for how much the message will remain in the partition
+
+  - partitions are replicated all W go to the leader
+    - the followers have to call the leader back to say it got it.
+    - Consumers can read from the lead or any follower partition. Producers only write to the lead partition
+
+
+  - the producer can talk to any partition
+
+  - consumers can be part of 1 consumer group, cg can contain any #consumers. 
+    - each consumer get a part of the data with no duplicate for ex: cg contain c1, c2 and topic with 4 partitiions. c1 listen to p1,p4 and c2 to p2,p3
+
+  - each consumer get different set of the data
+    - this allow for scaling, if consumer can not catch up u can add additional one to listen to this p
+
+    - if u have #c > #p some c will be idle
+
+
+---
+- 15. Message vs Event
+  - Message: An asynchronous communication sent over a channel, containing a request or event.
+    - Event: A message that describes something that has happened. a fact.
+    - Kafka record: Synonymous with message.
+    - <img src="./images/integration/message.png" width="550" height="250" />
+  - Request and Command
+    - Requests and commands are messages that instruct a service to do something, such as dispatch a payment. They are interchangeable, but it is best to choose one term and stick with it.
+    - The request may not be carried out due to a failure in the service or because no one is listening.
+---
+- 16. What is a Kafka Message?
+  - We should remember that messages are always written in batches and that batch has data associated with it, such as a producer ID timestamps and a CRC value, which is used to verify the integrity of the messages within the batch.
+  - Kafka Message/Record
+    - value/payload
+      - The payload of a Kafka record can be in any format that can be represented as an array of bytes, such as string, JSON, or Avro. The default maximum size for a payload is 1 MB, which is sufficient in most cases.
+
+      - Considerations for payload size
+        - When designing Kafka payloads, there are a few things to keep in mind:
+        - Performance: Larger payloads can impact system performance, as they need to be transmitted over the network, persisted, and replicated across brokers and partitions.
+        - Security: Sensitive data, such as PII or PCI data, should not be included in payloads unless necessary. If sensitive data must be included, it should be encrypted.
+        - Use case and design: Before increasing the maximum payload size, it is important to question the use case and design. Is it really necessary to send such large messages? How often are these messages sent?
+      - Alternatives to large payloads
+        - If you find that you need to send a payload larger than 1 MB, there are a few alternatives:
+
+          - Use a file: Instead of sending the entire file as a payload, you can send a reference to the location of the file for reading.
+          - Break the payload into multiple messages: If the payload can be broken into multiple smaller messages, you can send each message separately.
+          - Use a streaming platform: If you need to send large amounts of data in real time, you can consider using a streaming platform such as Apache Kafka Streams.
+      - Conclusion
+        - It is important to carefully consider the size and content of Kafka record payloads before sending them. Large payloads can have a negative impact on system performance, security, and use case and design. If you find that you need to send a payload larger than 1 MB, there are alternatives available.
+    - headers 
+      - key-value pairs that allow you to add metadata to messages without changing the payload. This decoupling makes messages more flexible and informative.
+        - source of the record
+        - content type
+    - key
+      -  optional, but they:
+        - Guarantee ordering of events within a partition.
+        - Improve performance by allowing consumers to process messages in parallel.
+        - Simplify event processing logic.
+        - example :
+          - Imagine you have a Kafka topic that is used to publish stock trades. You can use the stock symbol as the key for each trade. This will ensure that all trades for the same stock are processed in order, even if there are multiple consumers reading from the topic.
+
+---
+- 17. KRaft & Zookeeper
+  - What is ZooKeeper and how was Kafka dependent on it?
+
+    - ZooKeeper is an open-source tool that maintains synchronization of configuration in distributed systems. It managed the metadata required to run a Kafka cluster, such as identifying brokers, monitoring their status, and managing topics.
+
+  - Why leave ZooKeeper behind?
+    - Running ZooKeeper to manage Kafka metadata requires a cluster of at least three nodes, which can be a lot of additional Java processes to manage. Additionally, storing the metadata outside of the Kafka cluster is duplicative and can introduce latency.
+  - Kafka Raft is a consensus protocol that simplifies Kafka's architecture, eliminates ZooKeeper, and improves performance and scalability. It uses an event-based log, similar to Kafka, for efficient metadata management.
+    - KRaft is not responsible for replicating messages (data) between Kafka broker nodes. That is managed by in-sync replicas.
+
+---
+Installation:
+- the first thing we need to set up is the Kafka cluster ID environment variable, which is a unique identifier for our cluster.Conveniently, Kafka has provided a utility to generate it for us.
+  - KAFKA_CLUSTER_ID=$(bin/kafka-storage.sh random-uuid)
+- next, we need to format the log directory location.
+  - This is a directory on the disk that will be used for the persistent store of the message topics and all the metadata for Kafka.
+  - bin/kafka-storage.sh format -t $KAFKA_CLUSTER_ID -c config/kraft/server.properties
+- a __consumer_offsets topic, which is an internal topic used for storing information about committed offsets for each topic and partition.
+- cli examples:
+  - kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic my.first.topic
+  - kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic my.first.topic
+  - kafka-topics.sh --bootstrap-server localhost:9092 --create --topic my.first.topic
+  - kafka-topics.sh --bootstrap-server localhost:9092 --alter --topic my.first.topic --partitions 3
+  - kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic my.first.topic --group cg.new.group
+  - kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
+  - kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group cg.new.group --members
+- Current Offset: The current offset is the offset of the next message that will be read by the consumer. It is the offset of the last message read plus one.
+- LOG-END-OFFSET: The log-end-offset is the offset of the next message that will be written to the partition. It is the offset of the last message written plus one.
+- LAG: The lag is the difference between the log-end-offset and the current offset. It is the number of messages that are available to be read by the consumer.
+- rebalancing happen when consumer is added or removed from the consumer group. or #partitions changed.
