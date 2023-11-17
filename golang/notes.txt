@@ -210,16 +210,19 @@ Web:
   
   to render html text without escaping it: use template.HTML type.
 ----
-same origin policy:
+- same origin policy:
   - browser prevent javascript from making request to different domain.
   - origin = scheme + host + port
 
-  tplPath := filepath.Join("templates", "home.gohtml") // os separator agnostic.
+  - tplPath := filepath.Join("templates", "home.gohtml") // os separator agnostic.
 
   -- 
-  panics are reserved for unrecoverable events, like out of memory.
+- panics are reserved for unrecoverable events, like out of memory.
+- Must pattern : try to avoid using it randomly, generally if it not inside the main package that could be an indicator that u r using it wrong
   --
-  generally if u using Must function, use it in ur main package.
-  -----
+- embedding
+  - when you want to add non-go file to the binary so you can run the binary from anywhere and it does not have to read from the filesystem to get those files. it can read from the binary itself. 
+
+-----
 fullTimeGoDEV:
 https://stackoverflow.com/a/40824044/14840351

@@ -268,15 +268,23 @@ and then translates service layer return values into outbound replies
 
 ---Josh long--
 
-IntegrationFlow. from([]) u can originate from an inbounded adapter or GW,
-which is something that take real event from real world and turn it into a spring boot message,
-or you can originate it from a channel[pipe between components(an implicit connection)].
+- IntegrationFlow. from([]) u can originate from an inbounded adapter or GW,
+which is something that take real event from real world and turn it into a spring boot message object, or you can originate it from a channel[pipe between components(an implicit connection)].
 
-in spring integration flow when u have a component that return null,
-that also terminate the pipline/flow,.
+- in spring integration flow when u have a component that return null, that also terminate the pipline/flow,.
 
-conceptually every compnent has another channel that can connect to another things.
+- conceptually every compnent has another channel that can connect to another things.
 
+- Spring Integration make it's easy to think about messaging in a functional style.
+- u can use a handle method for all operation but it's more expressive to use filter/transform...
+
+- MessageSource:
+  - your job is to return a new message, when should you return the new message is a separate concern.
+    - there two different sources of data
+      - things you have to ask questions. (poller)
+        - ftp
+      - things that tell you things. 
+        - email
 ----events---
 
 # Events:

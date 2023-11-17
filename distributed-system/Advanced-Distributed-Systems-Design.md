@@ -6,7 +6,8 @@
 - RPC & Threads
   - any memory u had allocated when u make a romte call, the garabage collector needs to hold on those memory until u get the response back.
     - first time gc runs, and u don't get the response back, it will mark those memory as gen1(microseconds). (network call speed is in milliseconds)
-      next round when u still don't get the response it mark the memory as gen2. - gc doesn't actively clean up gen2 memory. it only clean up disposable, but regular memory sit in gen2.
+      next round when u still don't get the response it mark the memory as gen2. 
+      - gc doesn't actively clean up gen2 memory. it only clean up disposable, but regular memory sit in gen2.
     - effectively, u'll have a kind of meemory leak.
     - gc now need to clean up gen2 memory, and it try for it twice and the threads are actively using those memory,
       so gc will have to suspend those threads, and clean up the memory.

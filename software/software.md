@@ -61,6 +61,9 @@ Bob Martin's 3 Rules of TDD
 1- You are not allowed to write any production code unless it is to make a failing unit test pass.
 2- You are not allowed to write any more unit test than is sufficient to fail; and compilation failures are failures.
 3- You are not allowed to write any more production code than is sufficient to pass the one failing test.
+- the goal is writing code that is working and meant to be shipped.
+- writing the test first make a one to one relationship between the test and the code. so you are documenting your system.
+- following TDD you make sure that you are never ever more than 1 test away from a working system.
 
 ---
 
