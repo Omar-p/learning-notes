@@ -784,34 +784,31 @@ Elastic Compute Cloud (EC2)[IAAS]:
 
 - provide access to a virtual machine (instance)
 - Private service by-default - uses VPC networking. EC2 instance is configured
-  to launch into a single VPC subnet. u set it when u launch the instance.
-  in the launch u configure any public access should u want that because it is by
-  default a private service. the VPC u run in need to support that public access
+  - to launch into a single VPC subnet. u set it when u launch the instance.
+  - in the launch u configure any public access u want because it is by default a private service. the VPC u run in need to support that public access.
 - AZ resilient
 - Different instance sizes and capabilities[GPU, networking, special cpu]
 - On-Demand Biling - Per second.
   - charge for running the instance, cpu memory
   - charge for storage and then extras for any commercial software.
-- Storage type: Local ob-host storage or ELastic BLock Store(EBS) ->
-  network storage made available for the instance.
+- Storage type: Local on-host storage or ELastic BLock Store(EBS) ->   network storage made available for the instance.
 - Instance Lifecycle [States]:  
    Running - Stopped[cost storage] - Terminated - Stopping(u'll charge for ebs storage) - Pendding - shutting down
   Terminating an instance[terminated] : is a non-reversible action.
 - AMI Amzon machine Image \*\*
   - Permissions: control which accounts can/cannot use the ami
-  - public
-    - everyone allowed [linux/win]
-  - Owner Implicit allow
-  - Explicit
-    - specific AWS accounts allowed
-  - Root Volume: can contain other volume but at least one<b>(boot volume)</b>
+    - public
+      - everyone allowed [linux/win] 
+    - Owner Implicit allow
+    - Explicit
+      - specific AWS accounts allowed
+  - Root Volume: can contain other volume but at least one<b>(boot volume)</b> 
     - <b>Block Device Mapping:</b>
-      - configuration which links the volumes that the AMI has and how they're presented
-        to the OS. it determines which volume is the boot volume and which is data volume.
-  - the OS expects to receive volumes presented to it as well as an ID, a device ID
-    And the block mapping links the volume to the device ID that the OS expects.
+      - configuration which links the volumes that the AMI has and how they're presented  to the OS. it determines which volume is the boot volume and which is data volume.
+  - the OS expects to receive volumes presented to it as well as an ID, a device ID  And the block mapping links the volume to the device ID that the OS expects.  ; mapping between volumes and how os see it.
     - Connecting to EC2 :
-      - connect to win instances using RDP remote desktop protocol. 3389 port. - to linux instance using ssh port 22.
+      - connect to win instances using RDP remote desktop protocol. 3389 port. 
+      - to linux instance using ssh port 22.
   - ssh key pairs: u download the private once and keep it safe.
   - public part aws place it on the instanc. u use the private part for authentication.
   - for win instances using private key to gaining access to the local admin pass of the instance and u connect to it using rdp using local admin user and its password.
@@ -830,30 +827,33 @@ S3:
 - Economical & accessed via UI/CLI/API/HTTP.
 - Objects & Buckets
   - Objects:
-    - u can think of it as a file, it made up of two main compnents
-      and some associated meta-data. objectKey: objectVal.
-      size 0 to 5 tb.
-      if u know the object key and buket u can access data.
-      object also has: Version ID, Metadata, Access Control, Subresources.
+    - u can think of it as a file, it made up of two main compnents and some associated meta-data. 
+      - objectKey: objectVal.
+      - size 0 to 5 tb.
+    - if u know the object key and buket u can access data.
+    -  object also has: Version ID, Metadata, Access Control, Subresources.
   - Bucket:
     - created in specific region. never leave unless u configure it.
-    - bucket name is globally unique.
+    - bucket name is<b> globally unique</b>.
     - flat storage. all data on the same level. all in the root. folder is prefix for the name not a real folder.
     - 3 - 63 chars, all lower case, no underscore
     - start with num or lower case
     - can't be ip formatted.
-    - Buckets - 100 soft limits, 1000{can get it by support request} hard limits per acount.
+    - Buckets 
+      - 100 soft limits, 1000{can get it by support request} hard limits per acount.
     - unlimited object in bucket, 0 bytes to 5 tb.
     - Key = name, Value = data.
 - Anti-pattern & pattern.
   - S3 is an object store - not file or block. {prefered for images.. data accessed as a whole}
-    if u want to access the whole object[image, video..] then it's candidate for object storage.
-    if u have a server need to access a network file system. it's not S3. u need file-based stor
+    - if u want to access the whole object[image, video..] then it's candidate for object storage.
+    - if u have a server need to access a network file system. it's not S3. u need file-based stor
   - u can't mount an S3 bucket as (K:\ or /images
   - great for large scale data storage, distribution or upload.
   - great for 'offload' blog with many posts and images.
   - should be ur defaut for Input / Output from /to AWS products
   - if u will use it for static hosting, u need to name the bucket as the domain name.
+    - ref /userguides/bucketnamingrules.html
+    
 
 ---
 
@@ -864,10 +864,8 @@ CloudFormation:
 - resource section of a template is the only mandatory part of a cloudFormation template.
   - conain logical resources labelled as Instance: need a Type
   - properties to configure the instance in a certain way
-- if u have AWSTemplateFormatVersion and Description then the description
-  need to follow the template format version.
-  - AWSTemplateFormatVersion is not mandatory but if u have it and Description
-    then the description need to follow the template format version. {trick Q in aws exams}
+- if u have AWSTemplateFormatVersion and Description then the description need to follow the template format version.
+  - <b>AWSTemplateFormatVersion is not mandatory but if u have it and Description  then the description need to follow the template format version. {trick Q in aws exams} </b>
 - Metadata section control the UI
 - Parameters section
   - u can add field prompt users for information.
@@ -877,13 +875,14 @@ CloudFormation:
   - <img src="images/mapping-cfn.png" width="800" height="500">
 - Conditions section
   - based on some condition do->
+  - it define at the root level of the file and then called at the resource level to decide to create it or not.
 - outputs:
-  -set of outputs.  
-  -cloudFormation take a template create what specified in resource in a [Stack]  
-  -stack is a living representation of the template.
-  -one template can create 1 to many stacks
-  -for any logical instance in the stack aws create a physical one match it.
-  -it's cfn job to keep logical and physical in sync.
+  - set of outputs.  
+  - cloudFormation take a template create what specified in resource in a [Stack]  
+  - stack is a living representation of the template.
+  - one template can create 1 to many stacks
+  - for any logical instance in the stack aws create a physical one match it.
+  - it's cfn job to keep logical and physical in sync.
   - <img src="images/logical-physical-cfn.png" width="800" height="500">
 
 ---
@@ -1677,14 +1676,16 @@ some field can be ignored bec
   - Bucket policies are a type of AWS resource policy.
   - like identity policy, but instead they attached to a resource
     instead of identities, u control who can access that resource.
-  - idenetity perspective : u can only attach identities inside ur aws account.
+  - idenetity perspective : u can only attach id policies to identities inside ur aws account.
   - Resource perspective permissions
+    - you can reference identity from other account.
     - Allow/DENY same or different account, anonymous principals.
       we can reference all principals in the world.
       --see examples of bucket policies---
       main keys in the statement. ["Sid", "Effect[Allow|Deny]",
-      "Principla" not exist in identity policy, "Action", "Resource[arn]"]
+      "Principal" not exist in identity policy, "Action", "Resource[arn]"]
     - another keys "Condition" <-- policy apply if cond is true.
+    - for cross account access to s3, the bucket policy should allow the other account, and the other account should have an id policy that allow the access to that s3 bucket.
   - on bucket policy on a bucket, but it can have multiple statements.
   - access right for identities in the account is the combination of the resource
     polices and any identity policies attached to the account.
@@ -1697,49 +1698,32 @@ some field can be ignored bec
   - inflexible & simple permission [READ|WRITE|READ_ACP|WRITE_ACP|FULL_CONTROL]
   - <img src="images/acl-s3.png" width="800" height="500">
 - Block Public Access:
-  - added in respone to lots of public PR disaster, where buckets were being configured
-    incorrectly and being set open to the world. this resulted in a lot of data leaks.
-  - ex: bucket with resouece permissions granting public access, until block access
-    was introduced, if u have public access configured the public could logically
-    access a bucket.
-    Block public access added a further level of security. apply to pervent
-    the public access no matter what the resource policy say. [4-options]
-    not apply on any aws identities
+  - applied to anonymous  no matter what bucket policies say.
+  - added in respone to lots of public PR disaster, where buckets were being configured incorrectly and being set open to the world. this resulted in a lot of data leaks.
+  - not apply on any aws identities
 
 Key points[identity, resource policy]:
-
-- identity: controlling different resources, u have a preference for IAM, same account.
-- bucket: just controlling S3, anonymous or Cross-account
+- identity vs bucket policirs vs acl
+  - identity: controlling different resources, u have a preference for IAM, same account.
+  - bucket: just controlling S3, anonymous or Cross-account
 
 ---
 
-S3 Static Hosting:
-
+## S3 Static Hosting:
 - normal access[CLI, UI] is via AWS APIs.
 - this feature allows access via HTTP - e.g Blogs
 - enable it, set Index and Error documents.
-  - website endpoint is created. influenced by the bucket name
-    and the region that the bucket is in
+  - website endpoint is created. influenced by the bucket name and the region that the bucket is in
 - to use custome domain name via R53
-  - bucketname matters. u can use it it the name of the bucket match the custom domain.
+  - bucketname matters. u can use it if the name of the bucket match the custom domain.
 - two use cases:
-- Offloading
-  - server run on compute service [ec2], delivers a dynamic HTML page and
-    it deliver static media.
-    dynamic may need access to DB so that's not suitable for static s3 hosting.
-    but the static media are sitting there waiting to be delivered. [make over 95%
-    of the data volume]
-    we can move all the static media from the ec2[which is expensive] to static S3.
-    when ec2 deliver the dynamic generated html which point at the
-    media that hosted on the S3 bucket to customer browser.
-    so the media is retrieved from S3, not the compute service.
-- Out-of-band pages
-  - accessing something that is outside of the main way.
-  - store error page/static on it, so when the compute service face an issuse.
-    we redirect customer to it{change where the domain is pointing to} .
+  - Offloading
+    - server run on compute service [ec2], delivers a dynamic HTML page and it deliver static media. that dynamic html page may need access to DB so that's not suitable for static s3 hosting. but the static <br>media are sitting there waiting to be delivered. [make over 95% of the data volume]  we can move all the static media from the ec2[which is expensive] to static S3.  when ec2 deliver the dynamic generated html which point at the media that hosted on <?<br>the S3 bucket to customer browser.  so the media is retrieved from S3, not the compute service.
+  - Out-of-band pages
+    - accessing something that is outside of the main way.
+    - store error page/static on it, so when the compute service face an issuse.we redirect customer to it{change where the domain is pointing to} .
 - Pricing on [put, get, copy]requests, storage, data out.
-  -beaware if u have large base of customers {because u will recieve a lot of requests}
-  move data from internet to s3 is free.
+  - beaware if u have large base of customers {because u will recieve a lot of requests} moving data from internet to s3 is free.
 
 - DEMO
   - unblock public access
@@ -2334,17 +2318,18 @@ S3 Glacier Deep Archieve
   - Isolated network
   - Nothing <mark>IN</mark> or <mark>Out</mark> without explicit configuration.
   - if u have one resource or multiple are exploited, the impact is limited to the current VPC and only anything connected to it.
-  - Flexible configuration
-  - Hybrid Networking -
+  - Flexible configuration which allow you to create simple or multi-tiered network.
+  - custom vpc support Hybrid Networking -
     - let u to connect to other cloud & on-premises network.
   - Default or Dedicated Tenancy!
     - control whether the resource is created inside the VPC are provisioned on shared hardware or dedicated hardware.
+    - default is shared hardware. and u can overwrite it for each resource while creating it.
     - if u choose dedicated hardware on VPC level, any resource created on that VPC will be on dedicated hardware. increase cost. be careful, don't select it only if u know what u doing.
   - IPv4 private CIDR Blocks & [public IP] (when u want to make a svc available for public access).
 
   - 1 Primary Private IPv4 CIDR block, allocated in creation.
     - Min /28 (16 IP) Max /16 (65536 IP)
-    - optional secondary IPv4 Blocks. {after creation}
+    - you can add optional secondary IPv4 Blocks. {after creation} max is 5 but it can be increased by support request.
     - optional single assigned IPv6 /56 CIDR Block.
       - the range is either allocated by aws, or u can select to use your own IPv6 addresses which u own. u cannot pick a block.
       - IPv6s are publicly routable by default, but u need to allow it explicitly .
@@ -2354,14 +2339,14 @@ S3 Glacier Deep Archieve
 
 - Provided by R53
 - VPC `Base IP +2` Address
-- {enableDnsHostnames} :
+- {enableDnsHostnames} : 
   - give instances DNS Names .
   - indicate whether public instances inside VPC are given dns public hostname.
     - if it set to true they get dns hostname.
 - {enableDnsSupport}
   - enables DNS resolution in VPC
   - whether DNS resolution inside VPC enable or disable. if e [VPC +2 is available]
-  - enableDnsSupport first setting to check if u have dns issue
+  - <b>enableDnsSupport</b> is the first setting to check if u have dns issue
 
 <br>
 <br>
@@ -2387,34 +2372,38 @@ S3 Glacier Deep Archieve
 - 1 Subnet => 1 AZ, 1 AZ => 0+ Subnets.
 - IPv4 CIDR is a subset of the VPC CIDR. must be inside the VPC CIDR.
   - Cannot overlap with other subnets.
-- Optional IPv6 CIDR (/64 subset of the /56 VPC - space for 256)
-- Subnets can communicate with other subnets in the VPC.
+- Optional IPv6 CIDR (/64 subset of the /56 VPC - /56 has space for 256 subnets)
+- Subnets can communicate with other subnets in the same  VPC.
 
 # Subnet IP Addressing:
 
 - Reserved IP addresses (5 in total).
 - 10.16.16.0/20 (10.16.16.0=> 10.16.31.255)
-- first address is a Network address (10.16.16.0)
-- Network +1 (10.16.16.1)
-  - VPC Router, logical network device which move data between subnets and in/out VPC if it configured to allow that
-- `Network +2` (10.16.16.2) - Reserved (DNS\*) <- reserved in every subnet.
-- `Network +3` (10.16.16.3) - Reserved Future Use
-- Broadcast address 10.16.31.255 (Last IP in subnet)
-  - NOT SUPPORTED INSIDE VPC, BUT IT RESERVED
+  - 1- first address is a Network address (10.16.16.0)
+  - 2- Network +1 (10.16.16.1)
+    - VPC Router, logical network device which move data between subnets and in/out VPC if it configured to allow that
+  - 3- `Network +2` (10.16.16.2) - Reserved (DNS\*) <- reserved in every single subnet.
+  - 4- `Network +3` (10.16.16.3) - Reserved for Future Use
+  - 5- Broadcast address 10.16.31.255 (Last IP in subnet)
+    - Broadcast is NOT SUPPORTED INSIDE VPC, BUT IT RESERVED
 
-<hr>
-
+---
+- VPC has configuration object applied to it called a DHCP option set.
+  - 
 # DHCP Options Set
 
 - VPC has a configuration object apply to it called a DHCP option set.
   - how computing device recieve ip address automatically.
-  - 1 DHCP option set apply to VPC at one time.
+  - there is one DHCP option set apply to VPC at one time.
     - this configuration flows through to subnets .
     - it control things like DNS service, Ntp services...
-- cannot be updated
-- u can create new one and change VPC allocation to this new one.
-- 2 options u [Auto assign public IPv4, IPv6 ]
+- it cannot be updated
+  - u can create new one and change VPC allocation to this new one.
+- 2 options u configure on vpc [Auto assign public IPv4, IPv6 ]
 
+---
+- https://www.site24x7.com/
+  - it's a tool allow you to enter a network address block, subnet mast, #hosts, and #subnets. then it will give you a list of all the subnets in that network.
 ---
 
 # bASTION hOST[JumpBox]
@@ -2442,26 +2431,30 @@ S3 Glacier Deep Archieve
   - VPC can only have one Route table, but Route table can associated with many VPC
   - Target #local means the dest in the VPC itself
   - local routes have higher priority
+  - local routes are automatically added to the route table. uneditable.
+- if a packet dest match multiple routes, the most specific route is used.
+  - higher prefix = more specific = higher priority
 
 # IGW
 
 - Region Resilient gateway attached to a VPC.
 - 1 VPC = 0{private} or 1 IGW, 1 IGW = 0 or 1 VPC.
-- Runs from within the AWS public Zone.
-- IGW traffic between the VPC and the Internet or AWS public Zone (S3..SQS...SNS..etc)
+- Runs from within the AWS public Zone(the border of it).
+- Gateways traffic between the VPC and the Internet or AWS public Zone (S3..SQS...SNS..etc)
 - Managed
 - Aws handles performance. it simply works!
 - when attached to VPC we use it as a target in the route table.
-- <ol>
-  <li> Create IGW </li>
-  <li> Attach IGW to VPC </li>
-  <li> Create Custom RT </li>
-  <li> Associate RT </li>
-  <li> Default Routes [0.0.0.0/0 & ::/0] IGW </li>
-  <li> Subnet allocate IPv4 </li>
-  </ol>
+- how to create a public subnet
+  - <ol>
+    <li> Create IGW </li>
+    <li> Attach IGW to VPC </li>
+    <li> Create Custom RT </li>
+    <li> Associate RT </li>
+    <li> Default Routes [0.0.0.0/0 & ::/0] IGW </li>
+    <li> Subnet allocate IPv4 </li>
+    </ol>
 
-- ## if there is no security limitation any services in subnet with public ip can communicate with internet and vice versa.
+- <b> if there is no security limitation any services in subnet with public ip can communicate with internet and vice versa. </b>
 
 - IPv4 Addresses with a IGW
   - IGW maintain a recorde mapping [private:public]
@@ -3395,7 +3388,7 @@ S3 Glacier Deep Archieve
   - any change in the template will cause the stack to be updated.
     - the stack will update the logical resource then the update will reflect on the physical resource.
 
-# Template and Pseudo Parameters
+## Template and Pseudo Parameters
 
 - (Template Parameters) accept input
   - console/CLI/API
@@ -3410,7 +3403,7 @@ S3 Glacier Deep Archieve
 - Parameters.Name.[TYPE, Default, AllowedValue, Description..]
   - ![cfn-template-parameter](images/cfn/cfn-template-params.png)
 
-# Pesudo Prameters injected by aws to the stack.
+## Pesudo Prameters injected by aws to the stack.
 
 - they are exist even you don't define them in the parameter section. injected by aws in the stack.
 - AWS::Region region the stack created in.
@@ -3422,25 +3415,25 @@ S3 Glacier Deep Archieve
 - Pseudo and Parameters
   - there are useful and ensuring the tempate is portable and can adjust based on the person or the process that creating the stack.
 
-# Intrinsic Function:
+## Intrinsic Function:
 
 - allow us to gain access to data at the runtime, ur template can take actions based on how things are when the template is used to create the stack.
 
 - Ref & Fn::GetAtt
-
   - reference a value from one logical resource or Parameter on another one.
     - if u create a VPC in a template and u want to make sure another resource such as subnet goes inside that VPC then u can reference the VPC within other logical resources.
   - !Ref return The physical ID of the resource or the value of the parameter.
   - !GetAtt logicalNameOfResource.attributeName
     - return The attribute value.
     - access logical resource attributes.
+  - ![ref-getatt](images/cfn/ref-getatt.png)
+  - ![getting-latest-ami-id-by-ssm](images/cfn/getting-latest-ami-id-by-ssm.png)
 
 - Fn::Join & Fn::Split
 
   - WordpressURL.Value: !Join ['', ['http://', !GetAtt Instance.DNSName]]
 
 - Fn:GetAZs & Fn::Select
-
   - GetAzs is environmental awareness function
     - !GetAZs region
       - return list of AZs in the explicit region, or the current.
@@ -3448,12 +3441,10 @@ S3 Glacier Deep Archieve
         - ![cfn-GetAZs-Select](images/cfn/cfn-GetAZs-Select.png)
   - get a list of az in a given region.
     - select allow us to select element from that list.
-      ecample : Instance.Properties.AvailabilityZone: !Select [0, !GetAZs '']
+      example : Instance.Properties.AvailabilityZone: !Select [0, !GetAZs '']
 
 - Conditions(Fn::IF, And, Equals, Not & Or)
-
   - create resources based on conditions.
-
 - Fn::Base64 & Fn::Sub
   - sub allow us to substitue thing within text based on runtime information.
   - ![cfn-Base64-Sub](images/cfn/cfn-Base64-Sub.png)
@@ -3472,8 +3463,8 @@ S3 Glacier Deep Archieve
 
 - Mappings:
   - template can contain a Mapping object.  
-    .. which can contain many Mapping.  
-    .. which map keys to values, allowing lookup.
+    <br>.. which can contain many Mapping.  
+    <br>.. which map keys to values, allowing lookup.
   - can have one key, or Top & Second Level.
     - ex: mapping of ami id based on top level key of region and second level key of architecture.
   - Mappings use the !FindMap intrinsic Function
@@ -3481,6 +3472,8 @@ S3 Glacier Deep Archieve
   - improve template portability. {exam powerup}
     - let u store some data which can be used to influence how template behave for given input.
   - ![cfn-mapping](images/cfn/cfn-mapping.png)
+    - you always need to provide at least one top level key.
+  - it help in improving template protability.
 
 <hr>
 
@@ -3492,7 +3485,7 @@ S3 Glacier Deep Archieve
     - can be exported, allowing cross-stack references.{exam}
   - ![cfn-output](images/cfn/cfn-output.png)
 
-### Conditions [optional ]
+## Conditions [optional ]
 
 - allows the stack to react to a certain conditions, and change infrastructure which is deployed or specific configuration for that infrastructure based on those conditions.
 - created in the optional `Conditions` section of a template.
@@ -3505,7 +3498,7 @@ S3 Glacier Deep Archieve
   - control the size of instances created within a stack.
 - ![cfn-conditions](images/cfn/cfn-conditions.png)
 
-### DependOn
+## DependOn
 
 - allows to establish formal dependencies between resources with cfn template.
 - cfn tries to be effiecient.
@@ -3608,11 +3601,10 @@ S3 Glacier Deep Archieve
 <hr>
 
 ### StackSet
-
 - feature of cfn which allow u to create, update, or delete infrastructure across many regions in many AWS accounts.
 - deploy cfn across many accounts & regions. rather having to authenticate to each account individually and switch to each region u will let cfn to do it.
 - StackSets are containers in an admin account[distinguish where stackset is applied from the accounts where resources is created]....
-  - contain [stack instances; ref to actual running stack in aws region in account] ..which [reference stacks].
+  - it contain [stack instances; ref to actual running stack in aws region in account] ..which [reference stacks].
     - stack instance : ref to actual running stack in one particular region in one particular account.
       - if stack fail , stack instance will remain to keep track of the failure.
 - Stack instances & stack are in 'target accounts'
@@ -3621,7 +3613,7 @@ S3 Glacier Deep Archieve
   - self-managed role is where we use cfn in conjunction with aws organizations. all roles are created on ur behalf by the product behind the scence.
   - ![stackset](images/cfn/cfn-stackset.png)
 - Term: Concurrent Accounts
-  - option can be set when creating a StackSet, define how many individual aws accounts can be used at the same time. 2 val for 10 acc u will do 5 set.
+  - option can be set when creating a StackSet, define how many individual aws accounts can be used at the same time. 2 value for 10 acc u will do 5 set.
 - Term: failure Tolerance
   - amount of individual deployments to fail to mark the whole stackset as failed.
 - Term: Retain Stacks,
@@ -4141,6 +4133,8 @@ S3 Glacier Deep Archieve
 - ![aurora-serverless](images/rds/aurora-serverless.png)
 - ![aurora-serverless-usecases](images/rds/aurora-serverless-usecases.png)
 
+---
+
 # DynamoDB DBaaS
 
 - nosql, wide column, key/value & Document.
@@ -4162,7 +4156,7 @@ S3 Glacier Deep Archieve
     - choose a value that has a wide range of values| highest cardinality.
   - RANGE - Sort Key - optional
 
-### DynamoDB Tables
+## DynamoDB Tables
 
 - the base entity inside dynamodb.
   - dynamoDB shouldn't be designed as DBaaS it's more like Database Table as a service.
@@ -4223,7 +4217,6 @@ S3 Glacier Deep Archieve
   - ![dynamodb-rcu](images/dynamodb/rcu-calculation.png)
   - get single item size and calc its RCU and multiply by the number of items u want to read per second.
 
-##
 
 - for strongly consistenct read:
   - Set 'ConsistentRead' to true. in API call.(GetItem, Query, Scan, BatchGetItem)
@@ -4273,7 +4266,7 @@ S3 Glacier Deep Archieve
 - Attributes in the index - ALL, KEYS_ONLY & INCLUDE[u specify which to include]
 - Indexes are sparse, only row which have a value in the index alternative sprt key are added to the index. u can take the advantage and use scan op because u know the table only have the row u interested in.
 
-<hr />
+---
 
 ### Global Secondary Indexes(GSI)
 
@@ -4330,6 +4323,51 @@ S3 Glacier Deep Archieve
 
 - u can create a stream dedicated to TTL deletions.
 - ![dynamodb-ttl](images/dynamodb/ttl.png)
+
+---
+# Lambda
+
+### 
+- The environment has a direct memory you configure, the cpu allocated indirectly based on memory size.
+  - 128mb -> 10240mb
+- You are billed for the duration that a function runs
+- Lambda Function = Code + Configuration + Dependencies + Layers
+  - Deployment package 50MB zipped, 250MB unzipped.
+- you can create custom runtime for lambda using lambda layers.
+- you should assume every time lambda function is invoked it's running in new environment.
+- 512MB storage available as /tmp Up to 10240MB 
+- timeout 900s (15Min)
+
+- Common use cases
+  - Serverless Applciations(S3, API Gateway, Lambda)
+  - Database Triggers (DynamoDB, Streams, Lambda)
+  - File Porcessing(S3, S3 Events(Notification), Lambda)
+  - Serverless CRON (EventBridge/CloudWatch Events, Lambda)
+  - Realtime Stream Data Processing (Kinesis, Lambda)
+### Lambda Networking
+- lambda has two mode of networking
+  - VPC
+    - treat it as any resource within the VPC.
+    - You will need to give it the EC2 network permissions
+      - because it will need to create ENI to connect to the VPC.
+    - old way each lambda invokation inside a VPC will create a new ENI. (cannot scale well)
+      - new way, aws create on ENI for all lambda function within the same subnet and same security group rules. one ENI for each unique combination of subnet and security group.
+        - any update in SG or subnet will result in 90s initial setup.
+    - ![lambda-networking-VPC](images/lambda/lambda-networking-vpc.png)
+  - Public (default)
+    - ![lambda-networking-public](images/lambda/lambda-networking-public.png)
+    - ![Alt text](image-1.png)
+### Lambda Security
+- Lambda has a resource policy like s3.
+  - control who can invoke the lambda function. (other services, other accounts, public)
+- LambdaExecutionRole 
+  - CloudWatch Logs
+  - CloudWatch Metrics
+  - ...
+## Lambda Logging
+- Lambda logs are stored in CloudWatch Logs
+- Metrics - invocation, duration, error, throttling, latency ..
+- X-Ray - distributed tracing
 
 ### Lambda Environment Variables
 
@@ -4498,7 +4536,7 @@ S3 Glacier Deep Archieve
 - public anyone can read but for write need permission.
 - ![ecr](images/ci-cd/ecr.png)
 
-# Step Function
+## Step Function
 
 - orchestration service that allows you to model workflows as state machines.
   - u can design it using json.
@@ -4571,7 +4609,7 @@ S3 Glacier Deep Archieve
 
 ---
 
-#### APP CONFIG
+### APP CONFIG
 
 - create,manage, and deploy application configurations
 - capability of AWS Systems Manager
@@ -4620,10 +4658,109 @@ S3 Glacier Deep Archieve
 - can be used to store session data (stateless servers)
 - Require Application code changes !!
 
-### Redis vs Memcached
+## Redis vs Memcached
 
 - ![memecached vs redis](./images/memcached-vs-redis.png)
 
+
+---
+
+# Elastic Beanstalk
+
+## Architecture
+
+- provide managed application environment by handling the environment and letting the developer focus on the code.
+  - remove infrastructure overhead.
+  - developer focused - not ednd user.
+- it requires appp changes ... doesn't come for free.
+
+## Platforms
+- Built in languages, docker & custom platforms.
+- single container docker & multicontainer docker(ecs)
+- preconfigured docker
+  - used to support platform before EB natively support it.
+- you can support a custom platform via <b>packer</b>
+
+## Concepts
+- EB Application
+  - is a collection of things related to an application - a container / folder . all the infrastructure and version of the app.
+  - version: a specific labeled version of deployable code for an application. the source bundle is stored on s3
+  - *Environment: container of infrastructure and configurations for a specific application version.
+    - each application is either a <b>web server</b> tier or a <b>worker</b> tier. this controls the structure & function of the environment.
+    - web tier is designed to accept connection from end user, worker tier is designed to process work from web tier.
+  - ![elastic-beanstalk-application](images/elastic-beanstalk/elastic-beanstalk-application.png)
+- use docker for anything unsupported
+- always default to db provisioned and maintained outside of EB.
+  - DBs in an ENV are lost if the env is deleted.
+![Alt text](image-1.png)
+## Deloyment Policies
+- All at Once 
+  - quick, simple, and causing outage. it doesn't have a great methods for handling failures.
+  - good for DEV, TEST environments
+- Rolling
+  - no additional cost. same #instances
+- Rolling with additional batch - as above, with new batch to maintain capacity during the process.
+- Immutable 
+  - create a new temp ASG with new instances with the new version and then swap traffic and if everything is ok -> remove the old ASG.
+- Traffic Splitting - 
+  - like immutable but u can split the traffic between the new and old ASG which help in doing A/B testing.
+  - extra cost.
+## EB Environment And RDS
+- You can create an RDS instance within an EB environment
+- It's then linked to the EB environment
+- Delete the environment = delete RDS = data loss
+- Different environments = different RDS = different data
+- You will get automatically Environment Properties: RDS_HOSTNAME, RDS_PORT, RDS_DB_NAME, RDS_USERNAME, RDS_PASSWORD
+- Create RDS inside EB environment in Test or DEV environment only.
+
+- <b>Outside</b>
+  - we will have to mannually add rds connection env vars to the environment.
+  - data lifecycle is not tied to the environment lifecycle.
+- How to decouple exisiting RDS within EB from EB Environment.
+  - Create an RDS snapshot
+  - 'Enable Delete Protection' on the RDS instance 
+  - Create a new EB Environment within the same app
+  - Ensure new environment can connect to the RDS instance
+  - Terminated the old environment - this will try and terminate the RDS instance but it will fail due to delete protection
+  - Locate DELETE_FAILED Stack, manually delete and pick 'retain' for the RDS instance
+
+- EB Extensions:
+  - .ebextensions folder in the root of the source bundle
+    - you can use cfn to customize EB environment. such as provision additional resources like elastic cache, s3 bucket, rds instance, etc. or 
+      - option_settings allow you to set options of resources that are created by EB.
+      - Resources allow you to create additional resources that are not created by EB.
+      - other headings: packages, source, files, users, group, commands, container_commands, and services
+    - YAML or JSON format ending with .config 
+- EB and HTTPS
+  - to use https with EB u need to apply an ssl certificate to the load balancer.
+    - EB Console => Enviroment => Load Balancer configuration
+    - or via .ebextensions/securelistener-[alb|nlb].config
+      - `yaml
+         optionsettings:
+         aws:elbv2:listener:443:
+           ListenerEnabled: true
+           Protocol: HTTPS
+           SSLCertificateArns: arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012
+         `
+      - update security group to allow https traffic from ELB security group.
+      - ![config-for-ssl](images/elastic-beanstalk/config-for-ssl.png)
+  - Cloning
+    - 'unmanged changes' any change done without using EB console, or EB CLI, or EB API will not be cloned.
+      - ![EB-clone](images/elastic-beanstalk/EB-clone.png)
+
+- EB Docker
+  - Single Container  - one container on 1 host.
+    - uses EC2 with Docker
+    - you need to provide 1 of 3 things:
+      - Dockerfile: EB will build a docker image and use this to run the container
+      - Dockerrun.aws.json: provide a pre-built image from ECR or DockerHub, configure ports, volumes and other docker attributes.
+      - Docker-compose.yml: provide a multi-container docker environment.
+  - Multi Container 
+    - uses ECS(ECS cluster : ec2 instances and an ELB) with Docker
+    - you need to provide 1 of 2 things:
+      - Dockerrun.aws.json: provide a pre-built image from ECR or DockerHub, configure ports, volumes and other docker attributes.
+      - Docker-compose.yml: provide a multi-container docker environment.
+---
 udacity temp :
 
 Resources:
@@ -4946,3 +5083,42 @@ and configure additional rules that apply sampling based on properties of the se
 - CodeStorageExceededException -> you have exceeded your maximum total code size per account
 - ResourceConflictException -> the resource already exists
 - ServiceException -> AWS Lambda service encountered an internal error
+---
+- linux
+- a Console is the tool we use to view a shell, the shell is cmd line interpreter.
+- rhel use gnome window manager
+- sometimes when u ssh to a server arrows keys don't work.
+  - use ctrl+n next command, use ctrl+p previous command
+  - ctrl+a beginnig of the line, ctrl+e end of the line.
+
+- Kafka Connect
+  - source connector
+    - read data from external data source write it into kafka
+  - sink
+    - read data from kafka store it in datastore
+- Kafka Stream
+  - read data from kafka;(Data Enrichment) do transformation, joining...
+- Kafka stream vs kafka consumer
+  - kafka stream can build a stateful app which can lead to multiple uses cases: 
+    - calculating the total #orders in realtime
+    - calculating a total revenue made in realtime..
+- kafka stream api imlementation
+  - Stream DSL 
+    - high level api (functional)
+  - Processor API
+    - low level, complex compared to DSL
+    - Stream DSL is built on top pf Processor API
+- Topology & Processors
+  - kafka stream processing application has a series of processors.
+    - [Source Processor] -> [Stream Processor] -> [Sink Processor] (Directed acyclic graph)
+    - Stream Processor can split to multiple sub-topolgy and become source processor for them.
+  - Data Flow in kafka Stream Processing 
+    - record is passed in the topolgy one by one
+      - at any given point of time only one record gets processed in the topology. the rule is applicable to each sub one .
+- Kstream API 
+  - gives u access to all records in the Kafka topic
+  - treat each record independent of one another
+  - each event will be executed by the whole topology.
+  - KStream can be called as record stream or log.
+  - analogy: Insert Into DB table.
+- 

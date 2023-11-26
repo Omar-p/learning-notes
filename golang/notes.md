@@ -216,13 +216,105 @@ Web:
 
   - tplPath := filepath.Join("templates", "home.gohtml") // os separator agnostic.
 
-  -- 
+---]
+
 - panics are reserved for unrecoverable events, like out of memory.
 - Must pattern : try to avoid using it randomly, generally if it not inside the main package that could be an indicator that u r using it wrong
-  --
+
+---]
+
 - embedding
   - when you want to add non-go file to the binary so you can run the binary from anywhere and it does not have to read from the filesystem to get those files. it can read from the binary itself. 
 
------
+---]
 fullTimeGoDEV:
 https://stackoverflow.com/a/40824044/14840351
+
+---]
+## security owasp(go)
+
+- section1
+  - The Fundamentals of software Security : protecting system from unauthorized access.
+    - Confidentiality : sensitive information is not disclosed to unauthorized parties.
+    - Integrity : data is not modified or tampered with by unauthorized parties
+    - Availability 
+    - Authentication
+    - Non-repudiation : make it impossible for a user or device to deny that they performed a specific action.
+    - Incident response
+  - go
+    - type confusion and coercion
+  - owasp
+    - provide tools, guidelines to avoid security risks.
+    - it has a dedicated project to improve security in go applications 'owasp go project' 
+  - owasp top 10 proactive controls
+    - a complementary list to the OWASP top 10.
+      - it provides a prioritized set of actionable recommendations .
+      - designed to be a strating point for org and devs who are looking to implement a comprehensive security program.  
+    - it provide actionable recommendations for reducing the risk of security vulnerabilities in web applications . 
+    - it cover a range of security topics including secure coding practices, access control, cryptography and incident response.  
+  - ASVS(Application Security Verification Standard)
+    - intend to be used as a standard for creating detailed security specifications for web application project
+    - it organized into 3 main categories:
+      - Verification requirement
+        - high level requirements that define the overall security objectives for our web application.
+      - Functional Requirements
+        - define specific security control and mechanisms that must be implemented in a web application, 
+      - Technical Requirements
+        - define technical controls and mechanisms that must be implemented to mmet the functional requirements.
+    - it divided into 3 level of verifications
+      - Level 1: Basic
+        - basic security requirements that should be met by all web application regardless of the level of risk.
+      - Level 2: Additional
+        - focused on additional security requirements that are appropriate for web applications that handle sensitive data or are at a higher risk of attack such as ecommerce web applications
+      - Level 3: Advanced
+        - appropriate for web applications that handle extremely sensitive data or at are in an extremely high risk of attack. 
+        - ex: gov national infra, healthcare web app.
+    - it used to map security requirements to web application projects in several way
+      - Develop detailed security requirements 
+      - Assess security during development Identify and prioritize areas for improvement 
+      - Measure security maturity
+      - Provide a basis for test plans
+      - Compliance with security regulations
+        - PCIDSS, HIPA
+- Section 2 - Input Validation
+  - whitelisting
+  - boundary checking
+    - prevent buffer overflow, Integer overflow
+  - character escaping
+    - prevent injection attacks like XSS
+- section 3 - output encoding
+  - intro
+    - OWASP TOP 10 # 3 - Injection .
+    - Inject malicious code into input field or URL parameter 
+  - XSS
+    - reflected
+- section 5 - authentication  
+  - Oauth is authorization protocol allow user to give a limited access to their data on one site to another site without giving them their password. 
+- section 6 - session management
+  - Session Management Control
+    - Creation, Validation, Termination
+  - Secure Session Identifier
+    -  ensuring randomness of session identifier and setting the appropriate cookies attributes we can enhance our app security.
+  - cookies are used as Client session identifier store. 
+    - Cookie attributes
+      - Secure
+        - only send over HTTPS
+      - HttpOnly        
+        - resatrict access to cookie to http request only.
+          - prevent access to cookie from javascript(client-side script)
+      - SameSite
+        - prevent CSRF attacks
+      - Domain
+        - restrict the cookie to a specific domain
+      - Path
+        - restrict the cookie to a specific path
+        - cookie only sent to the server if the request path is equal to or under the cookie path.
+      - Expires
+        - set the expiration date for the cookie
+  - Session Integrity
+    - generate a new session for each login and don't reuse the old one.
+      - it mitigates session-related vulnerabilities such as session fixation and session hijacking.
+    - enforce periodic session termination
+  - Concurrent Login Pervenetion
+    - maintain a list of logged in users and prevent multiple logins from the same user.
+    - session identifier should be transmitted in HTTP cookie header
