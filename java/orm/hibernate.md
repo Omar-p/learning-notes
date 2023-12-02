@@ -61,7 +61,7 @@
 	- if the entity exists in the db, it will be updated. 
 	- it returns the managed entity.
 ---
-- Compund Key
+- Compound Key
   - @Embeddable
 	- @Embeddable is used to define a class whose instances are stored as an intrinsic part of an owning entity and share the identity of the entity.
   - @EmbeddedId
@@ -86,3 +86,21 @@
 - View
   - u can map the entity to a view instead of a table.
   - https://vladmihalcea.com/map-jpa-entity-to-view-or-sql-query-with-hibernate/
+---
+- Inheritance
+  - in order to persist entity leverage inheritance, we need to be able to provide mapping metadata that will instruct the ORM framework how to map the entity to the database.
+  - https://vladmihalcea.com/the-best-way-to-map-a-one-to-many-association-with-jpa-and-hibernate/
+  - first example we have two entities with common fields, so we can extract them to another class and annotate it with <b>@MappedSuperclass.</b> it's better to make the parent class abstract. the class will not have persistence lifecycle.
+    - issues:
+	  - if you want to extract rows from all child tables.
+	  - you have the need to use the parent class in your app as  List<ParentClass> .
+  - @Inheritance(strategy = InheritanceType.SINGLE_TABLE	)
+	- This strategy has the advantage of polymorphic query performance since only one table needs to be accessed when querying parent entities. On the other hand, this also means that we can no longer use NOT NULL constraints on subclass entity properties.
+	- Since the records for all entities will be in the same table, Hibernate needs a way to differentiate between them. on parent @DiscriminatorColumn(name="product_type", 
+  discriminatorType = DiscriminatorType.INTEGER) and ex: on child @DiscriminatorValue("1")
+    - Hibernate adds two other predefined values that the annotation can take — null and not null:
+		- @DiscriminatorValue(“null”) means that any row without a discriminator value will be mapped to the entity class with this annotation; this can be applied to the root class of the hierarchy.
+		- @DiscriminatorValue(“not null”) – Any row with a discriminator value not matching any of the ones associated with entity definitions will be mapped to the class with this annotation.
+		- Instead of a column, we can also use the Hibernate-specific @DiscriminatorFormula .
+		  - @DiscriminatorFormula("case when author is not null then 1 else 2 end")
+
