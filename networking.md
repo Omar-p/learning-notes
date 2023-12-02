@@ -1,4 +1,4 @@
-Congestion Avoidance and Control:
+# Congestion Avoidance and Control:
   - additive increase, multiplicative decrease.
 
 
@@ -13,9 +13,9 @@ Congestion Avoidance and Control:
 
 
 - SSL/TLS cannot prevent the capture of data across the network, but it protect it in  ways:
-  - Confidentiality] data is only accessible by Client and Server. [Encryption]
-  - Integrity] detect any modification to the data. [Hashing]
-  - Authentication] validate identities of the client & server. [PKI: public key infra]
+  - [Confidentiality] data is only accessible by Client and Server. [Encryption]
+  - [Integrity] detect any modification to the data. [Hashing]
+  - [Authentication] validate identities of the client & server. [PKI: public key infra]
   
   TLS tunnel is a conceptual illustration.
     Data is still passing through other people's networks. but protected by tls as described above.
@@ -71,47 +71,48 @@ TLS Key Players
   in oct 2014 POODLE attack released, which allow decrypting ssl 3.0 traffic.
       DigCert [GeoTrust, Verisign, Thawte] -> 19.4%  
 --
- TLS / SSL versions
-  SSL v1.0 1994
+- TLS / SSL versions
+  - SSL v1.0 1994
     - Developed by netscape
     - never publicly released 
     - full of flaws
-  SSL v2.0 1995
+  - SSL v2.0 1995
     - Developed by netscape
     - Complete redesign of SSL v1.0
     - Still full of flaws
-  SSL v3.0 1996
+  - SSL v3.0 1996
     - Developed by netscape
     - Complete redesign of SSL v2.0
     - foundation of TLS versions we use today [SSLv3.1 -- TLSv1.0, SSLv3.2 -- TLSv1.1..]
-    -- new features
-    - introduce concept of certificate chains [a way to scale the world of ssl]
-    - Added Compression capability [vulunabilities have found in it so no use this feature]
-    - Optional Support for additional Key exchanges
-      - SSL v1.0 and v2.0 only supported RSA Key Exchange
-    - Preominant version of SSL through ~2014. 
-      - Insecure as of ~oct 2014 due to POODLE attack
+    - new features
+      - introduce concept of certificate chains [a way to scale the world of ssl]
+      - Added Compression capability [vulunabilities have found in it so no use this feature]
+      - Optional Support for additional Key exchanges
+        - SSL v1.0 and v2.0 only supported RSA Key Exchange
+      - Preominant version of SSL through ~2014. 
+        - Insecure as of ~oct 2014 due to POODLE attack
   
-  TLS 1.0 add minor change to SSL 3.0 so it become SSL 3.1.
+  - TLS 1.0 add minor change to SSL 3.0 so it become SSL 3.1.
     - HMAC Support 
     - Required support for additional key exchanges
     * Major vulnerability: BEAST (attack on CBC cipher)
       - Mitigated in most modern browser.
       
-  TLS 1.1 
+  - TLS 1.1 
     - similar to TLS 1.0
       - formally deprecated "EXPORT grade" ciphers.
       - protection against CBC attacks (i.g., BEAST)
 
-  TLS 1.0 and 1.1 deprecated MARCH 2021
+  - TLS 1.0 and 1.1 deprecated MARCH 2021
   
-  TLS 1.2
+  - TLS 1.2
     - Improve security of key generation.
-    - intriduced support for AEAD ciphers
+    - introduced support for AEAD ciphers
       - Authenticated Encryption with Associated Data. 
       prior AEAD we do authentication in one step so if it a weak implementation of it. it will afffect the encryption. with AEAD we do both in one step so one weak don't compromise the other.
+    - replaced MD5 and SHA-1 with SHA-256
       
-  TLS 1.3 [some changes] 2018:
+  - TLS 1.3 [some changes] 2018:
     - shorter handshake (2 messages vs 5+)
     - 0-RTT(round trip time) Resumption.
       - u can resume prior tls session and send the first byte of encrypted data in the 
@@ -145,8 +146,7 @@ TLS Key Players
    - and that provide integrity and authentication for bulk data transfer
      - Message Authentication code (MAC)
        - combining message + secret key when calculating Digest.
-   - the client & server must agree with the key and how (message + secret key must be combined
-     in the same way).
+   - the client & server must agree with the key and how (message + secret key must be combined   in the same way).
    - Industry standard implementation if MAC: HMAC (how to combine message + key) -> digest
       - Hash based message authentication code RFC2104
 --
@@ -199,8 +199,7 @@ Signatures:
     - Again, Asymmetric encryption has limitation
     - to overcome that, we hash the message and encrypte its digest[we got the signature]
     - append it to the message and send it. the other side[B] use the A public key to decrypt
-      the signature and hash the recived message if they match, we achieve authentication and
-      integrity
+      the signature and hash the recived message if they match, we achieve authentication and  integrity
     
   - Many different  items can be Signed
     , Messages .. but also Certificates, Software, EMail, etc..
@@ -217,3 +216,32 @@ HOW SSL/TLS uses Cryptography
       code signing [os + code signing ca + software]
       internal corporate[employee + corporate internal CA + corporate resoruces[internal tools]]
       
+---
+- How SSL/TLS works
+  - Assuming that a client needs to establish a connection with the server over SSL, TLS, the first thing it does is send a message to a server informing it about the versions of SSL/TLS that he understands and is willing to use.
+
+
+  - Enclosed in this message is a randomly generated value that will be used to create a shared key.
+
+
+  - The server in return responds with a message where it lists the SSL TLS protocol versions that it supports.
+
+  - The server will also send its public key in the message that it sends to the client, plus a randomlygenerated string that will be used to create a symmetric key.
+
+
+
+  - Now the client has the server. It will use it to encrypt a message to the server. This message is called the pre master secret, since this message was encrypted by the server's public key.Only the server's private key can be used to decrypt it.
+
+
+  - The server uses its private key to decrypt the pre master secrets sent by the client.
+
+
+  - Now, each of the server and the client has the following a randomly generated value that is unique to each one of them.
+
+
+  - Both the client and a server used a randomly generated values that they exchanged to each other, plus the shared secret to create the symmetric key.
+
+  - Now, this symmetric key can be used to encrypt and decrypt further messages sent between them.
+
+
+  - The process of public key verification is called certificate signing and validation.
