@@ -2648,16 +2648,15 @@ S3 Glacier Deep Archieve
 
 ====
 
-- AWS NITRO
+- AWS NITRO : aws hypervisor stack
 
 ---
 
 # Virtualization 101:
-
+- 
 - Running more than one OS on one physical machine.
 
   - TYPES:
-
     - Emulated Virtualization[SWF]:
       - host OS/Hypervisor manage the [unmodified]guest OS.
       - each privilage call from guest kernel using Binary Translation (on the fly)translated to be made by the Hypervisor.
@@ -2673,7 +2672,10 @@ S3 Glacier Deep Archieve
       - hardware aware Virtualization, cpu provide a special intructions for Hypervisor to manage VM.
       - need to manage access to the devices, not effiecient in case of I/O intensive workload. unless u have physical nic for each VM u'll get some level of delay.
 
-      - <b>SR-IOV virtualization</b> aware on the devices level [Network interfaces..], now, even in intensive I/O the VM will perform well. - EC2 enhanced networking.
+      - <b>SR-IOV(single room IO virtualization) virtualization</b> aware on the devices level [Network interfaces..], now, even in intensive I/O the VM will perform well. 
+        - EC2 enhanced networking.
+          - provide consistence lower latency even at high load
+          
 
 ---
 
@@ -2703,7 +2705,8 @@ S3 Glacier Deep Archieve
     - instances can have multiple network interfaces, even in different subnets. but the subnets must be in the same AZ.
   - Storage :
     - ebs, run inside AZ, can be attached to one instance at a time.
-
+  -   you cannot connect stroage or NIC in one AZ to an instance in another AZ.
+  - instances with same generation and type have the same host.
 - EC2 instance run on the same host unless, host fails [maintainance/failure..]
 
   - instance stopped the started again. --> will started in the same AZ but in different host.
@@ -2726,11 +2729,13 @@ S3 Glacier Deep Archieve
 - categories
 
   - ![categories](images/ec2/categories.png)
-  - T ->
+  - T, A(Arm) M(Arm gen2) general purpose
   - C -> compute
   - R -> RAM
+    - X -> Extreme Memory, lower $ per GB memory
   - I -> I/O {}
   - D -> dense Storage
+    - H -> high throughput, balanced compute/mem, file system, kafka, big data, etc.
   - P -> parallel processing
   - ![examples](images/ec2/examples.png)
 
@@ -2740,8 +2745,21 @@ S3 Glacier Deep Archieve
     - may be no letter
     - a -> amd cpu
     - d -> nvme ssd
+    - n -> network optimized
+    - e -> extra capacity (ram or storage)
       ..
 - it's cost effective to scale ur app using multiple smaller instances than one large instance.
+- https://aws.amazon.com/ec2/instance-types/
+- https://instances.vantage.sh/
+
+---
+
+- access instance using ec2 connect
+  - using ec2 connect you are using aws permission to connect to the instance not the ssh key.
+    - it doesn't originate the connection from your machine. so you need to allow the ec2-instance-connect ip range in the security group.
+      - https://ip-ranges.amazonaws.com/ip-ranges.json
+    - ec2 instance connect gui allow connection to public instances only.
+      - ec2 instance connect cli allow connection to public and private instances as long as you have private connectivity using vpn, direct connect.
 
 # EC2 Network & DNS Architecture
 
@@ -3132,7 +3150,7 @@ S3 Glacier Deep Archieve
 
 # Storage Refresher
 
-- Direct(lcoal) attached storage - Storage on the EC2 host.
+- Direct(local) attached storage - Storage on the EC2 host.
   - called instance store.
     - super fast
     - lost in case:
@@ -3157,7 +3175,7 @@ S3 Glacier Deep Archieve
 
     - <b>volume of block storage have #addressable blocks.</b>
       - presented logically as a volume or as blank physical hard drive.
-        - no structure byond that.
+        - no structure beyond that.
     - when u present a unit of block storage to a server, on top of this the Os will create a file system.
 
       - ex: ext4, ntfs, xfs, zfs, btrfs, apfs, hfs+.
@@ -3800,13 +3818,16 @@ S3 Glacier Deep Archieve
   - reduce latency
   - improve performance
 - Terms:
-  - Origin : the source location of ur content
+  - Origin : the source location of your content
     - S3 Origin
     - Custom Origin
     - for one cloudfront distribution u can have multiple{1\*} origins.
   - Distribution:
     - unit of <mark>configuration</mark> within cloudfront.
+      - to use cloudfront u need to create a distribution and this distribution get to deployed out to cloudfront network.
       - everything is configured within the distributation in/directly.
+      - config contained in behavior which is part of the distribution.
+      - distribution can have multiple behaviors. 
         - ![cloudfront-distribution-indirect-configs](images/r53-cloudfront/cloudfront-distribution-indirect-configs.png)
   - Edge Location:
     - location where content will be cached{local cache}.
@@ -3815,6 +3836,7 @@ S3 Glacier Deep Archieve
     - Larger version of an edge location. Provides another layer of caching.
     - hold more data that is accessed less frequently than edge locations.
   - ![cloudfront-architecture](images/r53-cloudfront/cloudfront-architecture.png)
+  - it's for download style operation only and upload direct to origin.
 
 #### cloudfront behavior
 
@@ -3824,14 +3846,25 @@ S3 Glacier Deep Archieve
   - adding alternate domain name and then u can use a custom ssl cert.
   - security policy - balance between the more secure and the more compatible.
   - most recent version may not supported by all users' browsers.
-  - supported http
+  - http version
+  - ssl certificate:
+    - default cloudfront cert with default cloudfront domain name.
+    - request or import a cert with ACM with alternate domain name.
+      - you need to choose between SNI and Legacy client support.
 - Behaviors {cache control, restrictions}
   - a distribution can have multiple behaviors.
     - priority order
+      - default \*
+      - u can set one for specific path pattern. ex: /images
   - path pattern : default is \* which mean all request.
   - origin : the origin to use for this behavior.
-  - viewer protocol policy : https only, http and https, or redirect http to https.
+  - viewer protocol policy : 
+    - https only
+    - http and https
+    - redirect http to https.
   - Allowed HTTP Methods : GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE... cache..ttl
+  - field level encryption.
+  - cache setting, ttl...
   - restrict viewer access : yes or no.
     - <b>trusted signers</br> : who can access the content.
       - accounts that are able to generate signed urls or cookies.
@@ -4142,7 +4175,8 @@ S3 Glacier Deep Archieve
 
 - nosql, wide column, key/value & Document.
 - No Self-managed servers or infrastructure
-- {taking full control}Manual / Automatic{set & forget} provisioned performance IN/OUT or On-Demand
+- {taking full control of scalability}Manual / Automatic scalabality{set & forget} 
+  - provisioned performance IN/OUT or On-Demand
 
 - Highly Resilient .. across AZs and Optionally global
   - data is replicated across multiple storage nodes by default.
@@ -4194,16 +4228,21 @@ S3 Glacier Deep Archieve
 ### Point-in-time Recovery(PITR)
 
 - u need to enable PITR on the table.
+- 35 days recovery window.
 - Not Enabled by default.
 - it results in continuous stream of backups.
 - u can create a new table by restoring this backup from any [unit of time] interval in the duration of day recovery window.
 - ![dynamodb-pitr](images/dynamodb/dynamodb-pitr.png)
 
 - ![dynamodb1-exam](images/dynamodb/dynamodb1-exam.png)
+  - under point 4 - a dedicated lesson on PartiQL is coming up.
+- no base cost you only pay for what you use.
+  - you can purchase reserved allocation for capacity so for long term commitment you can get a cheaper rate.   
 
 ### DynamoDB Reading and Writing
 
-- u can switch between capacity modes even if u add data to the table but with some restrictions. - once within 24 hours.
+- u can switch between capacity modes even if u add data to the table but with some restrictions. 
+  - once within 24 hours.
 - with On-Demand u don't have admin overhead of managing capacity. but, u pay more which can be 5x more expensive.
 - with provisioned u set rcu and wcu per table basis.
 - Every Opertation consumes at least 1 RCU/WCU(\*)
@@ -4211,7 +4250,8 @@ S3 Glacier Deep Archieve
 - 1 WCU is 1 \* 1 KB write operation per second
 - Every table has a RCU and WCU burst pool(300 seconds)
 
-  - when u set rcu and wcu u set for sustained average but try to dep in burst pool as infrequently as possible. because other table modification task can use this pool as well.
+  - when u set rcu and wcu u set for sustained average but try to dip in burst pool as infrequently as possible. because other table modification task can use this pool as well.
+  - DynamoDB provides burst capacity for read and write operations to handle short-term increases in demand. While you provision RCU and WCU based on sustained average usage, the burst pool is available for occasional bursts in activity, but it's advisable to use it judiciously due to its shared nature among tables.
 
 - WCU calculation
   - ![dynamodb-wcu](images/dynamodb/wcu-calculation.png)
@@ -4229,9 +4269,11 @@ S3 Glacier Deep Archieve
 ### Query
 
 - Query is used to retrieve items from a table using the partition key.
+  - you have to specify single value for the primary key and optionally a SK or range.
   - reading and writing the entire item{row}.
   - if u have to perform a query which operate on single item as a minimum u're going to consume the capacity that whole item uses.
   - u charge for whole item even if u read a single attribute.
+    - if you return subset of attributes u'll be charged for the whole item.
   - ![dynamodb-query](images/dynamodb/query.png)
 
 ### scan
@@ -4247,7 +4289,14 @@ S3 Glacier Deep Archieve
 - Eventual Consistent Read is half the price of Strong Consistent Read.
 - ![dynamodb-consistency](images/dynamodb/consistency-model.png)
   - strong read vs eventual read
-
+    - strong read always use the leader
+    - eventual read can use any replica - half the cost.
+- calculate of wcu / rcu
+  - calculate for one item -> x
+  - x \* number of items per second - > y
+  - wcu = y / 1kb
+  - rcu = y / 4kb
+  - eventual rcu = y / 4 / 2
 ## DynamoDB Indexes
 
 - Query is the most efficient operation in DDB
@@ -4361,7 +4410,7 @@ S3 Glacier Deep Archieve
     - ![lambda-networking-VPC](images/lambda/lambda-networking-vpc.png)
   - Public (default)
     - ![lambda-networking-public](images/lambda/lambda-networking-public.png)
-    - ![Alt text](image-1.png)
+
 ### Invocation
 - Synchronous
   - Result (success or failure) is returned during the request.
@@ -4845,12 +4894,112 @@ S3 Glacier Deep Archieve
   - 2- <b>PrivateDNS overrides </b>the default DNS for services
     - application in private subnet will not require any changes to access the service. it will access public service with the normal DNS name.
 - VPC PEERING
-  - to create direct encrypted network link between two VPCs
+  - to create ptivate direct encrypted network link between <b>two</b> VPCs
   - works same/cross-region and same/cross-account
     - there is some limitation when running vpc peering between vpc in different region.
-  -  (optional) public Hostnames resolve to private IPs  
+  - you can (optionally) enable public Hostnames resolve to private IPs  .
+    - this mean you can use the same dnsname to locate services weather it's in the peered vpc or not .
+    - same region SG's can reference peer SGs.
+      - in different region u need to use IP ranges.
+  - VPC peering does not support <b> transitive peering</b> .
+    - if A is peered with B and B is peered with C, A cannot talk to C.
+    - u need to create a peering between A and C. 
+- when you creating vpc peering connection between 2 vpc, you create a logical gateway object inside each vpc. 
+  - you need to configure route table to route traffic to the other vpc. SGs & NACLs are also used to control traffic.
+- VPC Peering connection cannot be created where there is overlap in the VPC CIDRs - ideally never use the same address range in multiple VPCs.
+  - ![vpc-peering](images/vpc/vpc-peering.png)
+
+## BGP
+- Direct connect & dynamic vpn both utilize BGP.
+- it's made up self manged network(AS) Autonomous System.
+  - AS : it could be a large network or a collection of routers but in either way it controlled by one single entity.
+  - from BGP perspective it's a black box. it only concern about routing in and out in your AS.
+- each AS has a unique number. (ASN) allocated by IANA(0-64511)public or ARIN(64512-65535) private.   
+  - ASN is used to identify the AS and to exchange routing information.
+- BGP operates over tcp/179 - it's reliable and connection oriented.
+- it's not automatically configured. u need to configure peering between two AS manually.
+  - 
+- BGP is a path-vector protocol it exchange the best path to a destination between peers ... the path is called the ASPATH.
+  - it doesn't exchange every possible path to a destination. only the best path.  
+  - it doesn't take into account the link speed or condition. it only take into account the number of hops.
+
+- iBGP = Internal BGP - Routing within an AS
+- eBGP = External BGP - Routing between AS
+- ![bgp](images/vpc/bgp.png)
+  - in case you want to prioritize longer path over shorter path you can prepand your AS number to the path. to make the shorter path longer.
+  - BGP only advertise the best path to a destination. so the change will be propagated to other AS.
+
+## IPSEC 
+- a group of protocols working together to secure the communication between two hosts.
+- it sets up secure tunnels across insecure networks.
+  - between two peers (local and remote)
+    - 2 different business sites.
+- Provide Authentication, Integrity, Confidentiality.
+- Interesting traffic is the one which much certain defined rules.
+  - vpn tunnel is created for interesting traffic.
+- IPSEC has two main phases
+  - IKE Phase 1 (Slow & heavy)
+    - ![ipsec-vpn-ike-phase-1](images/vpc/ipsec-vpn-ike-phase-1.png)
+    - it's a protocol for the how the keys will be exchanged between the two peers.
+    - Authenticate - Pre-shared key or certificate
+    - Using Asymmetric encryption to agree on, and create a shared symmetric key.
+    - IKE SA(security association) Created (end of phase 1) phase 1 tunnel
+  - IKE Phase 2 (fast & agile) 
+      - 1 - the peer send the cipher suite it support and the other peer choose the best one.
+      - ![ipsec-vpn-ike-phase-2](images/vpc/ipsec-vpn-ike-phase-2.png)
+    - Uses the keys agreed in phase 1.
+    - Agree encryption method, and keys used for bulk data transfer.
+    - IPSEC SA created   phase 2 tunnel run over phase 1 
+  - the reason for two phases is it's possible for phase 1 to be established then the phase 2 created, used, and then turned down. and then phase 2 created again when interesting traffic is detected.
+
+  - two type of vpn(policy based vpn & route based vpn)
+    - The difference is how they match interesting traffic.
+    - policy-based VPNs
+      - rule sets match traffice => a pair of SAs
+        - different rules/ different security settings.
+    - Route Based VPNs
 
 
+- AWS Global Accelator
+  - it's design to optimize the flow of data from your users to aws infrastructure.
+  - unicast ip : one ip address is assigned to one interface.
+  - anycast ip : one ip address is assigned to multiple interfaces.
+    - routing moves traffic to closest location.
+  - aws global accelerator start with 2 X anycast ip address.
+  - Traffic initially uses public internet & enters a Global Accelerator edge location. 
+  - cloudfront move the content closer to the user by caching it in edge location.
+  - global accelerator move the aws network closer to the user as closer as possible.
+  - Transit over AWS backbone to 1+ locations.
+  - it's a network layer can work on any (TCP/UDP) application including web apps, cloudfront only work with http/https.
+
+- Direct Connect
+  - A physical connection(1, 10 or 100 Gbps) into AWS region (private & public)
+  - Business Premises => Direct Connect Location => AWS Region
+  - when you order Direct Connect you actually order a port allocation at a DX location. and aws authorize you to connect to the port.  AWS doesn't provide the physical connection.
+  - Cost: Port Hourly Cost & outbound data transfer cost.
+  - time: provisioning time ... physical cables & no resilience.
+  - Low(data doesn't deliver across public internet like vpn) & Consistent latency(1 link at best or ) + high speeds.
+    - the best way to achieve high speed in hybrid environment. 
+  - it used to access public aws services or private vpc. - NO public internet access unless you configure a proxy.
+    - Public VIF - access public services: from your premises to (Customer or Partner) 'DX ROUTER' to 'AWS DX ROUTER(the port)' to 'AWS public services'
+    - Private VIF - access private services: from your premises to (Customer or Partner) 'DX ROUTER' to 'AWS DX ROUTER(the port)' to 'Virtual Private Gateway' 'Private Service'
+  - ![dx](images/vpc/direct-connect.png)
+- Transit Gateway
+  - Network Transit hub to connect VPCs and on-premises networks.
+  - significantly reduce the number of connections required to connect many VPCs and on-premises networks.
+  - single network object - HA and scalable.
+  - <b> Attachments </b> - VPCs, VPN, Direct Connect, Peering.
+    - how TGW connect to other network objects within aws and hybrid network.
+  - hybrid network architecture without transit gateway
+    - ![transit-gateway](images/vpc/hybrid-network-architechture-without-transit-gateway.png)
+  - hybrid network architecture with Transit Gateway.
+    - ![transit-gateway](images/vpc/hybrid-network-architechture-with-transit-gateway.png)
+    - it come with default route table which allow all traffic between attachments. you can create complex routing topology by using multiple route tables.
+  - it support transitive routing.
+  - it can be used to create global network
+  - you can share it between accounts using AWS RAM(resource access manager: it's a service allow you to share resources between accounts)
+  - Peer with different regions .. same or cross account.
+  - make you avoid full mesh connectivity.
 --
 udacity temp :
 
