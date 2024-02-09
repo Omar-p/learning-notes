@@ -1549,8 +1549,8 @@ some field can be ignored bec
 
 # Amazon GuardDuty
 
-- continous security monitoring service, trying to protect your account and resources from any security issues.
-- Analyses supported data sources +continously reviewing those sources for any things ocurring within your account + AI/ML. + threat intelligence feeds.
+- continuous security monitoring service, trying to protect your account and resources from any security issues.
+- Analyses supported data sources +continuously reviewing those sources for any things occurring within your account + AI/ML. + threat intelligence feeds.
 - Identifies unexpected and potentially unauthorized and malicious activity within your aws account.
 - it learns what happen normally from any your managed account and then it can detect any deviation from that normal behavior. (finding)
   - notify or event-driven protection/remediation.
@@ -1592,7 +1592,7 @@ some field can be ignored bec
   - core 7 + ..
   - 115 Further checks
     - (14 cost, 17 security, 24 fault tolerance, 10 performance and 50 service limit)
-  - u also get accesst via <b> the AWS Support API </b>
+  - u also get access  via <b> the AWS Support API </b>
     - allow u to integrate trusted advisor into ur own application.
     - allow u to initiate checks and get the results back whenever required.
     - allow u to get summary and detailed info as required.
@@ -1602,11 +1602,16 @@ some field can be ignored bec
 ---
 
 # AWS WAF (Web Application Firewall)
-
+- Deploy On:
+  - ALB, API GW, CloudFront, AppSync, Cognito User Pool.
 - actual configuration unit in waf is called <b>web acl</b>.
   - can be associated with multiple services.
   - within it we have rules within rules groups.
+  - A rule group is a reusable set of rules that you can add to a web ACL.
+  - web acl are regional  except for cloudfront.
   - u can update the rules manually or by using event that trigger lambda by creating a feedback loop by analysing waf log and trigger lambda to update the rules.
+- waf and ALB
+  - ![fixed-ip-while-using-waf-with-lb](images/fixed-ip-while-using-waf-with-lb.png)
 - waf logging can be directed to s3(5mins), cw logs, and firehose.
 
   - if you want to react to log quickly you shouldn't directly use s3 as it take about 5 mins.
@@ -1624,17 +1629,17 @@ some field can be ignored bec
   - a resource can have one WEBACL but a WEBACL can be associated with multiple resources.
     - u cannot associate a cloudfront WEBACL with a regional resource or vice versa.
 - Rule groups
-  -
+  - 
 
 ---
 
 # AWS Shield
 
-- protect any internet conncected environment from DDoS Attack
+- protect any internet connected environment from DDoS Attack
 - AWS shield Standard & Advanced
   - Standard: free, always on, protect against most common attacks.
   - Advanced: paid, additional protection against more sophisticated attacks.
-- Protect Aganist
+- Protect Against
   - Network Volumetric Attack (L3) - Saturate Capacity (overwhelm the system)
   - Network Protocol Attacks (L4) - TCP Syn Flood
     - generate huge #of TCP connection requests, but never complete them. leave them open.
@@ -1646,7 +1651,7 @@ some field can be ignored bec
 
 - Free for AWS customers.
   - protection at the perimeter of your network. (region/VPC or the AWS Edge)
-- protect aganist common Network (L3) or Transport (L4) layer attacks.
+- protect against common Network (L3) or Transport (L4) layer attacks.
 - you will get best protect if you are using R53, CloudFront, AWS Global Accelerator.
 
 ### Advanced
@@ -1666,6 +1671,21 @@ some field can be ignored bec
   - allow u to group resources together and apply the same protection to them.
   - decrease admin overhead.
 
+---
+# AWS FIREWALL MANAGER
+-  Manage rules in all accounts of an AWS Organization 
+- Security policy: common set of security rules
+  - WAF rules (Application Load Balancer, API Gateways, CloudFront)
+  - AWS Shield Advanced (ALB, CLB, NLB, Elastic IP, CloudFront)
+  - Security Groups for EC2, Application Load Balancer and ENI resources in VPC AWS Network Firewall (VPC Level)
+  - Amazon Route 53 Resolver DNS Firewall Policies are created at the region level
+- Rules are applied to new resources as they are created (good for compliance) across all and future accounts in your Organization
+
+- SHIELD , WAF, FIREWALL MANAGER
+  -  WAF, Shield and Firewall Manager are used together for comprehensive protection Define your Web ACL rules in WAF
+  - For granular protection of your resources, WAF alone is the correct choice
+  - If you want to use AWS WAF across accounts, accelerate WAF configuration, automate the protection of new resources, use Firewall Manager with AWS WAF Shield Advanced adds additional features on top of AWS WAF, such as dedicated support from the Shield Response Team (SRT) and advanced reporting.
+  - If you're prone to frequent DDoS attacks, consider purchasing Shield Advanced
 ---
 
 # S3 -- S3 is private by default
@@ -2623,14 +2643,18 @@ S3 Glacier Deep Archieve
 <hr>
 
 # Secret Manager
-
+- has a resource permission similar to s3 bucket.
 - it does share responsibilities with SSM Parameter Store.
 - store, rotate, manage secrets.
 - secrets are encrypted using KMS. (API KEY, PASSWORD)
 - rotation happens automatically using lambda; a lambda function is invoked periodically to rotate the secret.
 - directly integrated with RDS, Redshift, DocumentDB, Aurora.
 - for exam search for rotation, integration, and specific mention of secret.
-
+- Multi-Region Secrets
+  - Replicate Secrets across multiple regions in aws.
+  - SM keeps read replicas in sync with the primary secret
+  - Ability to promote a replica to stand-alone secret in case of a disaster.
+  - Use Case: multi-region apps, disaster recovery strategies, multi-region DB
 # FSx for Windows File Server
 
 - fully managed native windows file servers/shares
@@ -3894,19 +3918,25 @@ S3 Glacier Deep Archieve
 - ![origin-access-control](images/r53-cloudfront/origin-access-control.png)
 
 ---
+- API GATEWAY ENDPOINTS
+  - ![api-gateway-endpoints](images/api-gateway-endpoints.png) 
+---
 
 # AWS Certificate Manager (ACM)
-
+- manage, provision, deploy TLS certificates.
 - Certificate Prove Identity .
   - chain of trust. Signed by a trusted authority.
 - ACM lets you run a public or private Certificate Authority (CA)
-  - Private CA - Application need to be configured to rust your private CA.
+  - Private CA - Application need to be configured to trust your private CA.
   - Public CA - Browsers trust a list of ca provided by os vendor , which can trust other providers which establish chain of trust.
 - ACM can generate or import Certificates
+  - ![acm-request-pub-cert](./images/sysops/acm-request-pub-cert.png) 
   - If generated .. it can automatically renew
     - use dns or email to prove u own the domain
   - if imported .. you are responsible for renewal
     - you renew them and import them again to ACM.
+    - ACM sends daily expiration events starting 45 days prior to the expiration date. appearing in Event Bridge
+      - there are a managed rule in config to check for expired certs acm-cert-expiration-check. (configurable #days) 
 - Certificates can be deployed out to supported services
   - stored encrypted within the product and deployed and managed in secure way to those supported services. (cloudfront and ALB.. NOT EC2)
     - ec2 is not supported because AWS has no way of securing the transfer and deployment. if u manage the instance and have root access u can access the certificate. and the whole point of ACM is to secure the storage and deployment of those certificate .
@@ -3914,7 +3944,10 @@ S3 Glacier Deep Archieve
   - certificates are only available in the region they are created in.
   - Certs cannot leave the region they are generated or imported in.
 - if u want to use a cert with an ALB in region X you need a cert in ACM in the region X.
+  - you need to add HTTP -> HTTPS redirect rule in the ALB. 
   - Global Services like CloudFront operate as though within `us-east-1`
+- ACM & API GATEWAY
+  - ![acm-apigateway-regional-edge-optimized](images/acm-apigateway-regional-edge-optimized.png)
 - ![acm](images/sysops/acm.png)
 
 ---
@@ -4133,15 +4166,15 @@ S3 Glacier Deep Archieve
       - u can create custom endpoint to make one for each replica.
     - All SSD BASED - High IOPS, Low Latency.
     - u don't specify the amount of storage u need. it's based on what u consume.
-    - <b> High Water mark </b> - billed for the most used - u reach 5tb then go to 1 tb u will be billed for 5 tb.
+    - <b> High watermark </b> - billed for the most used - u reach 5tb then go to 1 tb u will be billed for 5 tb.
       - if u will not need that amount of storage for a long time u can delete the cluster and create a new one.
-      - this approach [high water mark] is being changed by aws.
+      - this approach [high watermark] is being changed by aws.
     - replicas can be added and removed without requiring storage provisioning.
 
 - COST
 
   - No free-tier option
-  - Byond RDS singleAZ(micro) Aurora offers better value
+  - Beyond RDS singleAZ(micro) Aurora offers better value
   - Compute - hourly charge, per second, 10 min minimum.
   - Storage - per GB per month., IO Cost per request.
   - 100% DB size in backup are included
@@ -4745,7 +4778,7 @@ S3 Glacier Deep Archieve
 
 - Managed Redis or Memcached .. as a service.
 - Can be used to cache data - for READ HEAVY workloads with low latency requirements.
-- Reduce databasse (workload){cost effective}.
+- Reduce database (workload){cost-effective}.
 - can be used to store session data (stateless servers)
 - Require Application code changes !!
 
