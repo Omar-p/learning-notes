@@ -2085,10 +2085,11 @@ same as [flexible] but:
 - u can create Lifecycle rule on s3 bucket which can automatically
   expire object in the bucket. great way to optimize the cost of S3.
 - set of rules, consist of [actions] do x if y is true.
-- can be applied on a Bucket or groups of objects.
+- can be applied on a Bucket or groups of objects. (ex: objects under specified prefix)
   - Transition Actions: change object class [S3 standard -> S3-IA]
   - Expiration Actions: Delete object or a specific version.
     - actions on version is more complex.
+    - you cannot transition based on access frequency <= this is a feature of s3 intelligent tiring if you want it. but u can transition based on age.
 
 S3 Standard
 S3 Standard-IA
@@ -2099,7 +2100,7 @@ S3 Glacier - Flexible Retrieval
 S3 Glacier Deep Archieve
 
 - lifecycle rules can move object downward not upward.
-- all can move data down to any lower class, but S3 one AZ
+- all can move data down to any lower class, but S3 one AZ-IA
   cannot move objects to S3 glacier - Instant retrieval {be aware of that exception}.
 
 - A single rule cannot transition to Standard-IA or One Zone-IA. and then
@@ -2108,7 +2109,7 @@ S3 Glacier Deep Archieve
   - u can have 2 rules without 30 days gap.
 
 - in single rule to move from s3 to [s3-ia or S3-1-AZ-IA] rule applied after 30 days,
-  and to move with the same rule to galcier class u need to wait another 30 days.
+  and to move with the same rule to glacier class u need to wait another 30 days.
 
 - smaller objects can cost more on classes under standard because (minimum size).
 - <img src="./images/s3/s3-lifecycle.png" width="850" height="500">
@@ -2122,30 +2123,30 @@ S3 Glacier Deep Archieve
 - SRR (Same-Region Replication) : replicate obj between 2 buckets in the same region.
 
 - to replicate between two different accounts u need to add a bucket policy to the destination bucket,
-  to allow the source account to replicate to it. beacuse the s3 in destination account don't trust the source account{role}.
+  to allow the source account to replicate to it. because the s3 in destination account don't trust the source account{role and iam service of that account}.
 
 - <img src="./images/s3/s3-replication.png" width="850" height="500">
 
 - options
 
   - All objects or a subset of objects.
-  - Storage class of the destination. default is same as source.
-  - Ownership of the object. default is same as source.
+  - Storage class of the destination. default is same as source. you can change it.
+  - Ownership of the object. default is same as source. you can override it in case of different account
   - Replication Time Control (RTC)
-    - add gurantee that the object will be replicated within the 15 mins.
+    - add guarantee that the object will be replicated within the 15 mins.
 
 - consideration for exams
 
-  - Not retroactive. only new objects. & versioning needs to be enabled.
+  - Not retroactive. only new objects. & versioning needs to be enabled(in src&dest).
   - One-way replication. src to dest
-  - it can handle Unencrypted, SSE-S3, SSE-KMS(with extra config)
+  - it can handle Unencrypted, SSE-S3, SSE-KMS(with extra config), (cannot for SSE-C because S3 is not have access to the key in order to access the plaintext of the obj)
   - src bucket owner needs permissions to obj.
-  - NO system events, Glacier or Glacier Deep Archieve.
+  - NO system events, Glacier or Glacier Deep Archive.
   - DELETES are not replicated.
 
 - why use replication...?
   - SRR - Log Aggregation
-  - SRR - PROD and TEST Sync
+  - SRR - PROD and TEST Sync. (team account)
   - SRR - Resilience with strict sovereignty requirements.
   - CRR - Global Resilience improvements
   - CRR - Latency Reduction
@@ -2634,12 +2635,16 @@ S3 Glacier Deep Archieve
 - String, StringList, SecureString.
   - u can store
     - License codes, db connection strings, passwords, config values.
-  - allow Hierachies & Versions
+  - allow Hierarchies & Versions
 - store in PlainText or Cipher.
 - <b>Public Parameters</b> - Latest AMIs per region.
   - parameters that are publicly available and created by AWS.
 - ![ssm-theory](images/ssm-theory.png)
 - any parameter changes can fire an event..
+- cli
+  - `aws ssm get-parameters-by-path --path /myapp/prod --with-decryption`
+  - `aws ssm get-parameters-by-path --path /myapp/prod`
+  - `aws ssm get-parameters --names /myapp/prod/db-username /myapp/prod/db-password --with-decryption`
 <hr>
 
 # Secret Manager
@@ -2823,11 +2828,13 @@ S3 Glacier Deep Archieve
   - reason to use :
     - u may have a swf which is licensing based on Sockets/Cores.
   - ![ec2-reserved-option](images/ec2/ec2-dedicated-option.png)
-
-<hr>
+- Dedicated Instances
+  - you don't own or share the host. Extra charges for instances, but dedicated hardware.
+  - ![img_8.png](img_8.png)
+---
 
 - Reserved Instance
-  - Scheduled Reserved Instances
+  - Scheduled Reserved Instances(previously we discussed the standard reversed)
     - if u don't need full time period.
     - specific time in day/week/month.
     - ![scheduled-reserved-instances](images/ec2/scheduled-reserved-instances.png)
@@ -2835,6 +2842,7 @@ S3 Glacier Deep Archieve
   - 1- reserved
   - 2- on-demand
   - 3- spot
+  - if you use capacity reservation for something consistent you should look at a certain point to reserved instances.(more economical)
   - situation when u need to reserve capacity but u cannot satisfy long-term commitment as in reserved instances.
   - ![capacity-reservations](images/ec2/capacity-reservations.png)
 
@@ -2886,12 +2894,33 @@ S3 Glacier Deep Archieve
   - huge scale parallel processing system.
   - u choose #instances per partition.
     - u can share which instances in which partition to pass this info to the topology aware app. {HDFS, HBASE, CASSANDRA} to make intelligent data replication decision.
-  - u and ur app adminsiter the partition placement.
+  - u and ur app administer the partition placement.
   - ![partition-placement-group](images/ec2/partition-placement-group.png)
   - ![partition-placement-group](images/ec2/partition-placement-group-exam.png)
 
-<hr>
-
+---
+### Advanced EC2 Networking:
+-  primary ENI -> attached to instance cannot be detached or attached to any other instances.
+  - removed only when instance terminated.
+  - You can add additional ENI while creating the instance or after.
+  - Additional ENI can be in different subnets but in the same AZ.
+  - ![img_9.png](img_9.png)
+  - SG is associated with ENI not with the instance.
+    - ![img_10.png](img_10.png)
+    - each instance has a static privater ip associated with the primary ENI from subnet CIDR.(never change)
+      - the ip of the ENI are exposed to the instance os.
+      - Secondary ENI can have 1 or more secondary private ip.
+      - if you launch the instance in public subnet or explicitly assign public ip, this ip is not visible to the OS and the translation happen at the IGW.
+      - if you need static public ip you create Elastic IP and associate it with the primary ENI; the primary ip of theENI will release and if you remove the Elastic Ip you will get a new dynamic non-elastic on the ENI
+      - if the ENU has 1 or more ipv6 they will be visible to the OS ENI because they are publicly routable.
+      - the MAC Address of ENI used by OS to identify the network interface. and used in software licensing.
+      - each ENI can have one or more SG.
+      - Each ENI has SRC/DST check when you enable or disable it in the instance you configure the primary ENI.
+        - ![img_11.png](img_11.png)
+      - NOTES:
+        - you can if u have multi-tier app, to make the web communicate with the app using one interface with specific rules, the db with app using another ENI with specific rules; applying differenct security control.
+          - ![img_12.png](img_12.png)
+  
 ### Enhanced Networking & EBS Optimized
 
 - Enhanced Networking: improve the overall performance of ec2 networking .
@@ -2930,12 +2959,16 @@ S3 Glacier Deep Archieve
   - CDN
   - Global health checks & Failover
   - ![aws-globally-architecture](images/aws-globally-architecture.png)
+  - Global perspective, the function of the architecture at this level is to get customer through to a suitable
+   infrastructure location, making sure any regional failure are isolated and session are moved to alternative 
+    regions. it's attempt to direct customer to its local region and improve caching.
 - Regional entry point
   - scaling & resilience
-  - App services and compnenets
-  - ![aws-regional-architecture](images/aws-regional-architecture.png)
+  - App services and components
+  - the web tier work as entry point so you abstract your customers away from your infra so you can isolate any failure or scaling operation
+  - ![aws-regional-architecture](img_7.png)
 
-<hr>
+---
 
 # Evolution of Elastic Load Balancers(ELB)
 
@@ -3156,15 +3189,15 @@ S3 Glacier Deep Archieve
 
 # Storage Refresher
 
-- Direct(lcoal) attached storage - Storage on the EC2 host.
+- Direct(local) attached storage - Storage on the EC2 host.
   - called instance store.
-    - super fast
+    - superfast
     - lost in case:
       - disk fail
       - hw failure
       - migrate ec2 to another host
 - Network attached Storage - Volume delivered over the network (EBS)
-  - on-permise env use protocols like NFS, iSCSI, SMB.
+  - on-premise env use protocols like NFS, iSCSI, SMB.
   - on ec2 use EBS.
   - highly resilient
   - separate from the EC2 host.
@@ -3181,13 +3214,13 @@ S3 Glacier Deep Archieve
 
     - <b>volume of block storage have #addressable blocks.</b>
       - presented logically as a volume or as blank physical hard drive.
-        - no structure byond that.
+        - no structure beyond that.
     - when u present a unit of block storage to a server, on top of this the Os will create a file system.
 
       - ex: ext4, ntfs, xfs, zfs, btrfs, apfs, hfs+.
 
     - come in form of spinning disks or SSDs.
-      - phsical media : block storage
+      - physical media : block storage
       - logical volume : backed by different types of physical storage.
     - Bootable and Mountable.
     - preferred if u want to install an OS or run a database.
@@ -3204,7 +3237,7 @@ S3 Glacier Deep Archieve
       - super scalable.
     - preferred if u want to store data for web apps, mobile apps, backups, analytics, etc.
 
-<hr>
+---
 
 # Storage Performance
 
@@ -3217,6 +3250,7 @@ S3 Glacier Deep Archieve
 - Throughput : amount of data that can be transferred in a given second MB/s.
 - IO size \* IOPS = Throughput.
   - ex: 4KB \* 1000 IOPS = 4MB/s.
+  - ![img.png](img.png)
 
 <hr>
 
@@ -3229,7 +3263,7 @@ S3 Glacier Deep Archieve
   - instances see block device and create file system on this device (exr3/4,xfs)
 
 - Storage is provisioned in <b>ONE AZ</b> (Resilient in that AZ)
-- Attachhed to \*one{one or more}Ec2 instance or other service over a storage network.
+- Attached to \*one{one or more}Ec2 instance or other service over a storage network.
   - multi attached feature allow u to attach the same volume to multiple instances in the same AZ.
     - ex: for clustering.
   - u can detach the volume from one instance and attach it to another.
@@ -3238,11 +3272,11 @@ S3 Glacier Deep Archieve
 - snapshot (backup) into s3. Create volume from snapshot (migrate between AZs).
 - Different physical storage types, different sizes, different performance characteristics.
   - ex: gp2, io1, st1, sc1, standard.
-- Billed based on GB-month (and in some cases performance)
+- Billed based on GB-month (and in some cases' performance)
+ - price of 1GB in month = 2 Gb for 15 days = 0.5 GB for 60 days.
+ - ![img_1.png](img_1.png)
 
-  - price of 1GB in month = 2 Gb for 15 days = 0.5 GB for 60 days.
-
-- u cannot communicate cross AZs using EBS{EBS in AZ-a cannot be attched to EC2 in AZ-b}.
+- u cannot communicate across AZs using EBS{EBS in AZ-a cannot be attached to EC2 in AZ-b}.
 - EBS replicates within an AZ. Failure of an AZ means failure of a volume.
 - Architecture of EBS
   - ![Architecture of EBS](images/ebs/ebs-arch.png)
@@ -3255,7 +3289,7 @@ S3 Glacier Deep Archieve
   - default general purpose ssd
   - created with IO created allocation
     - IO is one input/output operation
-    - IO Credit is 16KB chunck of data
+    - IO Credit is 16KB chunk of data
       - 1 IOPS is 1 IO in 1 second
   - if u have no credits in this IO bucket u cannot perform any IO on the disk
   - IO 'credit' bucket capacity is 5.4 million credits. Fills at rate of Baseline Performance.
@@ -3268,10 +3302,11 @@ S3 Glacier Deep Archieve
         - IO credit start full capacity 5.4 million IO credit.
     - every volume has baseline performance base on its size with a minimum of 100 IOPS.
     - Bucket fills with min 100 IO Credits per second --> regardless of volume size.
-      - regardless of any thing else u can consume 100 IO Credits per second which 100 IOPS.
+      - regardless of anything else u can consume 100 IO Credits per second which 100 IOPS.
   - ![gp2](images/ebs/gp2.png)
 - gp3
   - ![gp3](images/ebs/gp3.png)
+- gp2 scale on size but in gp3 you need to add the extra IOPS.
 
 # HDD
 
@@ -3329,7 +3364,7 @@ S3 Glacier Deep Archieve
 - included in instance price..
 - Attached at launch time only.
 - if instance move to another host, the instance store will be lost.
-
+  - ![img_2.png](img_2.png)
   - stopped and started.
   - changing instance type.
   - hardware failure.
@@ -3368,22 +3403,37 @@ S3 Glacier Deep Archieve
 ### ECS Cluster Types:
 
 - Management Component{exist in the two mode}:
-  - handle schedulingandOrchestration, ClusterManager, PlacementEngine{where to run container}.
+  - handle schedulingAndOrchestration, ClusterManager, PlacementEngine{where to run container}.
 - EC2 Mode
   - ![ecs-ec2-mode](images/ecs-ec2-mode.png)
   - u can use dedicated host or spot instances but u need to configure the cluster to use them.
 - Fargate Mode
   - Fargate Shared Infrastructure:
     - aws maintain a shared infrastructure for fargate. offer to all users for fargate.
-  - each service has it's own ENI.
+  - each service has its own ENI.
   - injected to ur VPC via ENI.
   - ![ecs-fargate-mode](images/ecs-fargate-mode.png)
 - ![ecs-fargate-vs-ec2](images/ecs-fargate-vs-ec2.png)
   - Large workload - Price conscious - EC2 mode
     - u can use spot instances. or dedicated host.
 
----
-
+- Kubernetes 101 - Cluster Structure
+  - ![img_3.png](img_3.png)   
+  - details 101
+    - ![img_4.png](img_4.png)
+    - summary101
+      - ![img_5.png](img_5.png)
+  - EKS101
+    - run on AWS, Outposts, EKS Anywhere, EKS Distro(open-source). 
+    - control plane scales and runs on multiple AZs
+    - Integration with AWS services.. ECR, ELB, IAM, VPC
+    - EKS Cluster = EKS Control Plane & EKS Nodes
+    - etcd distributed key-value store across multiple AZs.
+    - Nodes - Self Managed, Managed node groups, or Fargate pods.
+      - You should choose based on your requirements .. windows, GPU, Bottlerocket, Outposts, .. check node type
+    - Storage Providers - include.. EBS, EFS, FSx Lustre, FSx for NetApp ONTAP.
+    - EKS (Visually)
+      - ![img_6.png](img_6.png)
 ---
 
 # CloudFormation
@@ -3724,14 +3774,14 @@ S3 Glacier Deep Archieve
   - contains records which map domain names to IP addresses.
 - Globally Resilient (multiple DNS Servers)
 - ![r53-hosted-zone](images/r53-cloudfront/r53-hosted-zone.png)
-- when u register a domain ns record for that domain are entered into top level domain zone. and this point to ur name servers. and then ur name servers and zone they are host become authoritative for that domain..
+- when u register a domain ns record for that domain are entered into top level domain zone. and this point to ur name servers. and then ur name servers and zone they  host become authoritative for that domain..
 
 ### public hosted zone
 
 - a dns database(zone file) hosted by R53(Public Name Servers).
 - Accessible from the internet & VPCs{using R53 Resolver}.
-- when u create a public Hosted zone R53 on allocate "4" nameserver specific for the zone.
-  - to integrate with public DNS system u change the "NS records" to point at these NS(connect to global DNS).
+- when u create a public Hosted zone R53 on allocate "4" public nameserver(where zonefile are hosted) specific for the zone.
+  - to integrate with public DNS system u change the "NS records" to point at these NS(created by r53)
 - inside public hosted zone u create Resource Records (RR){the actual items of data which dns uses} created within the Hosted Zone.
 - Externally registered domains can point at R53 public hosted zone.
   - ex: u can use godaddy to register a domain and u can create a public hosted zone in R53 get fullname service which allocated to that hosted zone and via godaddy interface u can add those nameservers into dns for your domain.
@@ -3741,6 +3791,8 @@ S3 Glacier Deep Archieve
 
 - ![r53-private-hosted-zone](images/r53-cloudfront/r53-private-hosted-zone.png)
 - to be able to access a private hosted zone u need to be within a VPC and that VPC need to be associated with the private hosted zone.
+- Split-View dns: same address different website one for public and other for your employee
+  - public can have subset of record the private can access. 
 - ![r53-private-hosted-zone-visually](images/r53-cloudfront/r53-private-hosted-zone-visually.png)
 - ![r53-split-view](images/r53-cloudfront/r53-split-view.png)
 
@@ -5246,3 +5298,33 @@ and configure additional rules that apply sampling based on properties of the se
   - KStream can be called as record stream or log.
   - analogy: Insert Into DB table.
 - 
+---
+- 14-03-2024
+---
+- OpsWork (Managed `Chef` & `Puppet`)
+  - both help in configuration as code. they leverage `Recipes` or `Manifests`
+  - They are opensource and you may think about them instead of ssm in case you have multi cloud environment.
+
+- In horizontal Scaling 
+  - -> scaling out, you add more instances to the pool.
+  - -> scaling in, you remove instances from the pool.
+
+---
+- Storage Gateway
+  - Volume 
+  - Tape Mode (VTL)
+    - AWS : ![img_15.png](img_15.png)
+      - VTL (1 PB across 1500 virtual tapes), VTS(unlimited storage) 
+      - written data cannot be modified; read as a whole or write as 
+        - old day:
+          - ![img_13.png](img_13.png)
+          - Traditional tap backup architecture cost money(equipments & staff) and time:
+            - ![img_14.png](img_14.png)
+            - exported tape mean there is not in the library; they moved to offsite storage. in aws it move from VTL to VTS
+    - use-cases: datacenter extensions, migration of backup platform
+  - File Mode
+    - ![img_16.png](img_16.png)
+    - ![img_17.png](img_17.png)
+      - SMP with windows server, NFS for linux
+    - replication:![img_18.png](img_18.png)
+    - lifecycle: ![img_19.png](img_19.png)
