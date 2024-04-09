@@ -886,6 +886,38 @@ CloudFormation:
   - <img src="images/logical-physical-cfn.png" width="800" height="500">
 
 ---
+###
+- The metrics are always going to be pushed into CloudWatch, and it will never initiate
+  outbound connections into your resources in order to be able to gather information.
+  - Because of this, you're going to have to make sure that all your resources have access to the
+    CloudWatch API endpoint.
+    - Consider where a resource becomes busy and it's not able to push
+      those metrics into CloudWatch in a timely fashion.
+- you have no native access to OS level metrics that can only be gathered from inside the instance itself. 
+  - CPU utilization is something that is made available at the hypervisor layer but other metrics, 
+    like memory utilization or disk space utilization are not available natively to CloudWatch.
+- install cloudwatch agent to gather metrics from the OS level.
+  - **Understanding CloudWatch Agent Setup**
+
+    - **Prerequisites**
+
+      * **Compatible resources:** Ensure resources you want to monitor are compatible with Systems Manager and have an agent installed and configured.
+      * **IAM role:**  Create an IAM role allowing communication between your client (EC2 or your data center) and the Systems Manager/CloudWatch service API endpoints.
+      * **Permissions:** Grant permissions for SSM Parameter Store (used to store the configuration file).
+
+    - **Installation**
+
+      1. **Install the CloudWatch agent:** Use a feature like SSM run command to install.
+
+      - **Configuration**
+
+      2. **Create a config file (first-time use only):** Log into the instance and manually create the configuration file.
+      3. **Upload config file:** Upload the file to Parameter Store.
+      4. **Restart the agent:** This ensures the agent picks up the new configuration.
+    - ![img_21.png](img_21.png)
+
+
+---
 
 # CloudWatch<Metrics, Logs, Events>:
 
@@ -988,6 +1020,7 @@ CloudFormation:
     - u able to access log file directly and can integrate that with a 3rd party monitoring solutions or something u design urself.
     - or query them using Athena
       - adhoc query engine , only pay for the data u read.
+      - ![img_22.png](vpc-flow-log-ex-arch.png)
 - ![vpc-flow-logs](images/vpc-flow-logs.png)
 - ![vpc-flow-logs-example](images/vpc-flow-logs-example.png)
 
@@ -1774,7 +1807,7 @@ Key points[identity, resource policy]:
   - attribute id=null, when versioning is disabled.
   - when enabled for each object aws allocate id to objects.
   - when u access object without specifying its id, u will get the latest version.
-  - when delete, S3 add delete marker to hide all versions of specific object.
+  - when deleted, S3 add delete marker to hide all versions of specific object.
     - if u delete the latest version, the previous version will be the latest.
   - but u can undo the operation.
   - if u want to fully delete, specify the object id and this version will be fully deleted.
@@ -2365,8 +2398,11 @@ S3 Glacier Deep Archieve
   - whether DNS resolution inside VPC enable or disable. if e [VPC +2 is available]
   - <b>enableDnsSupport</b> is the first setting to check if u have dns issue
 
-<br>
-<br>
+
+
+---
+
+---
 
 - recommandation for structuring your VPC.
   - 3-subnet + 1 for future
@@ -2374,8 +2410,9 @@ S3 Glacier Deep Archieve
     - 16 subnet in /16 network will result in 16 /20 network{4091 IPS}.
   - <img src="images/vpc/vpc-structure.png" width="850" height="500">
 
-<br>
-<br>
+---
+
+---
 
 # Subnets:
 
@@ -2559,7 +2596,7 @@ S3 Glacier Deep Archieve
 - [NACL] stateless
   - REQUEST and RESPONSE seen as different.
 - Only impacts DATA CROSSING SUBNET BOUNDARY.
-- NACLs can EXPLICTLY ALLOW and DENY.
+- NACLs can EXPLICITLY ALLOW and DENY.
 - Deals with IPs/CIDR, Ports & Protocols
   - no logical resources.
 - NACLs cannot be assigned to AWS resources
@@ -2591,7 +2628,7 @@ S3 Glacier Deep Archieve
     - add the ip of web instances ? add the whole subnet ? both are not
   
 
-<br>
+---
 
 - taking advantages of (SG) Logical References.
 
@@ -2821,7 +2858,7 @@ S3 Glacier Deep Archieve
 - lifecycle of an AMI:
   - ![lifecycle](images/ec2/ec2-ami-lifecycle.png)
     - 3- create image: when u create an AMI for any EBS volume which attached to that ec2 instance we have ebs snapshot created for those volumes.
-    - snapshots are refrenced inside the AMI using block device maping
+    - snapshots are refrenced inside the AMI using block device mapping
       - link snapshot id with and a device id linked to the ec2 instance.
 - exam power up:
   - ![exam-power-up](images/ec2/ec2-ami-exam-tips.png)
@@ -2993,16 +3030,18 @@ S3 Glacier Deep Archieve
 - 3 Types of LB available within AWS
 - v1(avoid/migrate) and v2
 - Classic LB(CLB v1) - introduced in 2009
-  - not really L7, lacking feature, 1 ssl per CLB - big deployment will require huge #CLB.
+  - not really L7, lacking feature, 1 ssl per CLB 
+    - big deployment will require huge #CLB.
 - ALB - v2 -HTTP/s and Websocket
 - NLP L4 - v2 - TCP, TLS & UDP
 - V2 = faster, cheaper, support target group and rules.
+  - you can load balance between multiple things or handle different based on your customer
 
 ---
 
 # Elastic Load Balancer (ELB)
 
-- it's job is to accept incoming traffic and distribute it to a group of targets.
+- its job is to accept incoming traffic and distribute it to a group of targets.
 - user is abstracted away from the underlying targets.
   - the amount of targets can be changed without impacting the user.
 - configurations:
@@ -3010,12 +3049,13 @@ S3 Glacier Deep Archieve
     - v4 only
     - dualstack
   - pick AZs which the LB will use
-    - specificly u pick subnets within those AZs.
-    - ![elb-archictecture](images/elb/elb-architecture.png)
+    - specifically u pick subnets within those AZs.
+      - LB put a node in each subnet.
+    - ![elb-architecture](images/elb/elb-architecture.png)
   - internet facing or internal
     - internal LB can only be accessed from within the VPC.
-    - internal is generally used to separate different tiers of an app.
-  - need minimum /28 subnet| preferres /27 for each subnet the node is in.
+    - internal is generally used to separate different tiers of an app, allow independent scaling for each.
+  - need minimum /28 subnet| prefers /27 for each subnet the node is in.
 - ![elb-decouple-app-tiers](images/elb/elb-decouple-app-tiers.png)
   - without LB each instance need to be aware of the other instances.
   - u cannot scale up/down without impacting the user./ changing config/code in other instances.
@@ -3029,9 +3069,9 @@ S3 Glacier Deep Archieve
 
 ---
 
-## LB Consolodation
+## LB Consolidation
 
-- ![elb-consolodation](images/elb/lb-consolodation.png)
+- ![elb-consolidation](images/elb/lb-consolodation.png)
 
 ## ALB
 
@@ -4968,7 +5008,9 @@ S3 Glacier Deep Archieve
        - you cannot do it with gateway endpoint.
   - Endpoint Policies - can be used
   - support only TCP and IPv4 only.
-  - Uses PrivateLink : allow external services to be injected into VPC either by aws or by third party. and give it ENI.
+  - ![img_22.png](interface-and-gateway-vpc-endpoint.png)
+  - ![img_22.png](s3-gateway-vs-interface.png)
+  - Uses ***PrivateLink*** : allow external services to be injected into VPC either by aws or by third party. and give it ENI.
   - 1- Interface Endpoint provides a New service endpoint DNS name.
     - e.g. vpce-123-xyz-sns.us-east-1.vpce.amazonaws.com
     - this DNS name is used to access the service.
@@ -4978,8 +5020,8 @@ S3 Glacier Deep Archieve
       - works specifically for one interface endpoint in one AZ.
   - 2- <b>PrivateDNS overrides </b>the default DNS for services
     - application in private subnet will not require any changes to access the service. it will access public service with the normal DNS name.
-- VPC PEERING
-  - to create ptivate direct encrypted network link between <b>two</b> VPCs
+### VPC PEERING
+  - to create private direct encrypted network link between <b>two</b> VPCs
   - works same/cross-region and same/cross-account
     - there is some limitation when running vpc peering between vpc in different region.
   - you can (optionally) enable public Hostnames resolve to private IPs  .
@@ -4990,7 +5032,7 @@ S3 Glacier Deep Archieve
     - if A is peered with B and B is peered with C, A cannot talk to C.
     - u need to create a peering between A and C. 
 - when you creating vpc peering connection between 2 vpc, you create a logical gateway object inside each vpc. 
-  - you need to configure route table to route traffic to the other vpc. SGs & NACLs are also used to control traffic.
+  - **you need to configure route table to route traffic to the other vpc. SGs & NACLs are also used to control traffic.**
 - VPC Peering connection cannot be created where there is overlap in the VPC CIDRs - ideally never use the same address range in multiple VPCs.
   - ![vpc-peering](images/vpc/vpc-peering.png)
 
@@ -4998,7 +5040,7 @@ S3 Glacier Deep Archieve
 - Direct connect & dynamic vpn both utilize BGP.
 - it's made up self manged network(AS) Autonomous System.
   - AS : it could be a large network or a collection of routers but in either way it controlled by one single entity.
-  - from BGP perspective it's a black box. it only concern about routing in and out in your AS.
+  - from BGP perspective it's a black box. it only concerns about routing in and out in your AS.
 - each AS has a unique number. (ASN) allocated by IANA(0-64511)public or ARIN(64512-65535) private.   
   - ASN is used to identify the AS and to exchange routing information.
 - BGP operates over tcp/179 - it's reliable and connection oriented.
@@ -5013,6 +5055,14 @@ S3 Glacier Deep Archieve
 - ![bgp](images/vpc/bgp.png)
   - in case you want to prioritize longer path over shorter path you can prepand your AS number to the path. to make the shorter path longer.
   - BGP only advertise the best path to a destination. so the change will be propagated to other AS.
+
+### Site-to-Site VPN
+- setup
+    - ![img_22.png](img_22.png)
+      - in creating the customer gateway you need to provide the certificate arn which allow aws to connect to your site.
+    - ![img_24.png](img_24.png)
+- vpn cloudhub: 
+  - ![img_25.png](vpn-cloudhub.png)
 
 ## IPSEC 
 - a group of protocols working together to secure the communication between two hosts.
@@ -5045,7 +5095,7 @@ S3 Glacier Deep Archieve
     - Route Based VPNs
 
 
-- AWS Global Accelator
+- AWS Global Accelerator
   - it's design to optimize the flow of data from your users to aws infrastructure.
   - unicast ip : one ip address is assigned to one interface.
   - anycast ip : one ip address is assigned to multiple interfaces.
@@ -5085,6 +5135,10 @@ S3 Glacier Deep Archieve
   - you can share it between accounts using AWS RAM(resource access manager: it's a service allow you to share resources between accounts)
   - Peer with different regions .. same or cross account.
   - make you avoid full mesh connectivity.
+
+- Reachability Analyzer
+  - ![img_22.png](reachability-analyzer.png)
+  - 0.1$ per reachability analysis.
 --
 udacity temp :
 
@@ -5477,3 +5531,10 @@ and configure additional rules that apply sampling based on properties of the se
       - SMP with windows server, NFS for linux
     - replication:![img_18.png](img_18.png)
     - lifecycle: ![img_19.png](img_19.png)
+---
+- Glue
+  - build your table definition, serve as central metadata repository for your data lake,
+    it will discover those schema out of your unstructured data (ex: s3). and publish table definition for your analysis tool such as athena, redshift, and EMR .
+  - Extract structure from unstructured data make you able to query your data in s3 using sql or sql like tool .
+  - ![img_20.png](img_20.png)
+  - 
