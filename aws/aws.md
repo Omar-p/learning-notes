@@ -178,7 +178,7 @@ Cloud Service model
 - IAM ROLE don't use access keys.
 
 - in cli to run command from specific profile
-  - aws [cmd] param (flages) --profile name
+  - aws [cmd] param (flags) --profile name
 - to configure a new profile:
 
   - aws configure --profile name
@@ -278,7 +278,7 @@ Cloud Service model
 
 - specifications define the transmission and reception of RAW BIT STREAMS between a device and a SHARED PHYSICAL MEDIUM.
   it defines things like VOLTAGES LEVELS, TIMING, RATES, DISTANCES, MODULATION,
-  and CONNECTORS. Copper(electrical), Fiber(light) or WIFI(Radio Frequency)
+  and CONNECTORS. Copper(electrical), Fiber(light) or WI-FI(Radio Frequency)
 - to connect two devices you need only a link(point to point) between them.
 - but when we need to connect multiple one. we need a hub[anything recieved on any port, is
   transmitted on every other port] including errors & collisions.
@@ -307,7 +307,7 @@ Cloud Service model
     - to connect more than two devices and use benefit of L2. a hub won't work because it doesn't understand L2. So we use a SWITCH.
   - SWITCH:
     - understand frames and MAC. they maintain a MAC ADDRESS TABLE which starts off EMPTY.
-    - As the switch recieves frames on its ports, it learns which devices are connected and populates the Mac address table.
+    - As the switch receives frames on its ports, it learns which devices are connected and populates the Mac address table.
     - <b>STORE and FORWARD</b> ..they don't repeat blindly like hubs. it means that ONLY VALID FRAMES are FORWARDED
       - collisions is isolated on the port they occurred.
         - Every X port switch has X collision domains. It allows switches to scale and be connected together.
@@ -352,7 +352,7 @@ Cloud Service model
 
 ### L4 Transport Layer
 
-- L3 problems: - L3 provides no ordering mechansim. - L3 is not guaranteed to be reliable. - L3 diff packets can experience diff delays.
+- L3 problems: - L3 provides no ordering mechanism. - L3 is not guaranteed to be reliable. - L3 diff packets can experience diff delays.
 
   - L3 has no communication channels - packets have a Source and Destination IP but no mthod of splitting by APP or CHANNEL.
     - No flow control if src is faster than dest. dest can be overwhelmed.
@@ -377,11 +377,11 @@ Cloud Service model
   - TCP is a connection based protocol.
 
     - A connection is established between 2 devices using random port on client[EPHEMERAL PORT] and a [WELL-KNOWN PORT] on the server.
-    - Once esablished the connection is bidirectional.
+    - Once established the connection is bidirectional.
     - reliable, provided via the segments encapsulated in IP packet.
 
   - 3-way handshake:
-    - to esablish the connection between client and server.
+    - to establish the connection between client and server.
     - they need to agree on the sequence number the client choose one randomly and then increment it for the next packets.
     - the server also choose one to start with it for the packet will be sent to the client.
 
@@ -431,15 +431,15 @@ Cloud Service model
 
 - 2 - Authentication: the client trust the public CA
   - it makes sure that the certificate
-    is valid (date, annd hasn't revoked) and that the DNS name matches the name/names on the cert.
-  - the client verfies the server has the private key.
+    is valid (date, and hasn't revoked) and that the DNS name matches the name/names on the cert.
+  - the client verifies the server has the private key.
 - 3 - Key Exchange:
   - the client generate the pre-master key, encrypt it with the servers public key and sends it to the server.
   - the server decrypt the pre-master key using its private key.
 
   - both sides use the same pre-master-key to generate the master secret  
     which is used to generate the ongoing session keys which encrypt and
-    decrypr data.
+    decrypt data.
   - Both sides confirm the handshake and from them on,
     communications between client <=> server are encrypted
 
@@ -503,16 +503,16 @@ Cloud Service model
 
 - IPV4
 - originally managed by IANA
-  -.. parts now delegated to regional autorities
+  -.. parts now delegated to regional authorities
 - All public IPv4 addressing is allocated
 - Part of the address space is private, can be used/reused freely.
 
 Class A: - 000.000.000.000 -> 127.255.255.255 128 Networks, 16_777_216 IPs each
 Class B:
 
-- 128.000.000.000 -> 191.255.255.255 16_384 , 65_536 first 2 octat for network
+- 128.000.000.000 -> 191.255.255.255 16_384 , 65_536 first 2 octet for network
   Class C:
-- 192.000.000.000 -> 223.225.225.255 2_097_152 , 256 first 3 octats for network
+- 192.000.000.000 -> 223.225.225.255 2_097_152 , 256 first 3 octets for network
   Class D: multicast
 
 ---
@@ -524,7 +524,7 @@ Private IP
 
 ---
 
-subnetting - CIDR Classless Inter-Domain Routing - let us take networks and break them down - it define a wat of expressing the size of a network -> prefix[newtork bits]
+sub-netting - CIDR Classless Inter-Domain Routing - let us take networks and break them down - it define a wat of expressing the size of a network -> prefix[newtork bits]
 
 ---
 
@@ -543,7 +543,7 @@ subnetting - CIDR Classless Inter-Domain Routing - let us take networks and brea
     access to a service.
 
 - "Public Internet Zone" where Internet services lay[gmail, online game..]  
-  "AWS PRIVATE zone" are called Vitual Private Clouds or VPCs, there are isolated.
+  "AWS PRIVATE zone" are called Virtual Private Clouds or VPCs, there are isolated.
   VPCs can't communicate with each other unless u allow it. and nothing from the internet
   can reach these private networks unless u configure it. service can be placed into
   these private zones such as EC2 instances and just like the home private network it
@@ -586,7 +586,7 @@ AWS Global Infrastructure:
   - useful for company such as Netflix, who need to store TV shows and movies
     as clos to their customers as possible. because this allow low latency and
     high speed distribution.
-- AWS Availabilty Zone : is a logical thing inside AWS
+- AWS Availability Zone : is a logical thing inside AWS
 
   - some think about it as it's a data center, but it's not. it may formed by multiple data centers, or it may be a single data center.
   - each AZ is isolated from other AZs, and they are connected by high speed
@@ -594,10 +594,10 @@ AWS Global Infrastructure:
 
   - inside every region AWS provide multiple availability zones,
     isolated infrastructure inside a region.
-    - u can distribute ur compnents across multible zones.
+    - u can distribute ur components across multiple zones.
     - services can be placed across multiple availability zones
       to make them resilient[VPC a way to create a private network
-      can work across multiple availabilty zones to provide resilience]
+      can work across multiple availability zones to provide resilience]
 
 - globally resilient service
   - there are relatively few of those inside AWS, the service operate globally with
@@ -610,7 +610,7 @@ AWS Global Infrastructure:
 - regionally resilient service
   - operate in a single region, with one set of data per region
 - zone resilient service
-  - AZ, services run from a single availabilty zone if if the AZ that service is
+  - AZ, services run from a single availability zone if the AZ that service is
     provisioned into fails, then that service will fail.
     - it's possible for hardware to fail in an availability zone and for AZ
       itself continue working because AWS do have resilient storage systems
@@ -2482,7 +2482,7 @@ S3 Glacier Deep Archieve
 - can be though of as a traditional firewall available within AWS VPC.
 - Every subnet has an associated NACL, filter traffic crossing the subnet boundary INBOUND or OUTBOUND.
 - connections within a subnet aren't impacted by NACLs.
-- contain a #of rules [Inbound/Outbound] rules.
+- contain a #of rules[Inbound/Outbound].
 
   - Inbound rules match traffic
     - ENTERING the subnet,
@@ -2490,7 +2490,7 @@ S3 Glacier Deep Archieve
     - match traffic LEAVING the subnet.
 
 - NACLs are stateless doesn't matter if it's req/res. what is important is the direction.
-- Rules are proccessed in order,<b> lowest rule</b> number first. Once a match occurs, Processing stops. \* is an implicit DENY if nothing else matches.
+- Rules are processed in order,<b> the lowest rule</b> number first. Once a match occurs, Processing stops. \* is an implicit DENY if nothing else matches.
 
 - Because NACLs are stateless each communication needs 1 REQUEST rule and 1 RESPONSE rule.
   - These rule-pairs (app port & ephemeral ports) are needed on each NACL for each communication type which occurs
@@ -2502,7 +2502,7 @@ S3 Glacier Deep Archieve
 
 - A VPC is created with a Default NACL
 - INBOUND and OUTBOUND rules have the implicit catch all  deny(\*) and rule that allow ALL traffic. <- reduce admin overhead.
-  - amazon perfer security group over NACLs.
+  - amazon prefer security group over NACLs.
 # Custom NACLs
 
 - can be created for a specific VPC and are initially associated with NO subnets.
@@ -2531,15 +2531,15 @@ S3 Glacier Deep Archieve
 - STATEFUL
   - detect response traffic automatically.
   - u don't need to allow ephemeral ports.
-- Allowed (IN or OUT) request = allowed respone.
+- Allowed (IN or OUT) request = allowed response.
 - LIMITATION:
   - <b>NO EXPLICIT DENY</b> .. Only ALLOW or implicit DENY.
     - cannot block specific bad actors.
       - so if u need to deny a specific ip in allowed range u need to use NACLs in conjunction with SGs.
-    - Supports IP/CIDR ... and logical resources. SG is L7 so it can reference logical resources and even itself within rule.
+    - Supports IP/CIDR ... and logical resources. SG is L7, so it can reference logical resources and even itself within rule.
 - including other security groups AND ITESELF.
   - not attached to instances or subnet.
-  - Attached to ENI's[Elastic netowrk interface] not instacnes (even if UI shows it this way).
+  - Attached to ENI's[Elastic network interface] not instances (even if UI shows it this way).
 - (SG) Logical Reference:
   - we have WEB[instances] and APP[instances].
   - we allow all inbound traffic in SG of WEB.
@@ -2664,13 +2664,13 @@ S3 Glacier Deep Archieve
 
 # FSx for Windows File Server
 
-- fully managed native windows file servers/shares
+- fully managed native Windows file servers/shares
   - file shares as a unit of consumption
-- Designed for integration with windows environments.
+- Designed for integration with Windows environments.
 - Integrate with Directory services or Self-managed AD
-  - running inside AWS or on-permises
+  - running inside AWS or on-premises
 - Single or Multi-AZ within a VPC
-- On-Deman and Scheduled Backups.
+- On-Demand and Scheduled Backups.
 - Accessible using VPC, Peering, VPN, Direct Connect.
 
 ---
@@ -2700,8 +2700,8 @@ S3 Glacier Deep Archieve
 
     - Hardware assisted V:
 
-      - hardware aware Virtualization, cpu provide a special intructions for Hypervisor to manage VM.
-      - need to manage access to the devices, not effiecient in case of I/O intensive workload. unless u have physical nic for each VM u'll get some level of delay.
+      - hardware aware Virtualization, cpu provide a special instructions for Hypervisor to manage VM.
+      - need to manage access to the devices, not efficient in case of I/O intensive workload. unless u have physical nic for each VM u'll get some level of delay.
 
       - <b>SR-IOV(single room IO virtualization) virtualization</b> aware on the devices level [Network interfaces..], now, even in intensive I/O the VM will perform well. 
         - EC2 enhanced networking.
@@ -2967,8 +2967,6 @@ S3 Glacier Deep Archieve
       - Corrupted file system
       - Incorrect networking or startup configuration
       - OS kernel Issues
-
----
 
 ---
 
@@ -3373,7 +3371,7 @@ S3 Glacier Deep Archieve
       - to avoid cost of FSR but with additional admin overhead u can force the restoring by using <br>dd{is a versatile command-line utility that can be used to read and write data at the block level} <br> `dd if=<input_file> of=/dev/null bs=<block_size>` <br> by reading each block so it will be restored immediately.
     - ![ebs-snapshot-exam](images/ebs/ebs-snapshot-consumption-billing.png)
 
-<hr>
+---
 
 # EBS Provisioned IOPS SSD(io1/2)
 
@@ -3573,7 +3571,7 @@ S3 Glacier Deep Archieve
     - cannot allocate or unallocate ranges.
 - Later .. Fn::ImportValue, FnLLFindInMap, Fn::Transform
 
-<hr>
+---
 
 - Mappings:
   - template can contain a Mapping object.  
@@ -3816,7 +3814,7 @@ S3 Glacier Deep Archieve
     - ![dns-why--not-single-server.png](./images/sysops/dns-why--not-single-server.png)
     - even if we replicate it, it's still a huge data volume. we need a Hierarchical Design.
 - a discovery service.
-- a huage distributed DB.
+- a huge distributed DB.
 - DNS Client = > ur laptop, phone, tablet, pc.
 - Resolver: swf on ur device or a server which queries DNS on ur behalf.
 - DNS zone(\*.netflix . com) => A part of DNS DB, Point at TLD authoritative servers where is
@@ -3847,7 +3845,7 @@ S3 Glacier Deep Archieve
   ***
   Client
   <br>--> resolver -using root hint files
-  <br>--> Dns root servers root servers send the address of the server manage the top level root u search for (.com)
+  <br>--> Dns root servers send the address of the server manage the top level root u search for (.com)
   <br>--> then u ask for (amazon) . the authoritative server for amazon.com
   <br>--> resolver query amazon.com for www and send the result to the client
   <br>--> client go to www.amazon.com
@@ -3867,7 +3865,7 @@ S3 Glacier Deep Archieve
     - 2- domain Registrar: the company which is registering the domain on behalf of the registrant.
         - let you buy a domain for that it have a relationship with multiple TLD registries. .com .org .net
         - we have here two options:
-            - 1- company whcih work as registrar and dns hosting provider.
+            - 1- company which work as registrar and dns hosting provider.
             - 2- company which work as registrar only and u can choose any dns hosting provider.
         - dns hosting provider : operate dns name servers.
     - 3- TLD Registry: the company which manages the TLD.
@@ -3925,9 +3923,9 @@ S3 Glacier Deep Archieve
       => mx record has a priority{smaller is highest} and value
     - value :
 
-        - it can be just a host, if it just a host no dot on right, it assume to be part of the same zone.
+        - it can be just a host, if it just a host no dot on right, it assumes to be part of the same zone.
             - ex: if value in google.com zone is mail, then it is mail.google.com
-        - if it contain a dot on the right, it is a fully qualified domain name.
+        - if it contains a dot on the right, it is a fully qualified domain name.
 
             - ex: if value in google.com zone is mail.other.domain.
 
@@ -5033,12 +5031,12 @@ S3 Glacier Deep Archieve
 
 - provide managed application environment by handling the environment and letting the developer focus on the code.
   - remove infrastructure overhead.
-  - developer focused - not ednd user.
-- it requires appp changes ... doesn't come for free.
+  - developer focused - not end user.
+- it requires app changes ... doesn't come for free.
 
 ## Platforms
 - Built in languages, docker & custom platforms.
-- single container docker & multicontainer docker(ecs)
+- single container docker & multi container docker(ecs)
 - preconfigured docker
   - used to support platform before EB natively support it.
 - you can support a custom platform via <b>packer</b>
@@ -5054,8 +5052,8 @@ S3 Glacier Deep Archieve
 - use docker for anything unsupported
 - always default to db provisioned and maintained outside of EB.
   - DBs in an ENV are lost if the env is deleted.
-![Alt text](image-1.png)
-## Deloyment Policies
+## Deployment Policies
+- ![deployment-policies](images/eb/eb-deployment-options.png)
 - All at Once 
   - quick, simple, and causing outage. it doesn't have a great methods for handling failures.
   - good for DEV, TEST environments
@@ -5076,14 +5074,14 @@ S3 Glacier Deep Archieve
   - Create RDS inside EB environment in Test or DEV environment only.
 
   - <b>Outside</b>
-    - we will have to mannually add rds connection env vars to the environment.
+    - we will have to manually add rds connection env vars to the environment.
     - data lifecycle is not tied to the environment lifecycle.
-  - How to decouple exisiting RDS within EB from EB Environment.
+  - How to decouple existing RDS within EB from EB Environment.
     - Create an RDS snapshot
     - 'Enable Delete Protection' on the RDS instance 
     - Create a new EB Environment within the same app
     - Ensure new environment can connect to the RDS instance
-    - Terminated the old environment - this will try and terminate the RDS instance but it will fail due to delete protection
+    - Terminated the old environment - this will try and terminate the RDS instance, but it will fail due to delete protection
     - Locate DELETE_FAILED Stack, manually delete and pick 'retain' for the RDS instance
 
 - EB Extensions:
@@ -5094,20 +5092,20 @@ S3 Glacier Deep Archieve
       - other headings: packages, source, files, users, group, commands, container_commands, and services
     - YAML or JSON format ending with .config 
 - EB and HTTPS
-  - to use https with EB u need to apply an ssl certificate to the load balancer.
-    - EB Console => Enviroment => Load Balancer configuration
+  - to use https with EB u need to apply a ssl certificate to the load balancer.
+    - EB Console => Environment => Load Balancer configuration
     - or via .ebextensions/securelistener-[alb|nlb].config
-      - `yaml
+      - ```yaml
          optionsettings:
          aws:elbv2:listener:443:
            ListenerEnabled: true
            Protocol: HTTPS
            SSLCertificateArns: arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012
-         `
+         ```
       - update security group to allow https traffic from ELB security group.
       - ![config-for-ssl](images/elastic-beanstalk/config-for-ssl.png)
   - Cloning
-    - 'unmanged changes' any change done without using EB console, or EB CLI, or EB API will not be cloned.
+    - 'unmanaged changes' any change done without using EB console, or EB CLI, or EB API will not be cloned.
       - ![EB-clone](images/elastic-beanstalk/EB-clone.png)
 
 - EB Docker
@@ -5131,7 +5129,7 @@ S3 Glacier Deep Archieve
   - IG (IPv6) allows all IPs IN and OUT
   - NAT is not supported for IPv6
 ## VPC Endpoints (Gateway). VPC object
-  - Interface Endpoint both nearly used in the same way providing the same functionality but they are used for different services and the way the achieve the functionality from technical point is different
+  - Interface Endpoint both nearly used in the same way providing the same functionality, but they are used for different services and the way the achieve the functionality from technical point is different
   - Provide private access to s3 and DynamoDB
     - allow private resources in VPC to access s3 and dynamodb without going over the internet.
     - you create a gateway endpoint and this is created per service per region . ex(s3, us-east-1) and then associate it with one or more subnets in a particular vpc.
@@ -5144,7 +5142,7 @@ S3 Glacier Deep Archieve
   - it can only access services in the same region  .
   - <b>use case</b> : Prevent Leaky Buckets - S3 buckets can be set to private only by allowing access  only from a gateway endpoint.
     - you can configure bucket policy to configure only connection from a specific gateway endpoint. 
-  - remember it's a VPC object so it can be accessed only from within the VPC.
+  - remember it's a VPC object, so it can be accessed only from within the VPC.
 - ## VPC Endpoints 
   - Provide access to aws public access
   - historically it's used to private access to anything not s3 and DDB. but now s3 is now supported by interface endpoint.
@@ -5192,14 +5190,14 @@ S3 Glacier Deep Archieve
 - BGP operates over tcp/179 - it's reliable and connection oriented.
 - it's not automatically configured. u need to configure peering between two AS manually.
   - 
-- BGP is a path-vector protocol it exchange the best path to a destination between peers ... the path is called the ASPATH.
+- BGP is a path-vector protocol it exchanges the best path to a destination between peers ... the path is called the ASPATH.
   - it doesn't exchange every possible path to a destination. only the best path.  
-  - it doesn't take into account the link speed or condition. it only take into account the number of hops.
+  - it doesn't take into account the link speed or condition. it only takes into account the number of hops.
 
 - iBGP = Internal BGP - Routing within an AS
 - eBGP = External BGP - Routing between AS
 - ![bgp](images/vpc/bgp.png)
-  - in case you want to prioritize longer path over shorter path you can prepand your AS number to the path. to make the shorter path longer.
+  - in case you want to prioritize longer path over shorter path you can prepend your AS number to the path. to make the shorter path longer.
   - BGP only advertise the best path to a destination. so the change will be propagated to other AS.
 
 ### Site-to-Site VPN
@@ -5238,7 +5236,7 @@ S3 Glacier Deep Archieve
   - two type of vpn(policy based vpn & route based vpn)
     - The difference is how they match interesting traffic.
     - policy-based VPNs
-      - rule sets match traffice => a pair of SAs
+      - rule sets match traffics => a pair of SAs
         - different rules/ different security settings.
     - Route Based VPNs
 
@@ -5246,12 +5244,12 @@ S3 Glacier Deep Archieve
 - AWS Global Accelerator
   - it's design to optimize the flow of data from your users to aws infrastructure.
   - unicast ip : one ip address is assigned to one interface.
-  - anycast ip : one ip address is assigned to multiple interfaces.
-    - routing moves traffic to closest location.
-  - aws global accelerator start with 2 X anycast ip address.
+  - any cast ip : one ip address is assigned to multiple interfaces.
+    - routing moves traffic to the closest location.
+  - aws global accelerator start with 2 X any cast ip address.
   - Traffic initially uses public internet & enters a Global Accelerator edge location. 
   - cloudfront move the content closer to the user by caching it in edge location.
-  - global accelerator move the aws network closer to the user as closer as possible.
+  - global accelerator move the aws network closer to the user as close as possible.
   - Transit over AWS backbone to 1+ locations.
   - it's a network layer can work on any (TCP/UDP) application including web apps, cloudfront only work with http/https.
 
@@ -5277,8 +5275,8 @@ S3 Glacier Deep Archieve
     - ![transit-gateway](images/vpc/hybrid-network-architechture-without-transit-gateway.png)
   - hybrid network architecture with Transit Gateway.
     - ![transit-gateway](images/vpc/hybrid-network-architechture-with-transit-gateway.png)
-    - it come with default route table which allow all traffic between attachments. you can create complex routing topology by using multiple route tables.
-  - it support transitive routing.
+    - it comes with default route table which allow all traffic between attachments. you can create complex routing topology by using multiple route tables.
+  - it supports transitive routing.
   - it can be used to create global network
   - you can share it between accounts using AWS RAM(resource access manager: it's a service allow you to share resources between accounts)
   - Peer with different regions .. same or cross account.
@@ -5291,23 +5289,23 @@ S3 Glacier Deep Archieve
 udacity temp :
 
 Resources:
-NatGateway1EIP:
-Type: AWS::EC2::EIP
-DependsOn: InternetGatewayAttachment
-Properties:
-Domain: vpc
-NatGateway1:
-Type: AWS::EC2::NatGateway
-Properties:
-AllocationId: !GetAtt NatGateway1EIP.AllocationId
-SubnetId: !Ref PublicSubnet1
+    NatGateway1EIP:
+        Type: AWS::EC2::EIP
+        DependsOn: InternetGatewayAttachment
+        Properties:
+        Domain: vpc
+    NatGateway1:
+        Type: AWS::EC2::NatGateway
+        Properties:
+        AllocationId: !GetAtt NatGateway1EIP.AllocationId
+        SubnetId: !Ref PublicSubnet1
 
 ---
 
 Type: AWS::EC2::SubnetRouteTableAssociation
 Properties:
-RouteTableId: String
-SubnetId: String
+    RouteTableId: String
+    SubnetId: String
 
 ---
 
@@ -5334,7 +5332,7 @@ make bucket
 
 with S3 select, you can just submit a sequel query and S3 will only return
 the relevant data. This is both cheaper and faster than downloading the entire
-object, when you may only need a subset. All of the processing is on the S3 side,
+object, when you may only need a subset. All the processing is on the S3 side,
 not on the application side. So you don't have to code for that filtering through
 an entire object
 
@@ -5650,50 +5648,9 @@ and configure additional rules that apply sampling based on properties of the se
 - CodeStorageExceededException -> you have exceeded your maximum total code size per account
 - ResourceConflictException -> the resource already exists
 - ServiceException -> AWS Lambda service encountered an internal error
----
-- linux
-- a Console is the tool we use to view a shell, the shell is cmd line interpreter.
-- rhel use gnome window manager
-- sometimes when u ssh to a server arrows keys don't work.
-  - use ctrl+n next command, use ctrl+p previous command
-  - ctrl+a beginnig of the line, ctrl+e end of the line.
-
-- Kafka Connect
-  - source connector
-    - read data from external data source write it into kafka
-  - sink
-    - read data from kafka store it in datastore
-- Kafka Stream
-  - read data from kafka;(Data Enrichment) do transformation, joining...
-- Kafka stream vs kafka consumer
-  - kafka stream can build a stateful app which can lead to multiple uses cases: 
-    - calculating the total #orders in realtime
-    - calculating a total revenue made in realtime..
-- kafka stream api imlementation
-  - Stream DSL 
-    - high level api (functional)
-  - Processor API
-    - low level, complex compared to DSL
-    - Stream DSL is built on top pf Processor API
-- Topology & Processors
-  - kafka stream processing application has a series of processors.
-    - [Source Processor] -> [Stream Processor] -> [Sink Processor] (Directed acyclic graph)
-    - Stream Processor can split to multiple sub-topolgy and become source processor for them.
-  - Data Flow in kafka Stream Processing 
-    - record is passed in the topolgy one by one
-      - at any given point of time only one record gets processed in the topology. the rule is applicable to each sub one .
-- Kstream API 
-  - gives u access to all records in the Kafka topic
-  - treat each record independent of one another
-  - each event will be executed by the whole topology.
-  - KStream can be called as record stream or log.
-  - analogy: Insert Into DB table.
-- 
----
-- 14-03-2024
-
 
 ---
+
 - Storage Gateway
   - Volume 
   - Tape Mode (VTL)
@@ -5709,7 +5666,7 @@ and configure additional rules that apply sampling based on properties of the se
   - File Mode
     - ![img_16.png](img_16.png)
     - ![img_17.png](img_17.png)
-      - SMP with windows server, NFS for linux
+      - SMP with Windows server, NFS for linux
     - replication:![img_18.png](img_18.png)
     - lifecycle: ![img_19.png](img_19.png)
 ---
