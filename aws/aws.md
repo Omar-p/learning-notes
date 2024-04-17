@@ -677,7 +677,7 @@ Elastic Compute Cloud (EC2)[IAAS]:
 - Instance Lifecycle [States]:  
    Running - Stopped[cost storage] - Terminated - Stopping(you'll charge for ebs storage) - Pending - shutting down
   Terminating an instance[terminated] : is a non-reversible action.
-- AMI Amazon machine Image \*\*
+- AMI Amazon machine Image \*\* (start, customize, stop, build)
   - Permissions: control which accounts can/cannot use the ami
     - public
       - everyone allowed [linux/win] 
@@ -698,7 +698,7 @@ Elastic Compute Cloud (EC2)[IAAS]:
   - for win instances using private key to gaining access to the local admin pass of the instance and u connect to it using rdp using local admin user and its password.
 - ssh client will prevent u from connecting to an instance if the key is too open.
   - u need to change the permissions on the key file to 400.
-
+    
   - Create AMI
     - ![reboot-vs-no-reboot-option](reboot-vs-no-reboot-option.png)
     - aws backup plan, its default is no-reboot
@@ -2886,6 +2886,8 @@ S3 Glacier Deep Archive
 - Spot
   - u bid for the instance capacity. if the price is higher than ur bid, the instance will be terminated.
   - ![ec2-spot](images/ec2/ec2-spot.png)
+  - ![img_117.png](img_117.png)
+  - ![img_118.png](img_118.png)
 - Reserved
   - particular type and locked to an AZ specifically or a region.
   - ![ec2-reserved-option](images/ec2/ec2-reserved-option.png)
@@ -2894,16 +2896,19 @@ S3 Glacier Deep Archive
   - reason to use :
     - u may have a swf which is licensing based on Sockets/Cores.
   - ![ec2-reserved-option](images/ec2/ec2-dedicated-option.png)
+  - ![img_114.png](img_114.png)
 - Dedicated Instances
   - you don't own or share the host. Extra charges for instances, but dedicated hardware.
   - ![img_8.png](img_8.png)
+  - ![img_115.png](img_115.png)
 ---
 
 - Reserved Instance
   - Scheduled Reserved Instances(previously we discussed the standard reversed)
-    - if u don't need full time period.
+    - if u don't need the full time period.
     - specific time in day/week/month.
     - ![scheduled-reserved-instances](images/ec2/scheduled-reserved-instances.png)
+    - ![img_113.png](img_113.png)
 - Capacity Reservations (AWS priority in case of capacity issues)
   - 1- reserved
   - 2- on-demand
@@ -2911,7 +2916,7 @@ S3 Glacier Deep Archive
   - if you use capacity reservation for something consistent you should look at a certain point to reserved instances.(more economical)
   - situation when u need to reserve capacity but u cannot satisfy long-term commitment as in reserved instances.
   - ![capacity-reservations](images/ec2/capacity-reservations.png)
-  - 
+  - ![img_116.png](img_116.png)
 
 ##### Savings Plans
 
@@ -2919,7 +2924,11 @@ S3 Glacier Deep Archive
 
 - ![img_78.png](img_78.png)
 - 
-<hr>
+---
+
+- Hibernate: If supported by the OS, the instance can save its RAM contents to the EBS root volume.
+    - ![img_124.png](img_124.png)
+    - ![img_123.png](img_123.png)
 
 ## System and Application Logging on EC2
 
@@ -2929,8 +2938,13 @@ S3 Glacier Deep Archive
 - one log group for each log file we want to inject into CW.
   - one log group for each metric and one log stream for each instance.
 - u can use cfn to configure the agent.
-<hr>
+---
 
+# Burstable Instance:
+- ![img_119.png](img_119.png)
+- ![img_120.png](img_120.png)
+- ![img_121.png](img_121.png)
+- ![img_122.png](img_122.png)
 
 # issues when launching an EC2 instance
 - ![img_111.png](img_111.png)
@@ -3151,12 +3165,14 @@ S3 Glacier Deep Archive
 - used with ELB, LT to deliver elastic architecture
 - automatic scaling & self-healing {as part of that scaling or in isolation} for EC2.
 - Use configs defined in LT or LC to know what to provision.
+  - ![img_125.png](img_125.png)
 - Has a [MINIMUM], [DESIRED] and [MAXIMUM] size e.g 1:2:4.
 - one foundational job: Keep running instances at the DESIRED capacity by provisioning or terminating instances.
   - Desired capacity is always has to be more than minimum capacity and less than maximum capacity.
 - ASG : define where the instances are launched. they are linked to a VPC and subnet within that VPC are configured on ASG.
 - there are tempt to keep #instances in each AZ even.
 - SCALING POLICIES automate based on metrics.
+  - ![img_126.png](img_126.png)
 - Scaling Policies:
 - MANUAL scaling
   - based on minimum, desired, maximum capacity.
@@ -5359,7 +5375,7 @@ S3 Glacier Deep Archive
   - significantly reduce the number of connections required to connect many VPCs and on-premises networks.
   - single network object - HA and scalable.
   - <b> Attachments </b> - VPCs, VPN, Direct Connect, Peering.
-    - how TGW connect to other network objects within aws and hybrid network.
+     - how TGW connect to other network objects within aws and hybrid network.
   - hybrid network architecture without transit gateway
     - ![transit-gateway](images/vpc/hybrid-network-architechture-without-transit-gateway.png)
   - hybrid network architecture with Transit Gateway.
@@ -5622,8 +5638,6 @@ Elastic File System (EFS) impl of (NFSv4 )
 
 depending on the operating system that is running on your EC2 instance, you may have to use another username.
 For example, the username for Amazon Linux instances is ec2-user while the username for Ubuntu instances is ubuntu.
-
-Hibernate: If supported by the OS, the instance can save its RAM contents to the EBS root volume.
 
 --AuthN & AuthZ--------------
 For the REST API type, the mechanisms for API Gateway to do authentication and authorization,
