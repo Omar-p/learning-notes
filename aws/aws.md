@@ -673,17 +673,18 @@ Elastic Compute Cloud (EC2)[IAAS]:
 - On-Demand Biling - Per second.
   - charge for running the instance, cpu memory
   - charge for storage and then extras for any commercial software.
-- Storage type: Local on-host storage or ELastic BLock Store(EBS) ->   network storage made available for the instance.
+- Storage type: Local on-host storage or ELasting BLock Store(EBS) ->   network storage made available for the instance.
 - Instance Lifecycle [States]:  
-   Running - Stopped[cost storage] - Terminated - Stopping(u'll charge for ebs storage) - Pendding - shutting down
+   Running - Stopped[cost storage] - Terminated - Stopping(you'll charge for ebs storage) - Pending - shutting down
   Terminating an instance[terminated] : is a non-reversible action.
-- AMI Amzon machine Image \*\*
+- AMI Amazon machine Image \*\*
   - Permissions: control which accounts can/cannot use the ami
     - public
       - everyone allowed [linux/win] 
     - Owner Implicit allow
     - Explicit
       - specific AWS accounts allowed
+  - AMI reference the snapshot of the ebs volume that the instance was created from.
   - Root Volume: can contain other volume but at least one<b>(boot volume)</b> 
     - <b>Block Device Mapping:</b>
       - configuration which links the volumes that the AMI has and how they're presented  to the OS. it determines which volume is the boot volume and which is data volume.
@@ -691,8 +692,9 @@ Elastic Compute Cloud (EC2)[IAAS]:
     - Connecting to EC2 :
       - connect to win instances using RDP remote desktop protocol. 3389 port. 
       - to linux instance using ssh port 22.
+  
   - ssh key pairs: u download the private once and keep it safe.
-  - public part aws place it on the instanc. u use the private part for authentication.
+  - public part aws place it on the instance. u use the private part for authentication.
   - for win instances using private key to gaining access to the local admin pass of the instance and u connect to it using rdp using local admin user and its password.
 - ssh client will prevent u from connecting to an instance if the key is too open.
   - u need to change the permissions on the key file to 400.
@@ -1552,13 +1554,19 @@ some field can be ignored bec
 # AWS MACIE
 - ![img_75.png](img_75.png)
 ---
-
-# AWS WAF (Web Application Firewall)
+# (L7 firewall)
+- Normal Firewall (L 3/4/5) [cannot see app data just bytes]
+  -  ![img_93.png](img_93.png)
+- L7 firewall terminate the connection and inspect the data, and create new connection to the destination.
+  - prevent specific app, ex: fb, dropbox..
+  - ![img_94.png](img_94.png)
+---
+# AWS WAF (Web Application Firewall) 
 - Deploy On:
   - ALB, API GW, CloudFront, AppSync, Cognito User Pool.
 - actual configuration unit in waf is called <b>web acl</b>.
   - can be associated with multiple services.
-  - within it we have rules within rules groups.
+  - within it, we have rules within rules groups.
   - A rule group is a reusable set of rules that you can add to a web ACL.
   - web acl are regional  except for cloudfront.
   - u can update the rules manually or by using event that trigger lambda by creating a feedback loop by analysing waf log and trigger lambda to update the rules.
@@ -1592,9 +1600,10 @@ some field can be ignored bec
   - Standard: free, always on, protect against most common attacks.
   - Advanced: paid, additional protection against more sophisticated attacks.
 - Protect Against
-  - Network Volumetric Attack (L3) - Saturate Capacity (overwhelm the system)
+  - Network Volumetric Attack (L3) - Saturate Capacity (overwhelm the system) (direct too much traffic to the system)
   - Network Protocol Attacks (L4) - TCP Syn Flood
     - generate huge #of TCP connection requests, but never complete them. leave them open.
+  - L4 can have volumetric attack as well.
   - Application Layer Attacks (L7) - HTTP Flood
     - generate huge #of HTTP requests, Web Request Flood.
     - ex : query.php?search=all_the_cat_image_ever
@@ -1604,7 +1613,7 @@ some field can be ignored bec
 - Free for AWS customers.
   - protection at the perimeter of your network. (region/VPC or the AWS Edge)
 - protect against common Network (L3) or Transport (L4) layer attacks.
-- you will get best protect if you are using R53, CloudFront, AWS Global Accelerator.
+- you will get the best protection if you are using R53, CloudFront, AWS Global Accelerator.
 
 ### Advanced
 
@@ -1613,11 +1622,11 @@ some field can be ignored bec
 - Cost protection (i.e EC2 scaling) for unmitigated attacks that should have been mitigated.
   - ex: EC2 scaling event caused by excessive load.
 - Proactive Engagement & AWS Shield Response Team(SRT)
-  - SRT will contact you directly when availability or performance of your application is impacted by possible attack. which provide quickest level of response SRT start troubleshooting before contacting you.
+  - SRT will contact you directly when availability or performance of your application is impacted by possible attack. which provide the quickest level of response SRT start troubleshooting before contacting you.
 - WAF Integration - includes basic AWS WAF fees for Web ACL, rules, and web requests
-  - implement protect aganist L7 Attacks
+  - implement protect against L7 Attacks
 - provide Realtime metrics , reports of DDOS events and attacks.
-- Health-based detection (required to be able to use PET )- application specific health check, used by practive engagement team to detect attacks.
+- Health-based detection(use R53 health check) (required to be able to use PET )- application specific health check, used by proactive engagement team to detect attacks.
   - help you to reduce any false positive detected by AWS Shield.
 - Protection groups :
   - allow u to group resources together and apply the same protection to them.
@@ -2018,15 +2027,15 @@ same as [flexible] but:
     u don't have to worry about moving data between tiers, AWS
     handle that according to how many the object accessed.
 
-  - cost: Intelligent Tiering has a monitoring and automation cost per {1000
+  - cost: Intelligent Tiring has a monitoring and automation cost per {1000
     objects}. the frequent access tier costs the same as S3 standard, the
-    infrequent the same as Standard-IA. Archieve Instant, Archieve and Deep
-    Archieve are comparable to their S3 glacier equivlents.
+    infrequent the same as Standard-IA. Archive Instant, Archive and Deep
+    Archive are comparable to their S3 glacier equivalents.
 
   - As objects are accessed, they are moved back to the frequent access tier.
     there are no retrieval fees for accessing objects.
 
-  - S3 Intelligent-Tiering should be used for long-lived data, with
+  - S3 Intelligent-Tiring should be used for long-lived data, with
     changing or unknown patterns.
   - <img src="./images/s3-intelligent-tiering.png" width="850" height="500">
 
@@ -2045,11 +2054,11 @@ same as [flexible] but:
 
 S3 Standard
 S3 Standard-IA
-S3 Intelligent-Tiering
+S3 Intelligent-Tiring
 S3 one AZ
 S3 Glacier - Instant retrieval
 S3 Glacier - Flexible Retrieval
-S3 Glacier Deep Archieve
+S3 Glacier Deep Archive
 
 - lifecycle rules can move object downward not upward.
 - all can move data down to any lower class, but S3 one AZ-IA
@@ -2662,6 +2671,26 @@ S3 Glacier Deep Archieve
 
 ---
 
+# AWS Directory Service
+- ![img_81.png](img_81.png)
+  - support mulitple AZ deployment, monitoring, and patching
+  - organization can administrate users (setting password policies, AD trust, Scaling out)
+  - Directories Options:
+    - AWS Managed Microsoft AD
+      - ![img_82.png](img_82.png)
+      - ![img_83.png](img_83.png)
+        - enterprise for more than 5000 user, and provide more usable storage capacity.
+    - AD Connector
+      - redirect director request to your existing on-premises AD, without storing any data in the cloud.
+      - require VPN or DX
+      - it doesn't support AD Transitive Trust
+      - not multi-VPC aware
+    - Simple AD
+      - standalone managed directory powered by samba 4 AD Compatible Server
+      - ![img_84.png](img_84.png)
+    - when to use which:
+      - ![img_85.png](img_85.png)
+---
 # FSx for Windows File Server
 
 - fully managed native Windows file servers/shares
@@ -2672,6 +2701,22 @@ S3 Glacier Deep Archieve
 - Single or Multi-AZ within a VPC
 - On-Demand and Scheduled Backups.
 - Accessible using VPC, Peering, VPN, Direct Connect.
+- files can be accessed by any service support windows based storage. (workspaces)
+- ![img_86.png](img_86.png)
+- ![img_87.png](img_87.png)
+  - VSS: windows feature allow user to perform file and folder level restore.
+
+---
+# FSx for Lustre
+- ![img_88.png](img_88.png)
+- POSIX-compliant file system optimized for compute-intensive workloads.
+- maintain file metadata 
+- no any built-in sync between the fsx for lustre and s3.
+- ![img_89.png](img_89.png)
+- ![img_90.png](img_90.png)
+- One AZ, access via ENI
+- ![img_91.png](img_91.png)
+- ![img_92.png](img_92.png)
 
 ---
 
@@ -2706,6 +2751,7 @@ S3 Glacier Deep Archieve
       - <b>SR-IOV(single room IO virtualization) virtualization</b> aware on the devices level [Network interfaces..], now, even in intensive I/O the VM will perform well. 
         - EC2 enhanced networking.
           - provide consistence lower latency even at high load
+          - ![img_108.png](img_108.png)
           
 
 ---
@@ -2865,11 +2911,14 @@ S3 Glacier Deep Archieve
   - if you use capacity reservation for something consistent you should look at a certain point to reserved instances.(more economical)
   - situation when u need to reserve capacity but u cannot satisfy long-term commitment as in reserved instances.
   - ![capacity-reservations](images/ec2/capacity-reservations.png)
+  - 
 
 ##### Savings Plans
 
 - ![savings-plan](images/ec2/savings-plan.png)
 
+- ![img_78.png](img_78.png)
+- 
 <hr>
 
 ## System and Application Logging on EC2
@@ -2881,6 +2930,17 @@ S3 Glacier Deep Archieve
   - one log group for each metric and one log stream for each instance.
 - u can use cfn to configure the agent.
 <hr>
+
+
+# issues when launching an EC2 instance
+- ![img_111.png](img_111.png)
+- ![img_110.png](img_110.png)
+- ![img_109.png](img_109.png)
+# EC2 ssh troubleshooting
+- ![img_112.png](img_112.png)
+- Instance connectm you should allow inbound traffic for predefined range for each region on port 22.
+
+---
 
 ## EC2 Placement Groups
 
@@ -2908,7 +2968,7 @@ S3 Glacier Deep Archieve
   - ![ec2-spread-placement-group](images/ec2/spread-placement-group-exam.png)
   - all handled for u by aws.
 - Partition:
-  - for distributed and replicated workloads which have infrastructure awarness.
+  - for distributed and replicated workloads which have infrastructure awareness.
   - when have more than 7 instances per AZs but u want to keep them separated across AZs.
   - 7 partitions per AZ.
   - huge scale parallel processing system.
@@ -2967,6 +3027,8 @@ S3 Glacier Deep Archieve
       - Corrupted file system
       - Incorrect networking or startup configuration
       - OS kernel Issues
+  - Auto recovery: (work only for EBS backed instances)
+    - move the instances to a new host, start with the same configs
 
 ---
 
@@ -2998,7 +3060,7 @@ S3 Glacier Deep Archieve
 - ALB - v2 -HTTP/s and Websocket
 - NLP L4 - v2 - TCP, TLS & UDP
 - V2 = faster, cheaper, support target group and rules.
-  - you can load balance between multiple things or handle different based on your customer
+  - which allow you to use load balance for multiple things or handle load balancing different based on which customer are using it.
 
 ---
 
@@ -3010,10 +3072,10 @@ S3 Glacier Deep Archieve
 - configurations:
   - ip
     - v4 only
-    - dualstack
+    - dualstack (ipv4&v6)
   - pick AZs which the LB will use
     - specifically u pick subnets within those AZs.
-      - LB put a node in each subnet.
+      - LB put a node or more in each subnet, from each AZ select only one subnet.
     - ![elb-architecture](images/elb/elb-architecture.png)
   - internet facing or internal
     - internal LB can only be accessed from within the VPC.
@@ -3022,7 +3084,8 @@ S3 Glacier Deep Archieve
 - ![elb-decouple-app-tiers](images/elb/elb-decouple-app-tiers.png)
   - without LB each instance need to be aware of the other instances.
   - u cannot scale up/down without impacting the user./ changing config/code in other instances.
-- CROSS-ZONE LB
+  - using LB you can scale ecah app tier in/out separately.
+- CROSS-ZONE LB(not enabled by default)
   - originally the LB is restricted on how to distribute traffic they have received.
     - each node will distribute traffic to the instances in the same AZ.
   - it's a feature allow LB node to distribute traffic to instances in other AZs.
@@ -3063,7 +3126,7 @@ S3 Glacier Deep Archieve
 - grace period : time to wait before the health check start. [choose based on the time it takes to configure the machine and to start the app]
 - ![asg-health-checks](images/elb/asg-health-checks.png)
 
-# Launch Configurations[LC] & Launch Templates[LT] Recommanded.:
+# Launch Configurations[LC] & Launch Templates[LT] Recommended.:
 
 - AutoScaling group utilize them .
 - perform the same task
@@ -3072,13 +3135,12 @@ S3 Glacier Deep Archieve
   - Networking configuration and SG the instances use.
   - Userdata & IAM ROLE
 - Both are not editable
-
-  - defined once. LT has versions.
+  - defined once and locked. LT has versions.
   - LT provide newer features
   - including T2/T3 Unlimited cpu options, Placement Groups, Capacity Reservations, lastice Graphics.
 
 - LC has one use as part of autoscaling groups. LC provide configurations of ec2 instances.
-- LT can do the same and can use the same configs to launch ec2 instacnes from cli/console.
+- LT can do the same and can use the same configs to launch ec2 instances directly from cli/console.
   - LT can be used to save time when Provisioning ec2 instances from cli/UI
   - ![LC-LT](images/ec2/LT-LC.png)
 
@@ -3123,7 +3185,7 @@ S3 Glacier Deep Archieve
     - ![img_66.png](img_66.png)
 - Cooldown Period in seconds.. how long to wait for scaling action before doing the next one.. remember there is a minimum billable time for each instance.
   - ![img_65.png](img_65.png)
-- use ec2 status health check -> self healing.
+- use ec2 status health check -> self-healing.
 
 #### Trick [ec2 ASG]
 
@@ -3175,10 +3237,10 @@ S3 Glacier Deep Archieve
 
 - a script or other configurations run when the instance is launched.
 
-- bootstraping is a process exist outside EC2, general term -> allowing system to self configure or perform self configuration steps.
-- EC2 Bootstraping
+- bootstrapping is a process exist outside EC2, general term -> allowing system to self configure or perform self configuration steps.
+- EC2 Bootstrapping
   - ![ec2-bootstrapping](images/ec2/ec2-bootstrapping.png)
-  - Bootstraping allows ec2 build automation.
+  - Bootstrapping allows ec2 build automation.
   - User data - Accessed via the meta-data IP.
   - http://169.254.169.254/latest/user-data
   - anything in USer Data executed by the instance OS.
@@ -3195,14 +3257,14 @@ S3 Glacier Deep Archieve
 - Boot-Time-To-Service-Time (the time required to launch an instance and make it available for use )
   - ![boot-time-to-service-time](images/ec2/boot-time-to-service-time.png)
   - how long it takes from allocating the instance, and setup configurations.
-  - u can bake the bootstraping with AMI to reduce post launch time.
+  - u can bake the bootstrapping with AMI to reduce post launch time.
     - after aws provision the instance it will be able to be used immediately.
       - /var/log/cloud-init.log /var/log/cloud-init-output.log
       - log for execution of user-data.
 
 ## EC2 Instance Roles
 
-- IAM ROLE allows EC2 Service to assume it. but we need to make the app inside the instacne<br> to assume that ROLE as well.
+- IAM ROLE allows EC2 Service to assume it. but we need to make the app inside the instance to assume that ROLE as well.
 - InstanceProfile : wrapper around IAM ROLE, allow permissions to get inside the instance.
 - when u create an instance role in the console an instanceProfile will be created with the <br> same name. but if u create it using cfn/cli u need to create them separately.
 - inside ec2, Temp Credentials delivered instance via meta-data.
@@ -3396,7 +3458,7 @@ S3 Glacier Deep Archieve
 - ![img_43.png](img_43.png)
 # instance store
 
-- Block storage Devices : volume attached to the instance presented to OS and used as basis for file system which can be used by the applciations.
+- Block storage Devices : volume attached to the instance presented to OS and used as basis for file system which can be used by the applications.
 - each ec2 host has its own instance store .
 - highest storage performance because it's directly attached to the host.
 - included in instance price..
@@ -3961,6 +4023,11 @@ S3 Glacier Deep Archieve
     - NS record:
       - the top level domain  is going to find the NS record for us , not giving us the  IP address that we're looking for, but it is going to tell us who is authoritative for ilovecloudDotCom 
       - ![img_53.png](img_53.png)
+
+- You can integrate R53 Resolver with another DNS resolver on any network
+  that is reachable from your VPC, e.g. another peered VPC or an on-premises network.
+  - for dns queries to other domain names outside your VPC, Resolver performs recursive 
+     lookups against public name servers, to resolve external domain names.
 ### public hosted zone
 
 - a dns database(zone file) hosted by R53(Public Name Servers).
@@ -3985,7 +4052,7 @@ S3 Glacier Deep Archieve
 
 ## R53 CNAME vs ALIAS
 
-- CNAME record cannot mapped naked/apex domain.
+- CNAME record cannot be mapped for naked/apex domain. `google . com` it nest be `www. google. com`
 - ![r53-cname-limitation](images/r53-cloudfront/r53-cname-limitation.png)
 - Alias Record map a name to AWS resource.
   - can be used both for naked/apex domain and normal domain.
@@ -4034,12 +4101,12 @@ S3 Glacier Deep Archieve
 
 ### Geolocation Routing
 
-- if no match or no default, it return a no answer.
+- if no match or no default, it returns a no answer.
 - ![r53-geolocation-routing](images/r53-cloudfront/r53-geolocation-routing.png)
 
 ### Weighted Routing
-
-- it can be used when u're looking for simple form load balancing or when u want tot est new software version.
+- (0-255)
+- it can be used when you're looking for simple form load balancing or when u want tot est new software version.
 - ![r53-weighted-routing](images/r53-cloudfront/r53-weighted-routing.png)
 
 ### Geoproximity Routing
@@ -4047,6 +4114,8 @@ S3 Glacier Deep Archieve
 - provide record as close as possible to the user.
 - by distance vs latency-based route based on aws db.
 - rules: aws region pr lat & long for external service.
+- you can configure a bias to route more or less traffic to a given resource.
+  - useful when you don't have an even distribution of resources.
 - ![r53-geoproximity-routing](images/r53-cloudfront/r53-geoproximity-routing.png)
 
 # R53 interoperability
@@ -4173,6 +4242,20 @@ S3 Glacier Deep Archieve
   - ![acm-apigateway-regional-edge-optimized](images/acm-apigateway-regional-edge-optimized.png)
 - ![acm](images/sysops/acm.png)
 
+# AWS Transfer Family
+- ![img_100.png](img_100.png)
+- ![img_99.png](img_99.png)
+- ![img_98.png](img_98.png)
+- ![img_97.png](img_97.png)
+
+# AWS snowball
+- ![img_101.png](img_101.png)
+### snowball 
+- ![img_102.png](img_102.png)
+### snowball edge
+- ![img_103.png](img_103.png)
+### snowmobile
+- ![img_104.png](img_104.png)
 ---
 
 # Kenesis
@@ -4756,6 +4839,8 @@ S3 Glacier Deep Archieve
   - u need to make sure <b>AWSXRayDaemonWriteAccess</b> policy is attached to the execution role.
   - the u can use X-Ray SDK within ur function.
     - AWS_XRAY_DAEMON_ADDRESS -> provide connection detail including port for X-Ray daemon.
+  - ![img_95.png](img_95.png)
+  - ![img_96.png](img_96.png)
 
 ## Layers:
 
@@ -5128,12 +5213,13 @@ S3 Glacier Deep Archieve
     - Default IPv6 Route ::/0 added to RT with eigw-id as target.
   - IG (IPv6) allows all IPs IN and OUT
   - NAT is not supported for IPv6
-## VPC Endpoints (Gateway). VPC object
-  - Interface Endpoint both nearly used in the same way providing the same functionality, but they are used for different services and the way the achieve the functionality from technical point is different
+## VPC Endpoints (Gateway: use routing). VPC object
+  - Interface Endpoint both nearly used in the same way providing the same functionality, but they are used for 
+    different services and the way the achieve the functionality from technical point is different
   - Provide private access to s3 and DynamoDB
     - allow private resources in VPC to access s3 and dynamodb without going over the internet.
-    - you create a gateway endpoint and this is created per service per region . ex(s3, us-east-1) and then associate it with one or more subnets in a particular vpc.
-      - <b>Prefix List</b> added to route table => Gateway Endpoint
+    - you create a gateway endpoint(per service per region) and this is created per service per region . ex(s3, us-east-1) and then associate it with one or more subnets in a particular vpc.
+      - it doesn't go into VPC, <b>Prefix List</b> added to route table => Gateway Endpoint
         - logical entity represent these services .
         - Gateway Endpoint is not going to a particular subnet or AZ. it's a HA across all AZs in a region by default. 
       - u just choose the subnet and the route table and the prefix list will be added to the route table automatically.
@@ -5143,7 +5229,8 @@ S3 Glacier Deep Archieve
   - <b>use case</b> : Prevent Leaky Buckets - S3 buckets can be set to private only by allowing access  only from a gateway endpoint.
     - you can configure bucket policy to configure only connection from a specific gateway endpoint. 
   - remember it's a VPC object, so it can be accessed only from within the VPC.
-- ## VPC Endpoints 
+  - ![img_79.png](img_79.png)
+- ## INTERFACE VPC Endpoints  (use dns)
   - Provide access to aws public access
   - historically it's used to private access to anything not s3 and DDB. but now s3 is now supported by interface endpoint.
   - it's not HA . it's added to a specific subnets - an ENI - not HA .
@@ -5157,13 +5244,14 @@ S3 Glacier Deep Archieve
   - Uses ***PrivateLink*** : allow external services to be injected into VPC either by aws or by third party. and give it ENI.
   - 1- Interface Endpoint provides a New service endpoint DNS name.
     - e.g. vpce-123-xyz-sns.us-east-1.vpce.amazonaws.com
-    - this DNS name is used to access the service.
+    - this DNS name is used to access the service. resolved to the private IP of the ENI.
     - Endpoint Regional DNS
       - private dns name works with all AZ
     - Endpoint Zonal DNS
       - works specifically for one interface endpoint in one AZ.
   - 2- <b>PrivateDNS overrides </b>the default DNS for services
     - application in private subnet will not require any changes to access the service. it will access public service with the normal DNS name.
+    - ![img_80.png](img_80.png)
 ### VPC PEERING
   - to create private direct encrypted network link between <b>two</b> VPCs
   - works same/cross-region and same/cross-account
@@ -5181,6 +5269,7 @@ S3 Glacier Deep Archieve
   - ![vpc-peering](images/vpc/vpc-peering.png)
 
 ## BGP
+- it's a routing protocol, used to control how data flow from point A to B.
 - Direct connect & dynamic vpn both utilize BGP.
 - it's made up self manged network(AS) Autonomous System.
   - AS : it could be a large network or a collection of routers but in either way it controlled by one single entity.
@@ -5189,16 +5278,16 @@ S3 Glacier Deep Archieve
   - ASN is used to identify the AS and to exchange routing information.
 - BGP operates over tcp/179 - it's reliable and connection oriented.
 - it's not automatically configured. u need to configure peering between two AS manually.
-  - 
+  - when the peering is established, the two AS exchange routing information. (about network topology)
 - BGP is a path-vector protocol it exchanges the best path to a destination between peers ... the path is called the ASPATH.
   - it doesn't exchange every possible path to a destination. only the best path.  
   - it doesn't take into account the link speed or condition. it only takes into account the number of hops.
-
-- iBGP = Internal BGP - Routing within an AS
-- eBGP = External BGP - Routing between AS
+- in complex hybrid infrastructure
+  - iBGP = Internal BGP - Routing within an AS
+  - eBGP = External BGP - Routing between AS
 - ![bgp](images/vpc/bgp.png)
   - in case you want to prioritize longer path over shorter path you can prepend your AS number to the path. to make the shorter path longer.
-  - BGP only advertise the best path to a destination. so the change will be propagated to other AS.
+  - BGP only advertise the best path to a destination(even if it knows multiple ones). so the change will be propagated to other AS.
 
 ### Site-to-Site VPN
 - ![img_49.png](img_49.png)
@@ -5285,6 +5374,15 @@ S3 Glacier Deep Archieve
 - Reachability Analyzer
   - ![img_22.png](reachability-analyzer.png)
   - 0.1$ per reachability analysis.
+
+# Advanced VPC routing
+- ![img_105.png](img_105.png)
+- RT has limit of 50 static routes. and 100 dynamic routes (propagated) when enable this option via virtual private gateway. any route this gateway is aware of will be added.
+- routing rules
+  - ![img_106.png](img_106.png)
+- Gateway route table(in-gress) - applies to gateway object. 
+  - allow gateway to route any traffice for our app to another subnet to inspect it before it reach the app.
+    - ![img_107.png](img_107.png)
 --
 udacity temp :
 
@@ -5361,7 +5459,7 @@ associated with the instance that the code is running on, like an EC2 instance, 
 1- ENV VAR
 2- Java System Properties.
 3- Default credentials Profile.
-4- if u're running inside of a container using Amazon ECS, if so it use credentials supplied by ecs.
+4- if you're running inside a container using Amazon ECS, if so it use credentials supplied by ecs.
 5- check instacne profile credentials(IAM ROLE), role associated with the instance code run on.
 
 AWS SDK for Java uses unchecked exceptions:
@@ -5491,11 +5589,13 @@ been granted access
   - ![img_74.png](img_74.png)
     - review s3 object lock types 
 ---
-Elastic File System (EFS) 
+Elastic File System (EFS) impl of (NFSv4 )
+  - provide network based file system
   - scalable file storage that can scale based on workload requirements.
   - Use it for any workload that can suddenly increase or decrease storage needs.
   - It can also be used for shared volumes.
   - You can mount EFS filesystems onto EC2 instances running Linux or MacOS Big Sur. Windows is not supported.
+  - accessd outside aws, DX or VPN
   - Moving your EFS file data can be managed simply with AWS DataSync, a managed data transfer service that makes
     it faster and simpler to move data between on-premises storage and Amazon EFS.
   - Amazon EFS Infrequent Access (EFS IA) is a new storage class for Amazon EFS that is cost-optimized 
