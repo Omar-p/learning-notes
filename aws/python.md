@@ -1,6 +1,7 @@
 # Py
-
-
+- single line comment start with `#` and multi with `triple quotes`
+- When no return value is specified in a function, it will automatically return None.
+- var definition make it visible in the whole outer scope not in the block only
 ### Type-System:
 
 - Static vs. Dynamic Type

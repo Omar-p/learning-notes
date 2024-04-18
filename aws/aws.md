@@ -2993,6 +2993,13 @@ S3 Glacier Deep Archive
   - ![partition-placement-group](images/ec2/partition-placement-group-exam.png)
 
 ---
+### CW metrics EC2
+- ![img_153.png](img_153.png)
+- ![img_154.png](img_154.png)
+- ![img_155.png](img_155.png)
+- ![img_156.png](img_156.png)
+- ![img_158.png](img_158.png)
+- ![img_157.png](img_157.png)
 ### Advanced EC2 Networking:
 -  primary ENI -> attached to instance cannot be detached or attached to any other instances.
   - removed only when instance terminated.
@@ -3005,7 +3012,7 @@ S3 Glacier Deep Archive
       - the ip of the ENI are exposed to the instance os.
       - Secondary ENI can have 1 or more secondary private ip.
       - if you launch the instance in public subnet or explicitly assign public ip, this ip is not visible to the OS and the translation happen at the IGW.
-      - if you need static public ip you create Elastic IP and associate it with the primary ENI; the primary ip of theENI will release and if you remove the Elastic Ip you will get a new dynamic non-elastic on the ENI
+      - if you need static public ip you create Elastic IP(soft limit: 5 per account) and associate it with the primary ENI; the primary ip of theENI will release and if you remove the Elastic Ip you will get a new dynamic non-elastic on the ENI
       - if the ENU has 1 or more ipv6 they will be visible to the OS ENI because they are publicly routable.
       - the MAC Address of ENI used by OS to identify the network interface. and used in software licensing.
       - each ENI can have one or more SG.
@@ -3119,8 +3126,12 @@ S3 Glacier Deep Archive
   - ![alb](images/elb/elb-alb.png)
 - alb -rules - theory:
 - ![alb](images/elb/elb-alb-rules-theory.png)
+  - ![img_160.png](img_160.png)
 - alb - rules - diagram:
   - ![alb](images/elb/elb-alb-rules.png)
+  - ![img_161.png](img_161.png)
+- view client ip & port
+  - ![img_159.png](img_159.png)
 
 ## NLB
 
