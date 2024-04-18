@@ -4225,6 +4225,39 @@ S3 Glacier Deep Archive
 
 - ![origin-access-control](images/r53-cloudfront/origin-access-control.png)
 
+### cloudfront and EC2, ALB
+- ![img_127.png](img_127.png)
+
+#### cloudfront Geolocation restrictions
+- ![img_128.png](img_128.png)
+
+### Report and troubleshooting
+- when you enable access log, you specify the bucket where the logs will be stored. and optionally a prefix.
+- ![img_129.png](img_129.png)
+- ![img_130.png](img_130.png)
+
+### cloudfront cache deep dive
+- ![img_140.png](img_140.png)
+- headers
+  - ![img_139.png](img_139.png)
+    - ![img_138.png](img_138.png)
+- you can define custom header in the distribution to be forwarded to the origin.
+  - ![img_137.png](img_137.png)
+- TTL
+  - if the origin return cache-control with higher val than max ttl configured in cloudfront, cloudfront will use the configured max ttl 
+    - ![img_136.png](img_136.png) 
+- cloudfront and cookies
+  - ![img_135.png](img_135.png)
+  - ![img_134.png](img_134.png)
+- cloudfront and query parameter
+  - ![img_133.png](img_133.png)
+- separating static and dynamic content to different distributions.
+  - ![img_132.png](img_132.png)
+- increasing cache ratio
+  - ![img_131.png](img_131.png)
+
+## cloudfront with ALB sticky session
+- ![img_141.png](img_141.png)
 ---
 - API GATEWAY ENDPOINTS
   - ![api-gateway-endpoints](images/api-gateway-endpoints.png) 
@@ -5766,7 +5799,9 @@ and configure additional rules that apply sampling based on properties of the se
 ---
 
 - Storage Gateway
+  - ![img_142.png](img_142.png)
   - Volume 
+    - ![img_145.png](img_145.png)
   - Tape Mode (VTL)
     - AWS : ![img_15.png](img_15.png)
       - VTL (1 PB across 1500 virtual tapes), VTS(unlimited storage) 
@@ -5776,13 +5811,27 @@ and configure additional rules that apply sampling based on properties of the se
           - Traditional tap backup architecture cost money(equipments & staff) and time:
             - ![img_14.png](img_14.png)
             - exported tape mean there is not in the library; they moved to offsite storage. in aws it move from VTL to VTS
+        - ![img_146.png](img_146.png) 
     - use-cases: datacenter extensions, migration of backup platform
   - File Mode
+    - ![img_143.png](img_143.png)
     - ![img_16.png](img_16.png)
     - ![img_17.png](img_17.png)
       - SMP with Windows server, NFS for linux
+    - you can use storage gateway for FSx, reason for that instead of using FSx directly is to have a local cache.
+      - ![img_144.png](img_144.png)
     - replication:![img_18.png](img_18.png)
     - lifecycle: ![img_19.png](img_19.png)
+  - if you don't have the hardware to run the gateway
+    - ![img_148.png](img_148.png)
+  - summary
+    - ![img_149.png](img_149.png)
+  - for sysops
+    - ![img_150.png](img_150.png)
+    - activation
+      - ![img_151.png](img_151.png)
+    - tips for cache volume
+      - ![img_152.png](img_152.png)
 ---
 - Glue
   - build your table definition, serve as central metadata repository for your data lake,
