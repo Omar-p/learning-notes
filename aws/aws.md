@@ -86,6 +86,9 @@ Cloud Service model
   - based on: fixed, account cost
   - based on: usage resource, ex: s3 outbound traffic cost
   - based on: Reservation Budget Resource creation
+  - ![img_203.png](img_203.png)
+- AWS COST ALLOCATION TAGS
+  - ![img_204.png](img_204.png)
 ---
 
 # Multifactor Authentication:(MFA)
@@ -727,6 +730,9 @@ Elastic Compute Cloud (EC2)[IAAS]:
       - EC2Rescue provide two options: 
         - Last Known Good Configuration: restore the registry to the last known good configuration.
         - Restore Registry from backup.
+
+- AWS COMPUTE OPTIMIZER
+  - ![img_205.png](img_205.png)
 ---
 
 S3:
@@ -908,10 +914,23 @@ CloudFormation:
       - get a better understanding of distrubutaion of ur metrics data, eliminate outliers.
     - ![cw-data](images/cw-data.png)
     - ![cw-data-arch](images/cw-data-arch.png)
+    - ![img_174.png](img_174.png)
+    - cw insights
+      - ![img_175.png](img_175.png)
+    - s3 log export
+      - ![img_176.png](img_176.png)
+    - cw subscription filter
+      - ![img_177.png](img_177.png)
+    - log aggregation from multiple aws accounts to s3 in near real-time
+      - ![img_178.png](img_178.png)
+    - alarm for ec2 recovery
+      - ![img_179.png](img_179.png)
   #### Alarms
   - ![cw-alarm](images/cw-alarm.png)
   - metrics resolution affect the alarm resolution.
-
+    - cw synthetics canary
+      - ![img_180.png](img_180.png)
+      - ![img_181.png](img_181.png)
 # VPC FLOW LOGs
 
 - provide details of traffic flow in private subnets.
@@ -982,6 +1001,10 @@ CloudFormation:
 - <b>Rules</b> match incoming events ... send it to a target.
   - there are also a schedules rules which can be used to trigger events at a specific time.
   - rule send events to 1+ target.
+  - Schema registry
+    - ![img_182.png](img_182.png)
+  - ![img_183.png](img_183.png)
+  - you can canfigure event transformation.
 
 ---
 
@@ -994,6 +1017,10 @@ CloudFormation:
     Requirements, Support information, dependencies.
 - Defines approval of provisioning from IT and Customer side.
 - Manage costs and scale service delivery because everything about the service is defined within this documented.
+- ![img_199.png](img_199.png)
+- Sharing Catalog:
+  - ![img_200.png](img_200.png)
+  - ![img_201.png](img_201.png)
 
 ### AWS Service Catalog
 
@@ -1006,7 +1033,13 @@ CloudFormation:
 - ![service-catalog](images/sysops/aws-service-catalog.png)
 
 ---
+# AWS COST EXPLORE
+- ![img_202.png](img_202.png)
+---
 
+# AWS Quotas 
+- ![img_184.png](img_184.png)
+- 
 # AWS Config
 
 - Record Configuration changes over time on resources.
@@ -1018,7 +1051,20 @@ CloudFormation:
 - all configuration data change stored in S3 and you can access it using aws config api.
 - ![aws-config](images/sysops/aws-config.png)
   - in remediation process you can also use ssm in case of config change on ec2 instance.
+  - ![img_189.png](img_189.png)
+- Aws Config Aggregator:
+  - ![img_190.png](img_190.png)
+  - ![img_192.png](img_192.png)
+  - ELB (CW, Trail, config)
+    - ![img_191.png](img_191.png)
+---
+# AWS Health Dashboard
+- ![img_193.png](img_193.png)
 
+# AWS Personal Health Dashboard 
+- if you want how the health of aws services is affecting your resources.
+- Global Service
+- ![img_194.png](img_194.png)
 ---
 
 # CloudTrail [regional]
@@ -1030,9 +1076,11 @@ CloudFormation:
 - by default store Event of last 90 days.
 - To customize the service .. create 1 or more Trails.
 - we have two types
+  -  ![img_186.png](img_186.png)
   - Management Events[log of action on aws resource (control-plane){create instance}, ].
   - Data Events(usage of the resource. upload/access object in S3).
   - insight events : capture unusual activity in your AWS account.
+    - ![img_185.png](img_185.png)
 - by default store Management Events only.
 - CloudTrail Insights helps you identify unusual activity in your account such as spikes in resource provisioning or bursts of AWS IAM actions.
 - ![cloud-trails](images/cloud-trails.png)
@@ -1055,11 +1103,13 @@ CloudFormation:
   - Compliance
     - can be used to help you meet industry, regulatory compliance, and audit requirements.
 - Trail is Encrypted using SSE. <mark>Log integrity validation</mark> means logs are digitally signed, so you can detect if a log was changed or deleted.
+  - ![img_187.png](img_187.png) 
 - When you enable log file integrity validation, CloudTrail creates a hash for every log file that it delivers. 
   Every hour, CloudTrail also creates and delivers a file that references the log files for the last hour and 
   contains a hash of each. This file is called a digest file. CloudTrail signs each digest file using the private 
   key of a public and private key pair. After delivery, you can use the public key to validate the digest file. 
   CloudTrail uses different key pairs for each AWS region.
+  - ![img_188.png](img_188.png)
 ---
 
 - Exam powerup:
@@ -1082,6 +1132,8 @@ CloudFormation:
   os, network & firewall configuration,
   platform - applications - identity & Access management,
   Customer Data]
+- Shared Control
+  -![img_206.png](img_206.png)
 - <img src="images/shared-reponsability-model.png" width="800" height="500">
 
 ---
@@ -1332,10 +1384,17 @@ some field can be ignored bec
   and sent to the management account. [Consolidated Billing].
   - remove financial admin overhead, certain services get cheaper when u use it
     more. and for certain services when u pay in advance u get a cheaper rate.
-- servic control policy: specify what each member account can do. restrict the
+- service control policy: specify what each member account can do. restrict the
   service that can be used by the member account.
 - using management account u can directly create new member AWS account
   instead of inviting existing AWS account.
+- you can share the reservered instance between the accounts in the organization.
+
+- ![img_197.png](img_197.png)
+- principal:(orgId)
+  - ![img_196.png](img_196.png)
+- org-tags:
+  - ![img_195.png](img_195.png)
 
 - best practice: u don't have to have iamuser in each member accounts, instead
   IAMROLE can be used to allow IAM USER to access other aws memeber account.
@@ -1373,7 +1432,7 @@ some field can be ignored bec
     - deny all
       - remove FullAWSAccess
       - ![](./images/iam/scp-deny-all.png)
-    - must go for deny all because aws will add new services. deny all[]
+    - must-go for deny all because aws will add new services. deny all[]
       - explicit allow services.
     - to reduce admin overhead of allowing each required service u can allow all and deny
       what u want.
@@ -1467,7 +1526,7 @@ some field can be ignored bec
   - use aws config and scp to enforce guardrails.
   - you can allow end user to provision new account within landing zone using service catalog
   - ![aws-control-tower.png](images/sysops/aws-control-tower.png)
-
+    - ![img_198.png](img_198.png)
 ---
 
 # AWS Inspector
@@ -1479,6 +1538,8 @@ some field can be ignored bec
   - adding agent provide reacher information
 - 2- Network & Host Assessment(os level vulnerabilities) (Agent)
   - agent is installed on the ec2 instance.
+- ![img_209.png](img_209.png)
+- ![img_210.png](img_210.png)
 
 #### Rules packages determine what is checked
 
@@ -1502,10 +1563,11 @@ some field can be ignored bec
 - continuous security monitoring service, trying to protect your account and resources from any security issues.
 - Analyses supported data sources +continuously reviewing those sources for any things occurring within your account + AI/ML. + threat intelligence feeds.
 - Identifies unexpected and potentially unauthorized and malicious activity within your aws account.
-- it learns what happen normally from any your managed account and then it can detect any deviation from that normal behavior. (finding)
+- it learns what happen normally from any your managed accounts and then it can detect any deviation from that normal behavior. (finding)
   - notify or event-driven protection/remediation.
 - supports multiple accounts (MASTER and MEMBER) (master invite other accounts)
-- ![guard-duty.png](images/sysops/guard-duty.png)
+- ![img_211.png](img_211.png)
+- ![img_212.png](img_212.png)
 
 ---
 
@@ -1562,6 +1624,8 @@ some field can be ignored bec
   - ![img_94.png](img_94.png)
 ---
 # AWS WAF (Web Application Firewall) 
+- LAYER 7
+- ![img_208.png](img_208.png)
 - Deploy On:
   - ALB, API GW, CloudFront, AppSync, Cognito User Pool.
 - actual configuration unit in waf is called <b>web acl</b>.
@@ -1592,7 +1656,10 @@ some field can be ignored bec
   - 
 
 ---
+- DDOS ATTACK ON AWS
+  - ![img_207.png](img_207.png)
 
+---
 # AWS Shield
 
 - protect any internet connected environment from DDoS Attack
@@ -3564,9 +3631,9 @@ S3 Glacier Deep Archive
 ---
 
 # CloudFormation
-
+- template component:
+  - ![img_162.png](img_162.png)
 - Physical and Logical Resources:
-
   - begin with a template [JSON|YAML].
   - .. contains logical resources - the "what" [declarative definiation].
     - u focus on what, and cfn deals with how.
@@ -3590,7 +3657,7 @@ S3 Glacier Deep Archive
     - the stack will update the logical resource then the update will reflect on the physical resource.
 
 ## Template and Pseudo Parameters
-
+- ![img_163.png](img_163.png)
 - (Template Parameters) accept input
   - console/CLI/API
   - .. when stack is created or updated (ex: size or env[test|dev|prod])
@@ -3604,13 +3671,15 @@ S3 Glacier Deep Archive
 - Parameters.Name.[TYPE, Default, AllowedValue, Description..]
   - ![cfn-template-parameter](images/cfn/cfn-template-params.png)
 
-## Pesudo Prameters injected by aws to the stack.
+## Pseudo Parameters injected by aws to the stack.
 
 - they are exist even you don't define them in the parameter section. injected by aws in the stack.
 - AWS::Region region the stack created in.
 - AWS::StackName
 - AWS::StackId
+- AWS::NotificationArns
 - AWS::AccountId
+- AWS::NoValue
 - populated by AWS based on the environment when creating the stack.
 
 - Pseudo and Parameters
@@ -3674,17 +3743,20 @@ S3 Glacier Deep Archive
     - let u store some data which can be used to influence how template behave for given input.
   - ![cfn-mapping](images/cfn/cfn-mapping.png)
     - you always need to provide at least one top level key.
-  - it help in improving template protability.
+  - it helps in improving template protability.
 
-<hr>
+---
 
-- outputs{optional}
+## outputs{optional}
   - optional, useful for providing status information or showing how to access svcs which created by the cloudformation stack.
   - values can be declared in this section:
     - visible as output when using CLI/console UI
     - accessible from a parent stack when using nesting.{exam}
     - can be exported, allowing cross-stack references.{exam}
+    - you cannot delete stack that has an output which is referenced by another stack.
+    - refrenced using !ImportValue
   - ![cfn-output](images/cfn/cfn-output.png)
+  - ![img_164.png](img_164.png) ![img_165.png](img_165.png)
 
 ## Conditions [optional ]
 
@@ -3714,8 +3786,10 @@ S3 Glacier Deep Archive
   - u need IGW to be created and attached to the VPC first. and there is no implicit dependency between them. so u need to use dependon to make sure the IGW is created and attached to the VPC before creating the elastic ip.
   - ![dependon](images/cfn/cfn-dependon.png)
 
-<hr>
-
+---
+- ![img_166.png](img_166.png)
+- /var/log/cloud-init-output.log <- logs of UserData
+---
 ### Cloudformation provisioning
 
 - simulate creation ec2 instance with userdata to bootstrap wordpress.
@@ -3865,8 +3939,15 @@ S3 Glacier Deep Archive
 - cfn-init helper is executed from UserData.
   - config key is under Metadata: AWS::CloudFormation::Init:
     - configKey of configurations directives.
-- it runs only once when the instance is created. if the the CloudFormation::Init is updated it will not run again.
+- it runs only once when the instance is created. if the CloudFormation::Init is updated it will not run again.
 - ![cfn-inti](images/cfn/cfn-init.png)
+- ![img_167.png](img_167.png)
+- ![img_168.png](img_168.png) ![img_169.png](img_169.png)
+- /var/log/cfn-init.log /var/log/cfn-init-cmd.log
+- ![img_170.png](img_170.png)
+- ![img_171.png](img_171.png) ![img_172.png](img_172.png)
+- common things to consider when the stack didn't receive the signals
+  - ![img_173.png](img_173.png)
 
 #### cfn-hub
 
