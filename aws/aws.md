@@ -1528,6 +1528,10 @@ some field can be ignored bec
   - ![aws-control-tower.png](images/sysops/aws-control-tower.png)
     - ![img_198.png](img_198.png)
 ---
+# AWS Artifact
+- ![img_219.png](img_219.png) 
+
+---
 
 # AWS Inspector
 
@@ -1863,7 +1867,14 @@ MFA delete
 
 # kms key precviously called CMK
 Key Management Service(KMS)
-
+- key types
+  - ![img_213.png](img_213.png)
+  - ![img_214.png](img_214.png)
+- coping encrypted ami to another region require to re-encrypt it with another kms key in the destination region.
+  - ![img_215.png](img_215.png)
+  - ![img_216.png](img_216.png)
+  - ![img_217.png](img_217.png)
+- ![img_218.png](img_218.png)
 - Regional & public service.
 - occupies AZ public zone and it can be connected to from anywhere with access to
   this public zone. [if u have permissions to access it]
@@ -2253,7 +2264,14 @@ S3 Glacier Deep Archive
   - <img src="./images/s3/s3-legal-hold.png" width="850" height="500">
 - <img src="./images/s3/s3-object-lock.png" width="850" height="500">
 - it can be used in conjunction with each other legal hold and retention period.
-
+---
+- S3 Access point:
+  - ![img_220.png](img_220.png)
+  - inside VPC:
+    - ![img_221.png](img_221.png)
+  
+- Multi - Region Access Point:
+  - ![img_222.png](img_222.png)
 ---
 
 # STS
