@@ -1,4 +1,4 @@
-Refactoring: 
+Refactoring:
    taking existing code changing its structure and end up with code
    that does the same as before but has better structure.
 
@@ -16,7 +16,7 @@ Refactoring:
      ----
      temp:
 
-     sam local invoke FuncResourceName -e event.json 
+     sam local invoke FuncResourceName -e event.json
 
           sam local invoke FuncResourceName -e event.json  -d 5858
 

@@ -1,0 +1,18 @@
+### Database Design
+- .1. Gathering Requirements
+  - The first step in database design is to gather requirements.
+    - **Understanding the System**: Determine what the system will store, including the types of data and the specific data needed for reports.
+    - **Identify Data Needs**: Understand the questions that need to be answered from the data and identify the entities or objects that need to be stored.
+    - **Challenges with Clients**: This step is difficult because clients may not fully understand databases or how they work.
+    - **Iterative Process**: The process requires iterations and refinements as you work with the client to understand their needs.
+    - **Proactive Suggestions**: Be prepared to offer suggestions to the client regarding potential data needs or query types that might be beneficial.
+  - **Outcome of the Step**: The goal is to clearly identify the entities or objects to be stored and understand the general structure of the queries needed.
+- .2. DBMS Selection
+  - **Identify Data Types**: Assess the types of data you'll be handling—whether they are relational (structured data), graph data, or document-based formats like XML/JSON. This helps in understanding the nature of the data.
+  - **Data Modeling Flexibility**: Recognize that the same data can be modeled differently depending on the use case. Simply knowing the data type isn’t enough; you need to consider how that data will be accessed and manipulated.
+  - **Understand Usage Patterns**: Determine how the data will be accessed and manipulated. Will you need to traverse between records, conduct complex analytics (like aggregations and summarization), perform simple OLTP (Online Transaction Processing) queries, or handle time-series data? This will guide you toward the appropriate DBMS.
+  - **Special Requirements Consideration**: Identify any specific requirements from the client that might dictate the DBMS choice, such as the need for robust transactional processing, the ability to manage large volumes of data efficiently, or whether the schema needs to be highly flexible or can be fixed.
+  - **Scalability and Performance Needs**: Consider the expected data volume and performance requirements. If the data volume is very large or expected to grow rapidly, you may need a system that supports horizontal scaling or other performance optimizations.
+  - **Default to Relational Databases**: While relational databases are often the go-to choice due to their versatility and wide support, the final decision should be based on the specific needs and constraints of the application, as identified in the steps above.
+  - **Consider Future Growth and Flexibility**: Think about the future needs of the system, including potential changes in data types, usage patterns, and scalability requirements, to ensure the chosen DBMS can accommodate growth and evolving demands.
+- .3. Data Modeling

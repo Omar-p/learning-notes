@@ -1,4 +1,4 @@
-# Java Microsevices with Spring Cloud: Developing Services
+# Java Microservices with Spring Cloud: Developing Services
 
 - microservices : 
 	- loosely coupled service oriented architecture with bounded context.

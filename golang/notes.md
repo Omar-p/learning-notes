@@ -4,19 +4,19 @@ Practical GO:
   - go use git to fetch external packages.
   - all files in the same folder must have the same package.
   - go env GOARCH GOOS -> architecture & os which the compiler is build the executable for.
-     - u can modify it -> GOOS=darwin go build <- to build for mac.
+     - u can modify it -> `GOOS=darwin go build` <- to build for mac.
   - main function don't accept args as java or C.  
      but there are package os and flag that can be used in building cli app. 
-  - string is a struct [pointer, len int] ,  "Strings behave like arrays of bytes
+  - `string` is a `struct` `[pointer, len int]` ,  "Strings behave like arrays of bytes
     but are immutable: once created, it is impossible to change the contents of a string".
     - A string is a struct that has a length and a pointer to a byte array. 
       When you pass a string to another function, it copies the length and 
       the pointer. As a consequence, the new copied string points to the 
-      same underlying data.
+      same underlying data. (passed by reference)
   - code point = rune(int32) ~= unicode  character.
   - utf-8 var-len encoding - char can be 1~4 bytes.
   - len(str) <- return #of bytes in the str not the length len("G☺") -> 4
-    - string in go is bunch of byte(uint8) and rune 
+    - string in go is a bunch of byte(uint8) and rune 
     - accessing str using [] will deal with it as bytes.
       accessing range str as rune.
     - u have option to decode from utf-16 to utf-8  
@@ -24,7 +24,7 @@ Practical GO:
   - in debugging/logging use %#v not %v
   - Go for http Headers don't use a map data structure
      use a special type called Header -> 
-       because headers are case insensitive and can be repeated 
+       because headers are case-insensitive and can be repeated 
          which can't be work in a regular map.
   - some server depending on User-Agent header in the request
      return a compact[machine] version on the response or uncompact[user]
@@ -38,7 +38,7 @@ Practical GO:
     - JSON -> []bytes -> Go: json.Unmarshal
     - Go -> io.Writer -> JSON: json.Encoder
     - Go -> []byte -> JSON: json.Marshal
-  - if u just use a truct in one place don't define it's type as global
+  - if u just use a struct in one place don't define it's type as global
     define it as anonymous struct in the scope u use it.
     ex: consuming api, testing.
   - url.PathEscape(str) escape the string to be used safely in url.  
@@ -60,10 +60,10 @@ Practical GO:
          u should be careful [specially when u pass it between funcs].   
   - const 
     - in go their type is decided depending on where u use them.
-      const n = 2
-        var f float64 = 5 ; f = f / n <- n is a float64   
-        var i int64 = 5 ; i = i / n <- n is a int64   
-  - copy(dst, src) int -> copy as much as it can and return the num of copied.    
+      - `const n = 2`
+        - `var f float64 = 5 ; f = f / n` <- n is a float64   
+        - `var i int64 = 5 ; i = i / n` <- n is a int64   
+  - `copy(dst, src)` int -> copy as much as it can and return the num of copied.    
 
   - idiom 
     - if there is a possiblity of panic we additionally return an error 
@@ -86,22 +86,22 @@ when we assign var from literal struct to named struct if they have the same mem
 go will make an implicit conversion and accept it.
 but, when we assign 2 var from different nammed struct but with the same memory layout
 we must make an explicit conversion to make go compile.
-------------------------------------------------------------------------
+---
 Go Use 2 words structure for string:
     one word contains a pointer to the start of the string.
     another contains the length of it.
------------------------------------------------------------------
+---
 For consistency 
     - when declaring a variable use [var x type] when you don't initalize it,
       and use := if you will initialize with the declaration. 
------------------------------------------------------------------
+---
 ==> go build -gcflags -m=2
     - it shows us the escape analysis of our code
       which value moved to the heap to be accessible
       from upper stack frame after the current stack frame
       removed.
 ==> write code for readability, don't hide the cost of ur code.
-______________________________________________________________________
+___
 each goroutine created initially with 2kb stack size, and when the stack 
 need to grows more than 2kb go allocate another stack with double size
 and move all frame to the new one. because of that go doesn't allow 
@@ -109,7 +109,7 @@ sharing data in the stack between different goroutines so any shared data
 moved to the heap memory 
 [go compiler use escape analysis to figure out which data need to be sotred in the heap]
 https://en.wikipedia.org/wiki/Escape_analysis
--------------------------------
+---
 Go struct:
   - compiler perform alignment
   - in named type compiler don't perform implicit conversion,
@@ -318,3 +318,7 @@ https://stackoverflow.com/a/40824044/14840351
   - Concurrent Login Pervenetion
     - maintain a list of logged in users and prevent multiple logins from the same user.
     - session identifier should be transmitted in HTTP cookie header
+---
+# Testing
+- To view test coverage:
+    - `go test -coverprofile=coverage.out` && `go tool cover -html=coverage.out`

@@ -141,5 +141,41 @@ example of promise:
   playGame().then(executeIfResolveInvoked).catch(executeIfRejectInvoked)
   
   
-  --
-  fetch("dataSOurce").then((data) => if data retrieved successfully).catch(ifCannotFetch)
+---
+- fetch("dataSOurce").then((data) => if data retrieved successfully).catch(ifCannotFetch)
+---
+- we assume mental model about the lang, and when the bug happens we blame the language.
+	- the source of truth is : JS specification
+    - whenever there's a divergence between what your brain thinks is happening. and what the computer does. that's where bugs enter the code.
+- ![img.png](img.png)
+- the author think `class` shouldn't be used in JS; but you must understand it.
+  - ![img_1.png](img_1.png) ![img_2.png](img_2.png)
+- In JS, variables don't  have types, values do.  when you define value as string you expect some behavior like accessing each character.
+  - ![img_3.png](img_3.png)
+- undefined -> currently doesn't have a value. (not initialized yet is long; because it can have a value then you set the value to undefined)
+- typeof is always return a string value ( "string", "number", ...."undefined") it cannot return undefined.
+  - if you want to make sure a value is really an object you must check it's not a null also; because `typeof null` will return "object"
+- typeof arr will return "object"; to make sure if it is array `Array.isArray()`
+
+## special values
+### Bigint
+  - `let x = 42n;` 42n is a bigint.
+  - 
+### undefined vs. undeclared vs. uninitialized(aka TDZ: Temporal Dead Zone)
+  - typeof is only operator that can reference undeclared variable(not exist in the program) without throwing an error.
+  - TDZ: block scope variable that is declared but not initialized yet.(they never get set to undefined)
+### NaN : invalid number.
+  - the number `0` is not the way you indicate the absence of a valid numeric value; it's an important value.
+  - ![img_4.png](img_4.png)
+    - isNaN util coarse check(try to convert the param to Number before check, so it's wrong); Number.isNaN() is the correct way to check.
+  - NaN is the only value in JS that is not equal to itself.
+
+### Negative Zero
+- ![img_5.png](img_5.png)
+  - some usecases in the game if the object stop and you want to maintain does it stop in the same direction or the opposite direction.
+  
+---
+## Typescript
+- ![img_6.png](img_6.png)
+- ![img_7.png](img_7.png)
+- nodejs let you run the typescript cli and install dependencies.

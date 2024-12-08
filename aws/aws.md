@@ -1751,7 +1751,7 @@ some field can be ignored bec
   - <img src="images/acl-s3.png" width="800" height="500">
 - Block Public Access:
   - applied to anonymous  no matter what bucket policies say.
-  - added in respone to lots of public PR disaster, where buckets were being configured incorrectly and being set open to the world. this resulted in a lot of data leaks.
+  - added in response to lots of public PR disaster, where buckets were being configured incorrectly and being set open to the world. this resulted in a lot of data leaks.
   - not apply on any aws identities
 
 Key points[identity, resource policy]:
@@ -2417,7 +2417,7 @@ S3 Glacier Deep Archive
 
 ---
 
-- recommandation for structuring your VPC.
+- recommendation for structuring your VPC.
   - 3-subnet + 1 for future
   - 3-tier + 1 spare
     - 16 subnet in /16 network will result in 16 /20 network{4091 IPS}.
@@ -2481,7 +2481,7 @@ S3 Glacier Deep Archive
 - used as management point or entry point for private only VPC.
 - often the only way IN to a highly secure VPC.
 - can be configured to only accept connection from certain IP addresses. <br> to authenticate with ssh. or to integrate with our own on premises identity server.
-
+- SSM session manager is a more secure way to remote control without SSH
 ---
 
 # VPC Router
@@ -2576,8 +2576,9 @@ S3 Glacier Deep Archive
 - can be though of as a traditional firewall available within AWS VPC.
 - Every subnet has an associated NACL, filter traffic crossing the subnet boundary INBOUND or OUTBOUND.
 - connections within a subnet aren't impacted by NACLs.
+  - ex: instances in the same subnet.
 - contain a #of rules[Inbound/Outbound].
-
+  - ![img_225.png](images/vpc/nacl.png)
   - Inbound rules match traffic
     - ENTERING the subnet,
   - Outbound rules
@@ -2595,7 +2596,7 @@ S3 Glacier Deep Archive
 # Default NACL
 
 - A VPC is created with a Default NACL
-- INBOUND and OUTBOUND rules have the implicit catch all  deny(\*) and rule that allow ALL traffic. <- reduce admin overhead.
+- INBOUND and OUTBOUND rules have the implicit catch-all  deny(*) and rule that allow ALL traffic(allow processed first). <- reduce admin overhead.
   - amazon prefer security group over NACLs.
 # Custom NACLs
 
@@ -2610,6 +2611,7 @@ S3 Glacier Deep Archive
   - REQUEST and RESPONSE seen as different.
 - Only impacts DATA CROSSING SUBNET BOUNDARY.
 - NACLs can EXPLICITLY ALLOW and DENY.
+  - can be used to block specific bad actors.
 - Deals with IPs/CIDR, Ports & Protocols
   - no logical resources.
 - NACLs cannot be assigned to AWS resources
@@ -2631,14 +2633,16 @@ S3 Glacier Deep Archive
     - cannot block specific bad actors.
       - so if u need to deny a specific ip in allowed range u need to use NACLs in conjunction with SGs.
     - Supports IP/CIDR ... and logical resources. SG is L7, so it can reference logical resources and even itself within rule.
-- including other security groups AND ITESELF.
+- including other security groups AND ITSELF.
   - not attached to instances or subnet.
-  - Attached to ENI's[Elastic network interface] not instances (even if UI shows it this way).
+  - Attached to ENI[Elastic network interface] not instances (even if UI shows it this way).
 - (SG) Logical Reference:
   - we have WEB[instances] and APP[instances].
   - we allow all inbound traffic in SG of WEB.
   - WEB need to access APP in [tcp:1337] to allow that in SG of APP?
-    - add the ip of web instances ? add the whole subnet ? both are not
+    - add the ip of web instances ? add the whole subnet ? both are not correct; we add the web's SG
+    - ![img_225.png](images/vpc/sg-logical-reference.png)
+    - ![img_225.png](images/vpc/SG-self-reference.png)
   
 
 ---
@@ -2676,6 +2680,188 @@ S3 Glacier Deep Archive
 
 - IPV6
   - <img src="images/vpc/natgw-ipv6.png" width=800 height=320>
+---
+## Egress-Only IGW :
+- a HA by default across all AZs in the region - scales as required.
+  - allow outbound connection only for ipv6.
+    - Default IPv6 Route ::/0 added to RT with eigw-id as target.
+  - IG (IPv6) allows all IPs IN and OUT
+  - NAT is not supported for IPv6
+## VPC Endpoints (Gateway: use routing). VPC object
+- Interface Endpoint both nearly used in the same way providing the same functionality, but they are used for
+  different services and the way the achieve the functionality from technical point is different
+- Provide private access to s3 and DynamoDB
+  - allow private resources in VPC to access s3 and dynamodb without going over the internet.
+  - you create a gateway endpoint(per service per region) and this is created per service per region . ex(s3, us-east-1) and then associate it with one or more subnets in a particular vpc.
+    - it doesn't go into VPC, <b>Prefix List</b> added to route table => Gateway Endpoint
+      - logical entity represent these services .
+      - Gateway Endpoint is not going to a particular subnet or AZ. it's a HA across all AZs in a region by default.
+    - u just choose the subnet and the route table and the prefix list will be added to the route table automatically.
+- you can configure <b> Endpoint policy</b> to control what things that can be connected to by the endpoint.
+  - allow it to connect to only subset of s3 buckets.
+- it can only access services in the same region  .
+- <b>use case</b> : Prevent Leaky Buckets - S3 buckets can be set to private only by allowing access  only from a gateway endpoint.
+  - you can configure bucket policy to configure only connection from a specific gateway endpoint.
+- remember it's a VPC object, so it can be accessed only from within the VPC.
+- ![img_79.png](img_79.png)
+- ## INTERFACE VPC Endpoints  (use dns)
+  - Provide access to aws public access
+  - historically it's used to private access to anything not s3 and DDB. but now s3 is now supported by interface endpoint.
+  - it's not HA . it's added to a specific subnets - an ENI - not HA .
+    - to ensure HA add one for each AZ you use.
+    - Network access controlled via security groups.
+      - you cannot do it with gateway endpoint.
+  - Endpoint Policies - can be used
+  - support only TCP and IPv4 only.
+  - ![img_22.png](interface-and-gateway-vpc-endpoint.png)
+  - ![img_22.png](s3-gateway-vs-interface.png)
+  - Uses ***PrivateLink*** : allow external services to be injected into VPC either by aws or by third party. and give it ENI.
+  - 1- Interface Endpoint provides a New service endpoint DNS name.
+    - e.g. vpce-123-xyz-sns.us-east-1.vpce.amazonaws.com
+    - this DNS name is used to access the service. resolved to the private IP of the ENI.
+    - Endpoint Regional DNS
+      - private dns name works with all AZ
+    - Endpoint Zonal DNS
+      - works specifically for one interface endpoint in one AZ.
+  - 2- <b>PrivateDNS overrides </b>the default DNS for services
+    - application in private subnet will not require any changes to access the service. it will access public service with the normal DNS name.
+    - ![img_80.png](img_80.png)
+### VPC PEERING
+- to create private direct encrypted network link between <b>two</b> VPCs
+- works same/cross-region and same/cross-account
+  - there is some limitation when running vpc peering between vpc in different region.
+- you can (optionally) enable public Hostnames resolve to private IPs  .
+  - this mean you can use the same dnsname to locate services weather it's in the peered vpc or not .
+  - same region SG's can reference peer SGs.
+    - in different region u need to use IP ranges.
+- VPC peering does not support <b> transitive peering</b> .
+  - if A is peered with B and B is peered with C, A cannot talk to C.
+  - u need to create a peering between A and C.
+- when you creating vpc peering connection between 2 vpc, you create a logical gateway object inside each vpc.
+  - **you need to configure route table to route traffic to the other vpc. SGs & NACLs are also used to control traffic.**
+- Invalid Configuration
+  - No Edge to Edge Routing
+    - ![img_223.png](img_223.png)
+    - ![img_224.png](img_224.png)
+  - VPC Peering connection cannot be created where there is overlap in the VPC CIDRs (Overlapping CIDR for IPv4)
+  - ideally never use the same address range in multiple VPCs.
+    - ![vpc-peering](images/vpc/vpc-peering.png)
+
+## BGP
+- it's a routing protocol, used to control how data flow from point A to B.
+- Direct connect & dynamic vpn both utilize BGP.
+- it's made up self manged network(AS) Autonomous System.
+  - AS : it could be a large network or a collection of routers but in either way it controlled by one single entity.
+  - from BGP perspective it's a black box. it only concerns about routing in and out in your AS.
+- each AS has a unique number. (ASN) allocated by IANA(0-64511)public or ARIN(64512-65535) private.
+  - ASN is used to identify the AS and to exchange routing information.
+- BGP operates over tcp/179 - it's reliable and connection oriented.
+- it's not automatically configured. u need to configure peering between two AS manually.
+  - when the peering is established, the two AS exchange routing information. (about network topology)
+- BGP is a path-vector protocol it exchanges the best path to a destination between peers ... the path is called the ASPATH.
+  - it doesn't exchange every possible path to a destination. only the best path.
+  - it doesn't take into account the link speed or condition. it only takes into account the number of hops.
+- in complex hybrid infrastructure
+  - iBGP = Internal BGP - Routing within an AS
+  - eBGP = External BGP - Routing between AS
+- ![bgp](images/vpc/bgp.png)
+  - in case you want to prioritize longer path over shorter path you can prepend your AS number to the path. to make the shorter path longer.
+  - BGP only advertise the best path to a destination(even if it knows multiple ones). so the change will be propagated to other AS.
+
+### Site-to-Site VPN
+- ![img_49.png](img_49.png)
+  - ![img_50.png](img_50.png)
+- setup
+  - ![img_22.png](img_22.png)
+    - in creating the customer gateway you need to provide the certificate arn which allow aws to connect to your site.
+  - ![img_24.png](img_24.png)
+- vpn cloudhub:
+  - ![img_25.png](vpn-cloudhub.png)
+
+## IPSEC
+- a group of protocols working together to secure the communication between two hosts.
+- it sets up secure tunnels across insecure networks.
+  - between two peers (local and remote)
+    - 2 different business sites.
+- Provide Authentication, Integrity, Confidentiality.
+- Interesting traffic is the one which much certain defined rules.
+  - vpn tunnel is created for interesting traffic.
+- IPSEC has two main phases
+  - IKE Phase 1 (Slow & heavy)
+    - ![ipsec-vpn-ike-phase-1](images/vpc/ipsec-vpn-ike-phase-1.png)
+    - it's a protocol for how the keys will be exchanged between the two peers.
+    - Authenticate - Pre-shared key or certificate
+    - Using Asymmetric encryption to agree on, and create a shared symmetric key.
+    - IKE SA(security association) Created (end of phase 1) phase 1 tunnel
+  - IKE Phase 2 (fast & agile)
+    - 1 - the peer send the cipher suite it supports and the other peer choose the best one.
+    - ![ipsec-vpn-ike-phase-2](images/vpc/ipsec-vpn-ike-phase-2.png)
+    - Uses the keys agreed in phase 1.
+    - Agree encryption method, and keys used for bulk data transfer.
+    - IPSEC SA created   phase 2 tunnel run over phase 1
+  - the reason for two phases is its possible for phase 1 to be established then the phase 2 created, used, and then turned down. and then phase 2 created again when interesting traffic is detected.
+
+  - two type of vpn(policy based vpn & route based vpn)
+    - The difference is how they match interesting traffic.
+    - policy-based VPNs
+      - rule sets match traffics => a pair of SAs
+        - different rules/ different security settings.
+    - Route Based VPNs
+
+
+- AWS Global Accelerator
+  - it's design to optimize the flow of data from your users to aws infrastructure.
+  - unicast ip : one ip address is assigned to one interface.
+  - any cast ip : one ip address is assigned to multiple interfaces.
+    - routing moves traffic to the closest location.
+  - aws global accelerator start with 2 X any cast ip address.
+  - Traffic initially uses public internet & enters a Global Accelerator edge location.
+  - cloudfront move the content closer to the user by caching it in edge location.
+  - global accelerator move the aws network closer to the user as close as possible.
+  - Transit over AWS backbone to 1+ locations.
+  - it's a network layer can work on any (TCP/UDP) application including web apps, cloudfront only work with http/https.
+
+- Direct Connect
+  - A physical connection(1, 10 or 100 Gbps) into AWS region (private & public)
+  - Business Premises => Direct Connect Location => AWS Region
+  - when you order Direct Connect you actually order a port allocation at a DX location. and aws authorize you to connect to the port.  AWS doesn't provide the physical connection.
+  - Cost: Port Hourly Cost & outbound data transfer cost.
+  - time: provisioning time ... physical cables & no resilience.
+  - Low(data doesn't deliver across public internet like vpn) & Consistent latency(1 link at best or ) + high speeds.
+    - the best way to achieve high speed in hybrid environment.
+  - it used to access public aws services or private vpc. - NO public internet access unless you configure a proxy.
+    - Public VIF - access public services: from your premises to (Customer or Partner) 'DX ROUTER' to 'AWS DX ROUTER(the port)' to 'AWS public services'
+    - Private VIF - access private services: from your premises to (Customer or Partner) 'DX ROUTER' to 'AWS DX ROUTER(the port)' to 'Virtual Private Gateway' 'Private Service'
+  - ![dx](images/vpc/direct-connect.png)
+- Transit Gateway
+  - Network Transit hub to connect VPCs and on-premises networks.
+  - significantly reduce the number of connections required to connect many VPCs and on-premises networks.
+  - single network object - HA and scalable.
+  - <b> Attachments </b> - VPCs, VPN, Direct Connect, Peering.
+     - how TGW connect to other network objects within aws and hybrid network.
+  - hybrid network architecture without transit gateway
+    - ![transit-gateway](images/vpc/hybrid-network-architechture-without-transit-gateway.png)
+  - hybrid network architecture with Transit Gateway.
+    - ![transit-gateway](images/vpc/hybrid-network-architechture-with-transit-gateway.png)
+    - it comes with default route table which allow all traffic between attachments. you can create complex routing topology by using multiple route tables.
+  - it supports transitive routing.
+  - it can be used to create global network
+  - you can share it between accounts using AWS RAM(resource access manager: it's a service allow you to share resources between accounts)
+  - Peer with different regions .. same or cross account.
+  - make you avoid full mesh connectivity.
+
+- Reachability Analyzer
+  - ![img_22.png](reachability-analyzer.png)
+  - 0.1$ per reachability analysis.
+
+# Advanced VPC routing
+- ![img_105.png](img_105.png)
+- RT has limit of 50 static routes. and 100 dynamic routes (propagated) when enable this option via virtual private gateway. any route this gateway is aware of will be added.
+- routing rules
+  - ![img_106.png](img_106.png)
+- Gateway route table(in-gress) - applies to gateway object.
+  - allow gateway to route any traffice for our app to another subnet to inspect it before it reach the app.
+    - ![img_107.png](img_107.png)
 
 ---
 # AWS SSM
@@ -5366,182 +5552,6 @@ S3 Glacier Deep Archive
       - Docker-compose.yml: provide a multi-container docker environment.
 ---
 # +300
-## Egress-Only IGW : 
-- a HA by default across all AZs in the region - scales as required.
-  - allow outbound connection only for ipv6.
-    - Default IPv6 Route ::/0 added to RT with eigw-id as target.
-  - IG (IPv6) allows all IPs IN and OUT
-  - NAT is not supported for IPv6
-## VPC Endpoints (Gateway: use routing). VPC object
-  - Interface Endpoint both nearly used in the same way providing the same functionality, but they are used for 
-    different services and the way the achieve the functionality from technical point is different
-  - Provide private access to s3 and DynamoDB
-    - allow private resources in VPC to access s3 and dynamodb without going over the internet.
-    - you create a gateway endpoint(per service per region) and this is created per service per region . ex(s3, us-east-1) and then associate it with one or more subnets in a particular vpc.
-      - it doesn't go into VPC, <b>Prefix List</b> added to route table => Gateway Endpoint
-        - logical entity represent these services .
-        - Gateway Endpoint is not going to a particular subnet or AZ. it's a HA across all AZs in a region by default. 
-      - u just choose the subnet and the route table and the prefix list will be added to the route table automatically.
-  - you can configure <b> Endpoint policy</b> to control what things that can be connected to by the endpoint.
-    - allow it to connect to only subset of s3 buckets.
-  - it can only access services in the same region  .
-  - <b>use case</b> : Prevent Leaky Buckets - S3 buckets can be set to private only by allowing access  only from a gateway endpoint.
-    - you can configure bucket policy to configure only connection from a specific gateway endpoint. 
-  - remember it's a VPC object, so it can be accessed only from within the VPC.
-  - ![img_79.png](img_79.png)
-- ## INTERFACE VPC Endpoints  (use dns)
-  - Provide access to aws public access
-  - historically it's used to private access to anything not s3 and DDB. but now s3 is now supported by interface endpoint.
-  - it's not HA . it's added to a specific subnets - an ENI - not HA .
-     - to ensure HA add one for each AZ you use.
-     - Network access controlled via security groups. 
-       - you cannot do it with gateway endpoint.
-  - Endpoint Policies - can be used
-  - support only TCP and IPv4 only.
-  - ![img_22.png](interface-and-gateway-vpc-endpoint.png)
-  - ![img_22.png](s3-gateway-vs-interface.png)
-  - Uses ***PrivateLink*** : allow external services to be injected into VPC either by aws or by third party. and give it ENI.
-  - 1- Interface Endpoint provides a New service endpoint DNS name.
-    - e.g. vpce-123-xyz-sns.us-east-1.vpce.amazonaws.com
-    - this DNS name is used to access the service. resolved to the private IP of the ENI.
-    - Endpoint Regional DNS
-      - private dns name works with all AZ
-    - Endpoint Zonal DNS
-      - works specifically for one interface endpoint in one AZ.
-  - 2- <b>PrivateDNS overrides </b>the default DNS for services
-    - application in private subnet will not require any changes to access the service. it will access public service with the normal DNS name.
-    - ![img_80.png](img_80.png)
-### VPC PEERING
-  - to create private direct encrypted network link between <b>two</b> VPCs
-  - works same/cross-region and same/cross-account
-    - there is some limitation when running vpc peering between vpc in different region.
-  - you can (optionally) enable public Hostnames resolve to private IPs  .
-    - this mean you can use the same dnsname to locate services weather it's in the peered vpc or not .
-    - same region SG's can reference peer SGs.
-      - in different region u need to use IP ranges.
-  - VPC peering does not support <b> transitive peering</b> .
-    - if A is peered with B and B is peered with C, A cannot talk to C.
-    - u need to create a peering between A and C. 
-- when you creating vpc peering connection between 2 vpc, you create a logical gateway object inside each vpc. 
-  - **you need to configure route table to route traffic to the other vpc. SGs & NACLs are also used to control traffic.**
-- VPC Peering connection cannot be created where there is overlap in the VPC CIDRs - ideally never use the same address range in multiple VPCs.
-  - ![vpc-peering](images/vpc/vpc-peering.png)
-
-## BGP
-- it's a routing protocol, used to control how data flow from point A to B.
-- Direct connect & dynamic vpn both utilize BGP.
-- it's made up self manged network(AS) Autonomous System.
-  - AS : it could be a large network or a collection of routers but in either way it controlled by one single entity.
-  - from BGP perspective it's a black box. it only concerns about routing in and out in your AS.
-- each AS has a unique number. (ASN) allocated by IANA(0-64511)public or ARIN(64512-65535) private.   
-  - ASN is used to identify the AS and to exchange routing information.
-- BGP operates over tcp/179 - it's reliable and connection oriented.
-- it's not automatically configured. u need to configure peering between two AS manually.
-  - when the peering is established, the two AS exchange routing information. (about network topology)
-- BGP is a path-vector protocol it exchanges the best path to a destination between peers ... the path is called the ASPATH.
-  - it doesn't exchange every possible path to a destination. only the best path.  
-  - it doesn't take into account the link speed or condition. it only takes into account the number of hops.
-- in complex hybrid infrastructure
-  - iBGP = Internal BGP - Routing within an AS
-  - eBGP = External BGP - Routing between AS
-- ![bgp](images/vpc/bgp.png)
-  - in case you want to prioritize longer path over shorter path you can prepend your AS number to the path. to make the shorter path longer.
-  - BGP only advertise the best path to a destination(even if it knows multiple ones). so the change will be propagated to other AS.
-
-### Site-to-Site VPN
-- ![img_49.png](img_49.png)
-  - ![img_50.png](img_50.png)
-- setup
-    - ![img_22.png](img_22.png)
-      - in creating the customer gateway you need to provide the certificate arn which allow aws to connect to your site.
-    - ![img_24.png](img_24.png)
-- vpn cloudhub: 
-  - ![img_25.png](vpn-cloudhub.png)
-
-## IPSEC 
-- a group of protocols working together to secure the communication between two hosts.
-- it sets up secure tunnels across insecure networks.
-  - between two peers (local and remote)
-    - 2 different business sites.
-- Provide Authentication, Integrity, Confidentiality.
-- Interesting traffic is the one which much certain defined rules.
-  - vpn tunnel is created for interesting traffic.
-- IPSEC has two main phases
-  - IKE Phase 1 (Slow & heavy)
-    - ![ipsec-vpn-ike-phase-1](images/vpc/ipsec-vpn-ike-phase-1.png)
-    - it's a protocol for how the keys will be exchanged between the two peers.
-    - Authenticate - Pre-shared key or certificate
-    - Using Asymmetric encryption to agree on, and create a shared symmetric key.
-    - IKE SA(security association) Created (end of phase 1) phase 1 tunnel
-  - IKE Phase 2 (fast & agile) 
-      - 1 - the peer send the cipher suite it supports and the other peer choose the best one.
-      - ![ipsec-vpn-ike-phase-2](images/vpc/ipsec-vpn-ike-phase-2.png)
-    - Uses the keys agreed in phase 1.
-    - Agree encryption method, and keys used for bulk data transfer.
-    - IPSEC SA created   phase 2 tunnel run over phase 1 
-  - the reason for two phases is its possible for phase 1 to be established then the phase 2 created, used, and then turned down. and then phase 2 created again when interesting traffic is detected.
-
-  - two type of vpn(policy based vpn & route based vpn)
-    - The difference is how they match interesting traffic.
-    - policy-based VPNs
-      - rule sets match traffics => a pair of SAs
-        - different rules/ different security settings.
-    - Route Based VPNs
-
-
-- AWS Global Accelerator
-  - it's design to optimize the flow of data from your users to aws infrastructure.
-  - unicast ip : one ip address is assigned to one interface.
-  - any cast ip : one ip address is assigned to multiple interfaces.
-    - routing moves traffic to the closest location.
-  - aws global accelerator start with 2 X any cast ip address.
-  - Traffic initially uses public internet & enters a Global Accelerator edge location. 
-  - cloudfront move the content closer to the user by caching it in edge location.
-  - global accelerator move the aws network closer to the user as close as possible.
-  - Transit over AWS backbone to 1+ locations.
-  - it's a network layer can work on any (TCP/UDP) application including web apps, cloudfront only work with http/https.
-
-- Direct Connect
-  - A physical connection(1, 10 or 100 Gbps) into AWS region (private & public)
-  - Business Premises => Direct Connect Location => AWS Region
-  - when you order Direct Connect you actually order a port allocation at a DX location. and aws authorize you to connect to the port.  AWS doesn't provide the physical connection.
-  - Cost: Port Hourly Cost & outbound data transfer cost.
-  - time: provisioning time ... physical cables & no resilience.
-  - Low(data doesn't deliver across public internet like vpn) & Consistent latency(1 link at best or ) + high speeds.
-    - the best way to achieve high speed in hybrid environment. 
-  - it used to access public aws services or private vpc. - NO public internet access unless you configure a proxy.
-    - Public VIF - access public services: from your premises to (Customer or Partner) 'DX ROUTER' to 'AWS DX ROUTER(the port)' to 'AWS public services'
-    - Private VIF - access private services: from your premises to (Customer or Partner) 'DX ROUTER' to 'AWS DX ROUTER(the port)' to 'Virtual Private Gateway' 'Private Service'
-  - ![dx](images/vpc/direct-connect.png)
-- Transit Gateway
-  - Network Transit hub to connect VPCs and on-premises networks.
-  - significantly reduce the number of connections required to connect many VPCs and on-premises networks.
-  - single network object - HA and scalable.
-  - <b> Attachments </b> - VPCs, VPN, Direct Connect, Peering.
-     - how TGW connect to other network objects within aws and hybrid network.
-  - hybrid network architecture without transit gateway
-    - ![transit-gateway](images/vpc/hybrid-network-architechture-without-transit-gateway.png)
-  - hybrid network architecture with Transit Gateway.
-    - ![transit-gateway](images/vpc/hybrid-network-architechture-with-transit-gateway.png)
-    - it comes with default route table which allow all traffic between attachments. you can create complex routing topology by using multiple route tables.
-  - it supports transitive routing.
-  - it can be used to create global network
-  - you can share it between accounts using AWS RAM(resource access manager: it's a service allow you to share resources between accounts)
-  - Peer with different regions .. same or cross account.
-  - make you avoid full mesh connectivity.
-
-- Reachability Analyzer
-  - ![img_22.png](reachability-analyzer.png)
-  - 0.1$ per reachability analysis.
-
-# Advanced VPC routing
-- ![img_105.png](img_105.png)
-- RT has limit of 50 static routes. and 100 dynamic routes (propagated) when enable this option via virtual private gateway. any route this gateway is aware of will be added.
-- routing rules
-  - ![img_106.png](img_106.png)
-- Gateway route table(in-gress) - applies to gateway object. 
-  - allow gateway to route any traffice for our app to another subnet to inspect it before it reach the app.
-    - ![img_107.png](img_107.png)
 --
 udacity temp :
 
@@ -5619,7 +5629,7 @@ associated with the instance that the code is running on, like an EC2 instance, 
 2- Java System Properties.
 3- Default credentials Profile.
 4- if you're running inside a container using Amazon ECS, if so it use credentials supplied by ecs.
-5- check instacne profile credentials(IAM ROLE), role associated with the instance code run on.
+5- check instance profile credentials(IAM ROLE), role associated with the instance code run on.
 
 AWS SDK for Java uses unchecked exceptions:
 1- There are two main categories of exceptions to be aware of.

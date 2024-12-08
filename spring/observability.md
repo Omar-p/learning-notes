@@ -1,0 +1,53 @@
+- Observability:
+  - a way to gain insights into our application based on outputs(log, metrics, traces) it generates.
+- Micrometer
+  - started as metrics library on jvm, inspired by netflix library `Spectator`.
+  - 
+- spring boot 3
+  - by default, spring boot 3 is observing a lot of things behind the scenes for us. (controller actions, http clients..)
+---
+### DevOps Metrics
+- **Mean Time to Detection (MTTD)**
+  - MTTD is the amount of time, on average, between the start of an issue and when the team become aware of it.
+- **Mean Time to Resolution (MTTR)**
+  - MTTR is the amount of time, on average, between when an issue is detected and when it is resolved.
+---
+## Methods of collecting Metrics
+- RED (service layer) (Request Oriented)
+  - Rate (throughput): Requests per second
+  - Errors: failed requests i.e., HTTP 500
+  - Duration: latency or Transaction Response Time
+- USE (infrastructure layer) (Resource Oriented)
+  - Utilization: how busy the resource is i.e., CPU, Memory
+  - Saturation: what resources or #resources that are utilized 100% i.e., disk, network
+    - ex: network queue length Zero = Good.
+  - Errors: how many errors the resource is generating
+- Four Golden Signals(by Google: if you can only measure four metrics of user-facing system, focus on these four metrics) [RED+Saturation]
+  - Latency
+  - Traffic (throughput)
+  - Errors
+  - Saturation
+- Core Web Vitals
+  - LCP(Largest Contentful Paint): measures loading performance. (2.5s) how long it takes for a user to feel that the page is loaded.
+  - FID(First Input Delay): measures interactivity. (100ms)  how long it takes for a user to interact with the page. (input field, button)
+  - CLS(Cumulative Layout Shift): measures visual stability. (0.1
+# Udemy
+- Telemetry Data: data that is collected for monitoring, tracing, and logging.
+  - it's used to find where the problem might be.
+  - Type of telemetry data(MELT):
+    - Metrics: are used to record the state of the system at a particular point in time.
+      - an aggregated value representing events in a period of time. (how many orders placed in the last 5 mins)
+      - it's great when comparing the system's state over time.
+    - Events: are used to record discrete occurrences in the system. (order placed)
+      - it validates that an expected event happened.
+    - Logs: a very detailed representation of an event.
+      - eventL (order placed) -> log: (order placed by user 123, order id: 123, payment method: credit card)
+    - Traces: are used to record the flow of a request through the system.
+- Monitoring: is collecting and visualizing data about systems regularly so the system's health can be viewed and tracked.
+  -  3 Questions of the monitoring:
+    - Is the service up?
+      - health endpoint returns 200
+    - Is the service functioning as expected?
+      - business metrics: number of orders, number of users
+    - Is the service performing well?
+      - latency, throughput, error rate

@@ -1,5 +1,5 @@
 ## Gathering Requirements
-- ask about the functionallity
+- ask about the functionality
   - ex: youtube. {comment section, search ..}
   - ex: fb newsfeed {posts{iamge|videos}, comments}
 - the scale of the system
@@ -15,7 +15,7 @@
     - stage 1: storage
         - storage of images/videos
         - storage of user data
-    - stage 2: core functionallity
+    - stage 2: core functionality
         - profile creation
         - follow/unfollow
     - stage 3: posting

@@ -1,3 +1,12 @@
+- Giving your password to 3rd party app is a bad idea. you cannot control what they do with it, even if it's not a third party app, and another app from the same company, if you have an API that takes a
+  username and password and returns some sort of session ID or token, and you let all your app developers use that to log users in, well, you can't really tell the difference between
+  which apps are using the API. That request looks the same from every app, but even worse, how do you know that it's actually your app at all?; Adding multi-factor authentication ? you have to add it to every app.
+  what OAuth does at a high level is requires that every application sends the user out to the OAuth server to log in there, and then redirects them back to the app so the app
+  can get tokens. And the key thing here is this redirect step. It means the user actually leaves the application and they go type in their password at
+  the OAuth server instead of ever giving their password to the application. So as soon as we avoid the application ever  seeing the user's password, it solves all of
+  these worries and uncertainties we have before. It provides security against untrusted third party apps and also makes first party apps much more flexible.
+  This way, if you wanted to add MFA, you don't need to make any changes to the apps at all, since you just turn it on at your OAuth  server and it would immediately be enabled across all of your applications.
+--------
 # BCP -> best current practice.
 - in OAuth 1.0 api server and authorization server were sharing a lot of information.
 - in oauth 2.0 we separate them to make the app easier to scale.
@@ -5,33 +14,55 @@
 - oauth 1.0 require use of api key which is not safe on mobilephone.
 
 - oauth vs openid
-  - oauth itself is designed for apps to get access to API. all they need the ability to access the API <br> The application doesn't need to know who the user is that's using that application. analog[hotel & card].
-
-  - there's nothing in oauth that communiactes user information, that's all added externally. Now, the main <br> way that's is using OpenID Connect. So OpenID connect takes OAuth as a foundation and it adds in user identity information on top.<br> So u can imageine the same framework we're going to learn about of how data moves around and who the players are in the OAuth transaction <br> that's all the same with OpenID connect. we just added the concept of user information into the flow as well.
+  - oauth itself is designed for apps to get access to API, all they need the ability to access the API <br> 
+    The application doesn't need to know who the user is that's using that application. analog[hotel & card].
+    The door(resource server) does not need to know who is using the card(access token), it just needs to know that the card is valid,
+    The person on the front desk(Authorization server) needs to know who you are, check your ID to give you the card.
+    No need for encoding the person data who use the card in the card itself. you may need to encode the list of doors that the card can open and expiration date.
+  - there's nothing in oauth that communiactes user information, that's all added externally. Now, the main <br> way that 
+    is using OpenID Connect. So OpenID connect takes OAuth as a foundation, and it adds in user identity information on top.
+    <br> So u can imagine the same framework we're going to learn about of how data moves around and who the players are in 
+    the OAuth transaction<br> that's all the same with OpenID connect. we just added the concept of user information into the flow as well.
     - So OpenID connect is an extension of OAuth and that extension provides a mechanism where the OAuth server <br> can actually communicate data about the user back to the application. and the main way it does that is with a new kind of token.
     - SO OAuth issues access tokens to apps, OpenID Connect issues (ID token)[statement about the user] to apps.
 
-  - briefly, OAuth is about accessing the app, Open ID is about identifying user
+  - briefly, <b>OAuth is about accessing the app, Open ID is about identifying user</b>
 
 ---
 
-# Roles:
-- client
-  - client need to authenticate with the authorization server by its credentials.
-    - based on the client's ability to be deployed with a client secret
-      or some sort of credentials that it can then use as authentication during the
-      OAuth exchange.:
-      - public
-        - In mobile app or SPA, we don't have the ability to include secret in the app, <br> because users can see the secrets.[SPA (view-source in browser), there are tools can extract strings from app binaries].<br>Essentially, the diffrence is any time the application will be running code on a device that the user controls, we cannot include secret in the applciation.[Apple TV, IoT ...]
-      - credentialed client
-        - app has credentials but whose identity has not been confirmed by authorization server
-      - confidential
-        - can be deployed with a client secret where that secret won't be visible to anybody using the app.<br>[normal for apps running on server, (API keys can be put in the app config or ENV VAR) and expecting them remain secret].
-- Resource server
-- Authorization Server
-- Resource owner
-- user agent [the device the resource owner use]
+## Roles:
+  - 1. client(app) -> the application that wants to access the user's data from the resource server.
+     - client need to authenticate with the authorization server by its credentials.
+       - based on the client's ability to be deployed with a client secret <br>
+         or some sort of credentials that it can then use as authentication during the <br>
+         OAuth exchange.:
+         - public
+           - In mobile app or SPA, we don't have the ability to include secret in the app, <br> because users can see the secrets.<br>
+               - [SPA (view-source in browser), there are tools can extract strings from app binaries].<br>Essentially, the difference is any time the application will be running code on a device that the user controls, we cannot include secret in the application.[Apple TV, IoT ...]
+         - credentialed client
+           - app has credentials but whose identity has not been confirmed by authorization server.
+           - The simplest example of this would be a mobile app where the first time it launches, it uses dynamic client registration to
+             get a client secret. That first request can't contain any authentication because there would be no way to deploy that authentication into 
+             the app, so anybody can mimic that first registration step to get a client secret.
+             - so the auth server can use policies of an unconfirmed, unidentified client when deciding token lifetimes. 
+               But it can know that refresh tokens are always being redeemed by the same client instance. (the first request the auth server can't be sure who is making it, but after that, it can be sure that the same client is making the next request)
+         - confidential
+           - can be deployed with a client secret where that secret won't be visible to anybody using the app.<br>[normal for apps running on server, (API keys can be put in the app config or ENV VAR) and expecting them remain secret].
+         - the authorization server might have different policies that make it act differently depending on the type of client making
+           <br>the request. For example, a confidential client that is also a first party app might have the consent screen skipped when it starts a flow because the authorization server can be sure that only the real application can actually complete that flow and end up with an access token.  
+         - However, for a first party public client, an attacker could mimic that application by copying its client ID and starting a flow.
+            <br> And if they can control the redirect URL they could end up with access tokens of the authorization server thought were being delivered to the real application.
+            So in that case, you may want to still include the consent screen to get the user involved in that flow. Some of the other things the authorization server might do differently, depending on the client type, is things like whether to
+            include refresh tokens or changing the token lifetimes to mitigate risk. All of these things are reasons to use client authentication when possible. 
+  - 2. Resource server (API)
+  - 3. Authorization Server
+    - instead of giving the client the user's password:
+      - the user authenticate with the auth server, and the auth server gives the client a token that represents the user's permission to access the resource.
+  - 4. Resource owner (user)
+  - 5. user agent [the device the resource owner use: running the app(mobile) or accessing the app(browser)]
 
+- in smaller system, the auth server and the resource server can be the same server. but, it has 2 different roles.
+- Remember, never put a client secret into a mobile app or a single page app.
 ---
 
 # User Consent:
@@ -43,10 +74,12 @@
     - POST url<br>grant_type=password&<br>username=USERNAME&<br>password=PASSWORD&<br>client_id=CLIENT_ID<br>
 
 - what can happen ?
-  - auth server can not detect if the owner who is issuing the request now, the client may store it and issue the token or may ask for more permission with the password grant.
+  - auth server can not detect if the owner who is issuing the request now, the client may store it and issue the token 
+    or may ask for more permission with the password grant.
 
   - we need to make sure that the owner who is sitting now and issuing the requst right now.
-    - the client first directs the user to the auth server. the owner authenticate himself, approves the request after he see the consent screen and the owner directed to the client app.
+    - the client first directs the user to the auth server. the owner authenticate himself, approves the request after 
+      he see the consent screen and the owner directed to the client app.
 
      another problem with password grant if we want to add multifactor authentications
      we need to build that in all our app from scratch. -> by redirecting the user to auth server
@@ -58,139 +91,121 @@
 
 ---
 
-Back channel vs Front channel(using address bar to send info between two other computer) ] describe how data transfer between systems.
+#### Back channel vs Front channel(using address bar to send info between two other computer) ] describe how data transfer between systems.
 
-Back channel is the "normal" way or secure way over https.
-so the server is authenticated [we know what server we're talking to by validating the certificate]
+- Back channel is the "normal" way or secure way over https.
+    so the server is authenticated [we know what server we're talking to by validating the certificate]
 
-Front Channel: no direct link between client & server.
+- Front Channel: no direct link between client & server.
+  - [we talk now about the connection between client-app & authorization server]
+  with password grant we can use back channel but there's no way to confirm the user
+  actually consented that request. so we use the front channel, it's a way to insert
+  the user into the negotiation between the client and the authorization server. that way,
+  the auth server knows the user is actually present and has given their permission[user consent above].
 
-[we talk now about the connection between client-app & authorization server]
-with password grant we can use back channel but there's no way to confirm the user
-actually consented that request. so we use the front channel, it's a way to insert
-the user into the negotiation between the client and the authorization server. that way,
-the auth server knows the user is actually present and has given their permission[user consent above].
-
-the flow: - client-app needs to first tell the auth server what is trying to do. [CLIENT_ID, SCOPE, RESOURCES TO ACCESS] - the client-app redirects the user to the auth server with all info in the first request in
-the query string of a url because no of these info is sensitive.
-
-- user logs in and approves the request, the auth server is ready to send an access token back to the client-app and
-  send the user back to the client-app. if it were to send the access token back in the
-  redirect, that would be like sending an access token in the mail.
-  - the auth server wouldn't really have any guarantee that it was actually
-  delievered back to the app and the app would't really have any guarantee that
-  the access token is really from the auth server.
-  but this is method is actually described in the core of OAuth spec, but it is
-  not recommanded any more because of lack of security of this flow. [Implicit flow]
-  using front channel for both req the app makes, as well as delivering the access token.
-  - implicit flow was included in OAuth because it used to be the case that browsers had
-    no other option. the solution is to deliver the access token in the back channel inseated
-    but remember that the back channel is an HTTPS req from client to a server. [POST req to
-    OAuth server]. why ?
-    it used to be the case that cross-origin requests weren't possible until browsers
-    built in support for Cross Origin Resource Sharing or CORS.
-
+implicit flow(not recommended) : 
+  - client-app needs to first tell the auth server what is trying to do. [CLIENT_ID, SCOPE, RESOURCES TO ACCESS] 
+  - the client-app redirects the user to the auth server with all info in the first request in the query string of the url because no of these info is sensitive.
+  - user logs in and approves the request, the auth server is ready to send an access token back to the client-app and
+    send the user back to the client-app. if it were to send the access token back in the redirect, that would be like 
+    sending an access token in the mail.
+  - the auth server wouldn't really have any guarantee that it was actually delivered back to the app and the app would not 
+    really have any guarantee that the access token is really from the auth server. but this is method is actually described 
+    in the core of OAuth spec, but it is not recommended any more because of lack of security of this flow. [Implicit flow]
+  - it works by using front channel for both req the app makes, and delivering the access token.
+    - implicit flow was included in OAuth because it used to be the case that browsers had
+      no other option. the solution is to deliver the access token in the back channel instead
+      but remember that the back channel is an HTTPS req from client to a server. [POST req to
+      OAuth server]. why was it not possible to do that in the past?
+        - it used to be the case that cross-origin requests weren't possible until browsers
+        built in support for Cross Origin Resource Sharing or CORS.
+  - back channel means a client to a server https connection.
 ---
 
-application identity:
-each client-app has its own identifier [client-id].
-app uses it to identify itself throughout the OAuth flow.
-. without app secret[password] there isn't really ever the assurance
+#### Application Identity:
+- each client-app has its own identifier [client-id].
+- app uses it to identify itself throughout the OAuth flow.
+- without app secret[password] there isn't really ever the assurance
 that the application using the client ID really is that application.
 
-previously: in the final step. if the auth server instead of sending the access token send
-a coupon[authorization code] with a short expiration date. and that coupon could
-be exchanged for an access token[with client secret to identify the client],
-but only once and only within a short time period.
-using that will require app go use the back channel to redeem it.
+-- 
+- Instead of sending the access token in the front-channel like `the implicit flow`,
+  the auth server send a coupon `authorization code` with a short expiration date. and that coupon could be exchanged 
+  for an access token `with client secret to identify the client`, but only once and only within a short time period.
+  - using the `authorization code` will require the client-app to go to use the back channel to redeem it.
 
-possibly, the authorization code can be stolen or copied, which means the server can't really
-ever be sure whoever is redeeming that code is the real app. to verify it we need a client-secret.
+- possibly, the authorization code can be stolen or copied, which means the server can't really ever be sure whoever 
+  is redeeming that code is the real app. to verify it we need a client-secret.
+  - But with public client(mobile-app, spa) we cannot store client secret.
+    solution: PKC-E[proof key for code exchange] extension, before client send the first
+    request to start the flow, it actually makes a unique secret for each request. and it uses that secret to
+    start flow, and again when it redeems the authorization code. and that let the auth server
+    know that the thing redeeming the code is who started the flow preventing authorization codes
+    from being redeeming by other app if it has stolen. *But* that don't prove the app identity, some attack 
+    may impersonate the client-app and get the access token.
 
-but with public client we cannot store client secret.
-solution: PKC-E[proof key for code exchange] extension, before client send the first
-request, it actually make a unique secret for each request. and it uses that secret to
-start flow. and again when it redeems the authorization code. and that let the auth server
-know that the thing redeeming the code is who started the flow preventing authorization codes
-from being redeeming by other app if it stolen. but that don't prove the app identity ..
-some attack may impersonate the client-app and get the access token.
+    - Without a client secret, The OAuth flow is performed with information that's entirely public.
+      - So if someone really wanted to, they could start an OAuth flow with the public client of some other app. and then can exchange auth code with access token.
+        - we need another aspect of identity, REDIRECT URI.
 
-without a client secret, The OAuth flow is performed with information that's entirely public.
-so if someone really wanted to, they could start an OAuth flow with the public client of
-some other app. and then can exchange auth code withe access token.
-
-So we need another aspect of identity, REDIRECT URI.
-
-     the location of the client where the authorization server is going to
-     send the user back to after they log in. and that's where authorization code
+- REDIRECT URI: the location of the client where the authorization server is going to send the user back to after they log in. and that's where authorization code
      will be delivered in the front channel.
+  - the only hint of confirming app identity if we can have a client secret is the redirect URI, so they are registered with the auth server.
 
-     a custom url scheme can't be used as any form of application identity. [not unique]
-
-     in recent years, mobile platforms have also started to allow native apps to take
-     over handling URL patterns for URLs. app developer does have to prove they control
-     the real domain. Apple and Google won't let u publish an app into their stores using
-     domain not own to u. [this is the best we have for public client]
-
-     that ensures that the auth server will only redirect to registered URLs for a given
-     client id.
+    - a custom url scheme can't be used as any form of application identity. [not unique], ex: `myapp://callback`
+      - because there is no global registry of url schemes, so there's no way to know if the app that registered the url scheme is the same app that's using it.
+      - HTTPS urls are considered to be globally unique. in recent years, mobile platforms have also started to allow native apps to take
+        over handling URL patterns for URLs. app developer does have to prove they control the real domain. Apple and Google won't let u publish an app into their stores using
+        domain not own to u. [this is the best we have for public client]. (ios: Universal Links , android: App Links)
+        that ensures that the auth server will only redirect to registered URLs for a given client id.
 
 ---
 
-Registering an Application:
+### Registering an Application:
 
 - register app identity to the authorization server
-- if will service with a public api, u can do it yourself.
-  if u use a company or enterprise OAuth server, then the registeration
-  step might not be self-service like that. and u 'll need to get an administrator
+- if you will service with a public api, u can do it yourself.
+  if u use a company or enterprise OAuth server, then the registration step might not be self-service like that. and u 'll need to get an administrator
   to go register the app for u.
 
 - u enter some info[name, logo, redirect urls]
   [may ask about the type of the app. depending on ur choice, it may
   decide different policies around whether refresh token are issued or might enable CORS
-  header for JS apps] about ur app and then get  
-  a client_id[public u can put it in src code], and u may or may not get back to
+  header for JS apps] about ur app and then get a client_id[public u can put it in src code], and u may or may not get back to
   a client_secret as well.
 
-- Entering redirect url is most important steps, some server allow multiple one,
+- Entering redirect url is the most important steps, some server allow multiple one,
   but it's important that u always register at least one.
+  -  with redirect urls u ensure that attackers can't start flow with ur client-id and then have users sent back to attackers website.
+  - server prevent u from registers urls with wildcard, because that's another factor that attackers have to try to trick users into getting sent
+  to the attacker's website. <-> wildcard or partial matching of redirect urls is a great way to open yourself up to open redirect attack.
 
-  with redirect urls u ensure that attackers can't start flow with ur client-id
-  and then have users sent back to attackers website.
-
-  server prevent u from registers urls with wildcard, because taht's
-  another fector that attackers have to try to trick users into getting sent
-  to the attacker's website. <-> wildcard or partial matching of redirect urls is
-  a great way to open urself up to open redirect attack.
-
-- if the registeration step asked u type of app and u choose a [mobile app|native app|js app]
-  then chances are the registeration process gave u back only a client ID and no client_secret.
-
-  because those type of app cannt protect a client secret.
+- if the registration step asked u type of app and u choose a [mobile app|native app|js app]
+  then chances are the registration process gave u back only a client ID and no client_secret.
+  because this type of app cannot protect a client secret.
 
 ---
 
-Authorization Code flow for web application:
+### Authorization Code flow for web application:
 
 - user want to use the client-app
-- client-app: generate a new random secret[PKCE Code Verifier] and hash it[Code challenge].
-- [client-app use a front channel to ask authorization server through the client not
-  directly]client-app redirect the user to the authorization server to grant client-app
+- client-app: generate a new random secret `PKCE Code Verifier` and hash it`Code challenge`.
+- `client-app use a front channel to ask authorization server through the client not
+  directly`; client-app redirect the user to the authorization server to grant client-app
   access, with the code challenge.
-- user login [do multi factor auth if required] and then server ask them to confirm
-  if he really are trying to log into the client-app.
-- if user confirm, server will response to the user with the authorization code.
-  [take the app's redirect url, adds the authorization code in the query string and
-  and send the user's browser there to deliver that back to the client-app].
-- authorization code sent in front channel so the server don't sure if it will be recieved
+- user login `do multi factor auth if required` and then server ask them to confirm; if he really is trying to log into the client-app.
+- if user confirm, server will respond to the user with the authorization code.
+  `take the app's redirect url, adds the authorization code in the query string and
+  and send the user's browser there to deliver that back to the client-app`.
+- authorization code sent in front channel so the server don't sure if it will be received
   by client-app. so its expiration under 1min and one time used.
 - client-app can now using back channel ask for access_token using the authorization code
-  , client-id and client secret, as well as the plaintext PKCE secret that
-  the client-app generated at start.
+  , client-id and client secret, as well as the plaintext PKCE secret that  the client-app generated at start.
 - authorization server verify the request and if hashing of PKCE code generate the
   same code challenge -> server respond to the client-app server with the access_token.
+  - ![authorization-code-flow](images/oauth/authorization-code-flow.png)
 
-* PKCE was first was the public client app, but it's now recommanded to used even for
+* PKCE was first used by the public client app, but it's now recommended to used even for
   confidential app-client because u can swap the auth codes and end up logged into
   somebody else account with the real application, app and auth server wouldn't know
   an attack was happened. [Authorization code Injection]
@@ -200,72 +215,44 @@ Authorization Code flow for web application:
   - PKCE Code Verifier -> string 43-128 characters long
   - Code challenge -> base64url(sha256(code_verifier))
 
-auth url
-https://server.com/auth?
-response_type=code& <- tell server u 're doing authorixation code flow.
-client_id=CLIENT_ID&
-redirect_uri=REDIRECT_URI& <- REDIRECT_URI has to match one of u enter in registeration.
-scope=photos&
-state=XXXXX& <- originally used for CSRF protection, but PKCE provide that protection as
-well. so u can use it in soring app specific state. like which page to redirect after they
-login, like cart or checkout. this is only save if u 're sure that OAuth server
-suppoert PCKE.
-code_challenge=XXXXXXXXXXXX&
-code_challenge_method=S256
+- Auth url
+  - `https://server.com/auth?<br/>
+  response_type=`code` <- tell server you're doing authorization code flow.<br/>
+  &client_id=CLIENT_ID <br/>
+  &redirect_uri=REDIRECT_URI <- REDIRECT_URI has to match one of u entered in registration.</br>
+  &scope=photos<br/>
+  &state=XXXXX <- originally used for CSRF protection, but PKCE provide that protection as  well. so u can use it in soring app specific state.  like which page to redirect after they log in, like cart or checkout. this is only safe if you're sure that OAuth server support PCKE.<br/>
+  &code_challenge=XXXXXXXXXXXX<br/>
+  &code_challenge_method=S256<br/>
+  - ![img.png](img.png)
 
-client won't see user until the user confirm the access and redirected to the client-app.
+  - client won't see user until the user confirm the access and redirected to the client-app.
 
-if error happened
-https://example.com/redirect?
-error=access_denied&
-state=XXXXX
-else
-https://example.com/redirect?
-code=AUTH_CODE_HERE&
-state=XXXX
+  - if error happened:
+      - ![img_1.png](images/oauth/error-response-for-authorization-code.png)
+    - else
+      - ![img_2.png](images/oauth/response-for-authorization-code-request.png)
+      - for `csrf` u should check the state value == the state u generate when u redirect user to authorization server
 
-- for csrf u should check the state value == the state u generate when u redirect user to
-  authorization server
+  - The back channel request for exchanging the authorization code with the access toke.
+    - client-app send a POST request with some parameters, different server may expect this either in the body or as a http basic auth header.
 
-client-app send a POST request with some parameters, different server may expect
-this either in the body or as an http basic auth header.
+    - ![img_3.png](images/oauth/back-channel-exchanging-the-authorization-code.png)
 
-POST https://server.com/token
-grant_type=authorization_code&
-code=AUTH_CODE_HERE&
-redirect_uri=REDIRECT_URI&
-code_verifier=VERIFER_STRING&
-clinet_id=CLIENT_ID&
-client_secret=CLIENT_SECRET
+    - if successes, server response with access token and refresh token.
+      - ![img_1.png](images/oauth/success-response-with-access-token.png)
+      - exchanging the refresh token:
+        - ![img_2.png](images/oauth/exchanging-refresh-token.png) 
 
-if successed
-server response
-{
-"token_type": "Bearer",
-"access_token": "afslfjkfjklfdsa",
-"expire_in": 3600,
-"scope": "photos",
-"refresh_token": <- optional  
- }
-
-using the refresh token
-
-POST https://server.com/token
-grant_type=refresh_token&
-refresh_token=REFRESH_TOKEN
-clinet_id=CLIENT_ID&
-client_secret=CLIENT_SECRET
-
-if it fail, u should attempt a new authorization flow.
-
-using PKCE to protect against authorization code injection attacks, is considered a best
-practice in OAuth 2.1. if the server not support it u can normally send the code_verifier
-parameters and server will ignore it. and when server support that. now u don't need to
-modify ur code. so u make sure using random state value to protect against csrf attack.
+        - if it fails, u should attempt a new authorization flow.
+  - using `PKCE` to protect against authorization code injection attacks, is considered a best
+    practice in OAuth 2.1. if the server not support it u can normally send the code_verifier
+    parameters and server will ignore it. and when server support that. now u don't need to
+    modify ur code. so u make sure using random state value to protect against csrf attack.
 
 ---
 
-Flow for native app:
+### Flow for native app:
 
 - we cannot use client_secret because, the app will run on the user agent.
   so he can use tool to decompile the src code and extract the client_secret
@@ -276,52 +263,36 @@ Flow for native app:
   send the user to after login].
 
 - in mobile apps, we lose a lot of protections that are built into the browser. so
-  in a mobile app, 1 - u start in the app. 2 - the app launched an in-app browser to
-  the authorization server, which is fine, but then the auth server sends a redirect to
-  the app. But in that caase, there's a chance that redirect could be intercepted depending
-  on how it works.
+  in a mobile app, 
+  - 1 - u start in the app. 
+  - 2 - the app launched an in-app browser to the authorization server, which is fine, but then the auth server sends a redirect to
+    the app. But in that case, there's a chance that redirect could be intercepted depending on how it works.
 
-  1- Custom URL scheme : start with app name example://.. but there is no registry for that
-  so anyone can pick any url and that cannot be used as identity of the client-app.
-  2 - Claim URL Pattern [deep linking] : the mobile app can claim url pattern, including a
-  full domain name or even path. once that's registered, anytime any url from another
-  app or browser. your app will lanuch instead. [when u click on fb link, android open
-  facebook app]
-  what make option 2 more secure is that in order for an application to claim a url
-  pattern, the app developer has to actually prove that they control that domain name.
+    - option one : Custom URL scheme : start with app name example://.. but there is no registry for that so anyone can pick any url and that cannot be used as identity of the client-app.
+    - option two : Claim URL Pattern [deep linking(universal link, app link)] : the mobile app can claim url pattern, including a full domain name or even path. once that's registered, 
+          anytime the url visited from another app or browser. your app will launch instead. [when u click on fb link, android open facebook app]
+  - what make option 2 more secure is that in order for an application to claim an url pattern, the app developer has to actually prove that they control that domain name.
+    - there are way this can fail. so we still don't trust the redirect URLs in mobile apps quite as much as we do in a browser environment. ---> so we use PKCE
 
-  there are way this can fail. so we still don't trust the redirect URLs in mobile apps
-  quite as musch as we do in a browser environment. ---> we use PKCE
+#### browser security for native app:
 
-browser security for native app:
-
-- how the mobile app launches the browser to the
-  OAuth server to start the flow is one of the most
-  important parts about security of doing OAuth in a mobile env.
-
-- mobile app now would embed a web view into the apps that the user
-  never left that app[open a browser switch to it then back to app (the old way)].
+- How the mobile app launches the browser to the  OAuth server to start the flow is one of the most important parts about security of doing OAuth in a mobile env.
+- mobile app now would embed a web view into the apps that the user never left that app[open a browser switch to it then back to app (the old way)].
 - problem with web view:
-  - Not a real browser so the user doesn't see an address bar. just see web page
-  framed into the app. [the user cannot verify if that is the actual auth server]
-  - No shared cookies with the system. the app has full control over web view, and if it
-  did share cookie with the system browser or other apps, data would link between
-  apps. -> if u logged in auth server in safari and launch the app and got web view to
-  auth server, u wouldn't be logged in the app because it doesn't share cookies with
+  - Not a real browser so the user doesn't see an address bar. just see web page framed into the app. [the user cannot verify if that is the actual auth server]
+  - No shared cookies with the system. the app has full control over web view, and if it did share cookie with the system browser or other apps, data would link between
+  apps. -> if u logged in auth server in safari and launch the app and got web view to  auth server, u wouldn't be logged in the app because it does not share cookies with
   the system. [UX now worse because user is going to type their pass every time that open up]
-  - App has full control over web view so it can extract the credentials. we don't app to
-  touch user passwords.
+  - App has full control over web view so it can extract the credentials. we don't app to touch user passwords.
+- Now, we have APIs which are able to launch a browser in a secure way within the app, which means the user never actually leaves the app.
+  -  IOS (class SFSafariViewController), Android (chrome: Chrome Custom tabs)
+  - benefits:
+    - user never leaves the app
+    - app doesn't have access to that browser so it cannot inspect the content. (sniffing the password)
+    - benefits of using cookies
+    
 
-Now, we have APIs which are able to launch a browser in a secure way within the app,
-which means the user never actually leaves the app.
-. IOS (class SFSafariViewController), Android (chrome: Chrome Custom tabs)
-benefits:
-. user never leaves the app
-. app doesn't have access to that browser so it cannot inspect the content.
-. benefits of using cookies
-.
-
-native app flow:
+#### native app flow:
 
 - remember u cannot ship the app with any credential.
 
