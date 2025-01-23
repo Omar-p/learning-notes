@@ -167,7 +167,7 @@ Cloud Service model
 ---
 ### IAM Access Keys:
 
-- Long-Term Credentials ...[don't change regularly or automatically](for IAM user only)
+- Long-Term Credentials ...(don't change regularly or automatically, for IAM user onlY)
 - IAM USER
   - has 1 username and 1 password[u can create Iam user to used only in cli or api access and those don't need a password] password on IAM user is optional.
   - two access keys [can be created, deleted, made inactive or made active]
@@ -456,7 +456,7 @@ Cloud Service model
   - Application Layer - HTTP Flood
     - ![ddos-application-layer-attack](./images/sysops/ddos-application-layer-attack.png)
     - take advantage of the imbalance of processing between client & server.
-      it's easy for the client to request a web page but it's often very complex for a server to deliver the same page. if u multiply that by a large #of clients, u can easily overwhelm the server.
+      it's easy for the client to request a web page, but it's often very complex for a server to deliver the same page. if u multiply that by a large #of clients, u can easily overwhelm the server.
   - Protocol Attack - SYN Flood
     - A Botnets generate a huge #of spoofed SYN's (connection initiations) the server sees these as normal and sends SYN-ACK's back to the spoofed IPs.
     - the servers will wait for an ACK ..which will never happens as the remote IPs will never respond.
@@ -468,9 +468,12 @@ Cloud Service model
       - ![ddos-volumetric-attack](./images/sysops/ddos-dns-amplification-attack.png)
       - An attackers controls network of compromised devices(botnet) via a control location(often using vpn to digest real location)
       - A botnet exploits a protocol where a response is significantly larger than the request. in this case making a spoofed request(setting the source ip to the target server) to DNS.
-      - The DNS servers respond to the `spoofed IP`, the frontend servers for our application, which is overwhelmed by the amount of data. this prevents legimate customers accessing services.
+      - The DNS servers respond to the `spoofed IP`, the frontend servers for our application, which is overwhelmed by the amount of data. this prevents legitimate customers accessing services.
   - ..often involve large armies of compromised machines(botnets) affected by malware.
+---
 
+### VLANs
+-  
 ---
 
 ### Network Address Translation(NAT):
@@ -482,20 +485,20 @@ Cloud Service model
     - private address space:
       in range 10.0.0.0 can be used in different places, but can't be routed over the internet.
       - to give internet access to private devices, we need to use NAT.
-- provide some securitiy benefits
+- provide some security benefits
 - Translate private IPv4 addresses to public
 - Static Nat - 1 private to 1 (fixed) pubic address (IGW) [in NAT table 1:1 private:public]
   - translate from 1 specific private ip address to 1 specific public address[this how IGW within aws works]
   - used when 1 public ip need to be consistent.
 - Dynamic NAT - 1 private to 1st available public[from address pool]
-  - same as static but a public ip is not permnent for a device, it's allocated temporarly from a pool.
+  - same as static but a public ip is not permanent for a device, it's allocated temporarily from a pool.
   - if a device from a private network attempt to access the internet and no available public ip,
     this access will fail
   - when we have large #of private ip address and want them all to have internet access via public IPs.
     but when we have less public ip addresses than private ip addresses.
 - Port Address Translation(PAT) - many private to 1 public (NATGW)
   - allow a large #of private devices to share one public address, it's how the AWS gateway functions\
-    within AWS environment, it has a many to one mapping architecture.
+    within AWS environment, it has a many-to-one mapping architecture.
   - THe NAT Device record the src(private) and src Port. it replaces the src IP with the
     single public IP and a public source port allocated from a pool which allows IP overloading(many to one)
     PAT record the mapping in the NAT table, to translate the incoming packet from the internet to its
@@ -1043,15 +1046,16 @@ CloudFormation:
 # AWS Config
 
 - Record Configuration changes over time on resources.
-- Auditing of changes, compliance with standards.
+- it's great for Auditing of changes, compliance with standards.
 - <b>Does not prevent changes happening</b> ... no protection.
   - but it can help with remediation.
 - Regional Service .. support cross-region and account aggregation.
 - Changes can generate SNS notifications and near-realtime event via EventBridge & Lambda.
-- all configuration data change stored in S3 and you can access it using aws config api.
+- all configuration data change in consisting format, stored in S3 and you can access it using aws config api.
 - ![aws-config](images/sysops/aws-config.png)
-  - in remediation process you can also use ssm in case of config change on ec2 instance.
-  - ![img_189.png](img_189.png)
+  - standard in the green, other is optional(powerful)
+    - in remediation process you can also use ssm in case of config change on ec2 instance.
+    - ![img_189.png](img_189.png)
 - Aws Config Aggregator:
   - ![img_190.png](img_190.png)
   - ![img_192.png](img_192.png)
@@ -1486,44 +1490,52 @@ some field can be ignored bec
 - you can think of it as another evolution of AWS organization. adding more features, intelligent and automation.
 - <b>Landing Zone</b> - multi-account environment.
 
-  - Provide SSO/ID Federation, Centralised Logging & Auditing(CW, CloudTrail, COnfig, SNS).
-  - designed to allow anyone to implement a well architected multi account environmetn and it has the concept of the home region, region which u initial deploy into.
+  - Provide SSO/ID Federation, Centralised Logging & Auditing(CW, CloudTrail, Config, SNS).
+  - designed to allow anyone to implement a well architected multi account environment, and it has the concept of the home region, region which u initial deploy into.
+    - you can disable other regions, but the home region will always be available.
   - Home region is the region where the control tower is deployed.
+  - it uses IAM Identity center(AWS SSO) to provide sso for multiple accounts, ID Federation. 
+  - you can allow end user to provision new account within landing zone using service catalog.
 
 - Guard Rails - Detect/Mandate rules/standards across all accounts within landing zone.
 
-  - rules for multi-account governanace
+  - rules for multi-account governance
     - Mandatory, Strongly Recommended or Elective
       - Mandatory: must be applied to all accounts.
       - Strongly Recommended: recommended by aws
-  - it function in 2 different way:
+  - it functions in 2 different way:
     - Preventive: Stop you doing things (implemented by AWS ORG SCP)
       - enforced or not enabled
-        - ..i.e allow or deny regions or disallow bucket policy changes.
+        - .i.e allow or deny regions or disallow bucket policy changes.
     - Detective (only identify): compliance checks (AWS CONFIG Rules)
       - clear, in violation or not enabled
         - detect CloudTrail enabled or EC2 public IPv4
 
-- Account Factory - provide automation and standardization of creating new accounts. (goes byond what aws organization can do) (by admin or end users)
+- Account Factory - provide automation and standardization of creating new accounts. (goes beyond what aws organization can do) (by admin or end users[with appropriate permissions])
+  - Guardrails - automatically added
   - can be interacted with both control tower console and service catalog.
-  - Account & network standard configuration will passed to the account
+  - Account & network standard configuration will be passed to the account
     - like ip ranges used by vpc which can prevent addressing overlap .
-  - Accounts can be closed or repurposed and can be fully integrated with a business SDLC.
+  - Accounts can be closed or repurposed and can be fully integrated with a business SDLC.(provisioning account in certain development stage or for client demo)
+  - u give end users the ability to create a new account and take administrative control of that account. (creating account for purpose u defined it's okay!)
 - Dashboard - single page oversight of the entire environment.
 - flow
-  - when control tower is enabled, it create 2 ou, u can create other ou :
+  - when control tower is enabled, it creates 2 ou, u can create other ou :
     -
-    - 1- foundational organization unit(security)
-      - inside it create 2 accounts
+    - 1- foundational organization unit(by default called : security)
+      - inside it, it creates 2 accounts
         - 1-Audit Account
           - sns
           - cw
+          - you can give access for third party auditor to this account.
         - 2- Log Archive Account
           - aws config
           - cloudtrail..
+          - it needs access to log permission to all other accounts inside the landing zone. 
     - 2- custom organization unit(sandbox)(test/less rigid security operations)
       - account factory will create aws accounts in fully automated way as many as you need and configurations of those accounts handled by the factory
   - use aws config and scp to enforce guardrails.
+    - detect drifts from governance standards, or prevent them.
   - you can allow end user to provision new account within landing zone using service catalog
   - ![aws-control-tower.png](images/sysops/aws-control-tower.png)
     - ![img_198.png](img_198.png)
@@ -1570,8 +1582,7 @@ some field can be ignored bec
 - it learns what happen normally from any your managed accounts and then it can detect any deviation from that normal behavior. (finding)
   - notify or event-driven protection/remediation.
 - supports multiple accounts (MASTER and MEMBER) (master invite other accounts)
-- ![img_211.png](img_211.png)
-- ![img_212.png](img_212.png)
+- ![img_76.png](Guard-Duty.png)
 
 ---
 
@@ -1590,7 +1601,7 @@ some field can be ignored bec
 - #### 7 core checks with basic & developer support plans.
   - anything's beyond that u need business or enterprise support plan.
 - free 7 core checks
-  - ![img_76.png](img_76.png)
+  - ![img_76.png](trusted-advisor.png)
   - S3 Bucket Permissions - NOT OBJECT.
     - check for any S3 bucket with public access.
   - SG - Specific Ports Unrestricted
@@ -1600,7 +1611,7 @@ some field can be ignored bec
   - MFA on Root Account
     - check that root account has MFA enabled
   - EBS Public Snapshots
-    - check for any public snapshots
+    - check for any public snapshots, alert if you have any.
   - RDS Public Snapshots
     - check for any public snapshots
   - 50 Service Limits checks
@@ -1614,7 +1625,7 @@ some field can be ignored bec
     - allow u to initiate checks and get the results back whenever required.
     - allow u to get summary and detailed info as required.
     - support cases.. u can create support cases using the api.
-  - cw integration - react to changes
+  - cw integration - react to changes; you can define Event Driven responses to any changes.
 
 ---
 # AWS MACIE
@@ -1865,7 +1876,7 @@ MFA delete
 
 ---
 
-# kms key precviously called CMK
+# kms key previously called CMK (public service)
 Key Management Service(KMS)
 - key types
   - ![img_213.png](img_213.png)
@@ -2460,14 +2471,22 @@ S3 Glacier Deep Archive
 # DHCP Options Set
 
 - VPC has a configuration object apply to it called a DHCP option set.
-  - how computing device recieve ip address automatically.
+  - how computing device receive ip address automatically.
   - there is one DHCP option set apply to VPC at one time.
     - this configuration flows through to subnets .
-    - it control things like DNS service, Ntp services...
+    - it controls things like DNS service, Ntp services, NetBios Name Servers & Node type ...
 - it cannot be updated
   - u can create new one and change VPC allocation to this new one.
 - 2 options u configure on vpc [Auto assign public IPv4, IPv6 ]
 
+### DHCP deep device
+- device start with unique mac address (Layer 2)
+- DHCP starts with L2 broadcast to get info from  DHCP server on the local network. 
+- the dhcp server and client start communicating using L2; end result client get L3 network information and additional configuration (ip, subnet mask, default gateway)
+- DHCP also configure which DNS server to use .
+- Selecting Dns service inside vpc : AmazonProvidedDNS(R53 resolver running within the vpc), or provide custom DNS server.
+  - you allocate 1 or 2 private domain name for any resources provisioned in vpc, you also get public dns name if the resource has a public ip address 
+  - ![DHCP-VPC](images/vpc/dhcp-vpc.png)
 ---
 - https://www.site24x7.com/
   - it's a tool allow you to enter a network address block, subnet mast, #hosts, and #subnets. then it will give you a list of all the subnets in that network.
@@ -2489,16 +2508,22 @@ S3 Glacier Deep Archive
 - Every VPC has a VPC Router
 - highly available.
 - [move traffic from somewhere to somewhere else]
-- Runs in all AZs the VPC uses, - In every subnet .. `network+1` address.
+- Runs in all AZs the VPC uses,
+  - it has an interface In every subnet . `subnet+1` address.(default GW assigned via DHCP Option Set)
+- Route traffic between subnets.
+- route from external network(other vpc, private network, public network) into the vpc and vice versa.
 - the default config : Routes traffic between subnets in that VPC.
 - Controlled by `route table` each subnet has one.
-- specify what to do with traffic when it leave the subnet.
+- specify what to do with traffic when it leaves the subnet.
 - A VPC has a Main route table
   - subnet default.
-  - VPC can only have one Route table, but Route table can associated with many VPC
+  - VPC can only have one Route table, but Route table can be associated with many VPC
   - Target #local means the dest in the VPC itself
-  - local routes have higher priority
-  - local routes are automatically added to the route table. uneditable.
+  - local routes have higher priority.
+  - route tables can be associated with gateways
+  - local routes are automatically added to the route table. non-editable.
+  - subnets by default associated with the main route table but if you want to use a different route table you can associate it with the subnet. and the main route table will be disassociated.
+  - if no route match the dest, route table route it to a suitable gateway.
 - if a packet dest match multiple routes, the most specific route is used.
   - higher prefix = more specific = higher priority
 
@@ -2758,7 +2783,7 @@ S3 Glacier Deep Archive
 - BGP operates over tcp/179 - it's reliable and connection oriented.
 - it's not automatically configured. u need to configure peering between two AS manually.
   - when the peering is established, the two AS exchange routing information. (about network topology)
-- BGP is a path-vector protocol it exchanges the best path to a destination between peers ... the path is called the ASPATH.
+- BGP is a path-vector protocol it exchanges the best path to a destination between peers ... the path is called the `ASPATH`.
   - it doesn't exchange every possible path to a destination. only the best path.
   - it doesn't take into account the link speed or condition. it only takes into account the number of hops.
 - in complex hybrid infrastructure
@@ -2777,17 +2802,20 @@ S3 Glacier Deep Archive
   - ![img_24.png](img_24.png)
 - vpn cloudhub:
   - ![img_25.png](vpn-cloudhub.png)
+  - 
 
 ## IPSEC
 - a group of protocols working together to secure the communication between two hosts.
 - it sets up secure tunnels across insecure networks.
   - between two peers (local and remote)
     - 2 different business sites.
+    - 2 different cloud networks.
 - Provide Authentication, Integrity, Confidentiality.
 - Interesting traffic is the one which much certain defined rules.
-  - vpn tunnel is created for interesting traffic.
+  - interesting rules: (based on network prefixes, or more complex type)
+    - vpn tunnel is created for interesting traffic.
 - IPSEC has two main phases
-  - IKE Phase 1 (Slow & heavy)
+  - IKE(internet key exchange) Phase 1 (Slow & heavy)
     - ![ipsec-vpn-ike-phase-1](images/vpc/ipsec-vpn-ike-phase-1.png)
     - it's a protocol for how the keys will be exchanged between the two peers.
     - Authenticate - Pre-shared key or certificate
@@ -2807,6 +2835,10 @@ S3 Glacier Deep Archive
       - rule sets match traffics => a pair of SAs
         - different rules/ different security settings.
     - Route Based VPNs
+      - using prefixes to match interesting traffic.
+      - match a single pair of SAs.
+    - ![img_76.png](img_76.png)
+    - ![img_225.png](img_225.png)
 
 
 - AWS Global Accelerator
@@ -2816,12 +2848,13 @@ S3 Glacier Deep Archive
     - routing moves traffic to the closest location.
   - aws global accelerator start with 2 X any cast ip address.
   - Traffic initially uses public internet & enters a Global Accelerator edge location.
-  - cloudfront move the content closer to the user by caching it in edge location.
-  - global accelerator move the aws network closer to the user as close as possible.
+    - cloudfront move the content closer to the user by caching it in edge location.
+    - global accelerator move the aws network closer to the user as close as possible.
+  - ![aws-global-accelerator](aws-global-accelerator.png)
   - Transit over AWS backbone to 1+ locations.
-  - it's a network layer can work on any (TCP/UDP) application including web apps, cloudfront only work with http/https.
-
-- Direct Connect
+  - **it's a network layer can work on any (TCP/UDP) application including web apps, cloudfront only work with http/https**.
+  
+## Direct Connect
   - A physical connection(1, 10 or 100 Gbps) into AWS region (private & public)
   - Business Premises => Direct Connect Location => AWS Region
   - when you order Direct Connect you actually order a port allocation at a DX location. and aws authorize you to connect to the port.  AWS doesn't provide the physical connection.
@@ -2833,6 +2866,53 @@ S3 Glacier Deep Archive
     - Public VIF - access public services: from your premises to (Customer or Partner) 'DX ROUTER' to 'AWS DX ROUTER(the port)' to 'AWS public services'
     - Private VIF - access private services: from your premises to (Customer or Partner) 'DX ROUTER' to 'AWS DX ROUTER(the port)' to 'Virtual Private Gateway' 'Private Service'
   - ![dx](images/vpc/direct-connect.png)
+  - DX physical Architecture
+    - ![dx-arch](images/vpc/direct-connect-architecture.png)
+  - DX MacSec
+    - a security feature improve or partially improve the lacking of built-in encryption in DX.
+      - ![dx-without-macsec](images/vpc/dx-without-macsec.png)
+    - allow frame encryption layer 2 
+    - provide a hop by hop encryption... between two switches/routers
+    - provide Confidentiality, Integrity, and Authentication.
+      - encrypt frame ether type and payload.
+      - add additional field to detect tampering.
+    - provide replay protection.
+    - Not E2E - so it doesn't replace `IPSEC over DX`.
+    - Designed to allow for high speed ... terabit networks.
+    - modify ethernet frame by adding 16 bytes MacSec tag & 16 bytes integrity check value. (ICV)
+      - ![packet-macsec](packet-macsec.png)
+    - ![macsec-connection](macsec-connection.png)
+    - ![macsec-dedicated-physical-extension](macsec-dedicated-physical-extension.png)
+  ### DX connection process:
+  - ![dx-connection-process](images/vpc/dx-connection-process.png)
+  ### How DX integrate with your network
+  - ![img_225.png](images/vpc/dx-vif-bgp-vlan.png)
+  - ![img_225.png](images/vpc/dx-vif-bgp-vlan-theory-1.png)
+  - single dx connection can have 50 public & private VIFs. + 1 transit VIF.
+    - for each hosted connection is 1
+  ### Private VIFs
+  - Access 1 VPC(* more using transit gateway and DX gateway) resources using private IPs.
+    - Attached to Virtual-Private_Gateway - 1* VPC only, in the same region as the DX location your location terminates in .
+    - 1 private VIF = 1 VGW* = 1 VPC*
+    - No encryption on private VIFs .. apps can layer on encryption (e.g. HTTPS)
+    - you can use MTU of 1500 or 9001 (jumbo frames)
+    - USING VGW = Route Propagation enabled by default.
+      - allow routes to be automatically added into route table
+    - ![creating-private-VIFs](creating-private-VIFs.png)
+  - ![(private-VIFs-architecture](private-VIFs-architecture.png)
+  - ![private-vif-key-pbjective](private-vif-key-pbjective.png)
+  ### Public VIFs
+  - Access public zone services.
+  - can access all public zone regions - across AWS global network. 
+  - aws advertise all AWS public IP ranges to you over public VIFs.
+  - you can use BGP to advertise your own public IP ranges to AWS. (public ip you own them)
+    - if you don't have you can work with aws support to allocate public ip for you.
+  - bi-directional BGP session.
+  - Advertised prefixes are not transitive .. your prefixes don't leave AWS.
+    - you can only access aws public service, but, u cannot route to another customer public ip.
+  - ![creating-public-vifs](creating-public-vifs.png)
+  - ![img_225.png](public-vifs-architecture.png)
+---
 - Transit Gateway
   - Network Transit hub to connect VPCs and on-premises networks.
   - significantly reduce the number of connections required to connect many VPCs and on-premises networks.
@@ -3920,7 +4000,7 @@ S3 Glacier Deep Archive
 - Conditions(Fn::IF, And, Equals, Not & Or)
   - create resources based on conditions.
 - Fn::Base64 & Fn::Sub
-  - sub allow us to substitue thing within text based on runtime information.
+  - sub allow us to substitute thing within text based on runtime information.
   - ![cfn-Base64-Sub](images/cfn/cfn-Base64-Sub.png)
     - ${Instance.InstanceId} is wrong because it's a self reference.
   - ${parameter} ${LogicalResource} ${LogicalResource.AttributeName}
@@ -4109,14 +4189,14 @@ S3 Glacier Deep Archive
 
 ### DeletionPolicy
 
-- if u delete a logica resource from a template .. by default , the physical resource will be deleted as well.
+- if u delete a logical resource from a template .. by default , the physical resource will be deleted as well.
 - this can cause data loss
   - RDS, EC2 with attached EBS volume
 - with deletion policy u can control the behavior of the physical resource when the logical resource is deleted.
   - DELETE(Default), Retain or (if supported) Snapshot.
     - snapshot supported in EBS Volume, ElastiCache, RDS, Redshift, Neptune.
     - snapshots continue on past stack lifetime - u have to clean up ($$).
-- <b> ONLY APPLIES TO DELETE .. NOT REPLACE.
+- <b> ONLY APPLIES TO DELETE .. NOT REPLACE. </b>
   - delete the stack, delete the logical resource from the template.
 - ![deletionPolicy](images/cfn/cfn-deletionPolicy.png)
 
@@ -4224,9 +4304,9 @@ S3 Glacier Deep Archive
   <br>--> resolver query amazon.com for www and send the result to the client
   <br>--> client go to www.amazon.com
     - <img src="images/dns-resolution.png" alt="dns-resolution" width="800" height="500"/>
-    - Root hints => provided by os vendor, stored in resolver, list of root servers IPs.
+    - Root hints => provided by os vendor, stored in resolver, points at the root servers IPs and address
     - Root servers => managed by 13 different companies, host the dns root zone.
-    - Root zone => managed by IANA, delegate TLDs {authoritative servers}.
+    - Root zone => managed by IANA, delegate TLDs {authoritative servers}. points at TLD authoritative servers.
     - TLDs => managed by different companies, host the TLDs zone.
 - host files : static file of ips that override DNS resolution, used for testing.
 
@@ -4251,7 +4331,7 @@ S3 Glacier Deep Archive
 # Route53 Fundamentals:
 
 - AWS manged DNS product.
-- Global Service .. single database, globally resilient
+- Global Service .. single database, globally resilient, distributed globally as a single set.
     - Register Domains
     - Host Zones.. managed nameserver
     - services provided:
@@ -4259,11 +4339,11 @@ S3 Glacier Deep Archive
             - it has relationships with all the major domain registries[.com .net .io .org]
             - when a domain is registered a few things happen:
             - R53 checks with the registry for that top level domain if the domain is available
-            - R53 create a Zonefile for the domain being registered and allocates name service
+            - R53 create a Zonefile for the domain being registered and allocates name servers
               for this zone, and these are servers which R53 create and manages which are
               distributed globally and are generally 4 of these for one individual zone[hosted zone]
             - as part of registering the domain it communicates with the .org|com registry  
-              and liaisng with that registry, it add these name server records into zone file
+              and liaisng with that registry, it adds these name server records into zone file
               for .org|com top level domain. using name server records which they after that
               delegate to host zone[authoritative for the domain] in the future
         - 2-Hosted Zone[4 servers for one individual]
@@ -4296,26 +4376,25 @@ S3 Glacier Deep Archive
     - when sending email to hi@google.com - send mx query to google.com.
       => mx record has a priority{smaller is highest} and value
     - value :
-
         - it can be just a host, if it just a host no dot on right, it assumes to be part of the same zone.
             - ex: if value in google.com zone is mail, then it is mail.google.com
         - if it contains a dot on the right, it is a fully qualified domain name.
 
             - ex: if value in google.com zone is mail.other.domain.
 
-        - <img src="./images/dns-mx-record.png" alt="mx-record" width="800" height="500">
+         - ![dns-mx-record](./images/dns-mx-record.png)
 - TXT Records
 
     - allow u to add arbitrary text to a domain .
     - one usage is to prove domain ownership.
-        - <img src="./images/dns-txt-record-ownership.png" alt="txt-record" width="800" height="500">
+        - ![dns-txt-record-ownership](./images/dns-txt-record-ownership.png)
     - it can be used for spam protection.
         - add certain information to domain indicating which entities are authorized to send email on ur behalf and if any email server receiving mail from any other servers that is a good indication this is a spam.
 
 - TTL . u can set on DNS record.
     - if u may change ur dns record u should lower TTL value to low value before changing the record,
       to make sure that the change is propagated quickly. no machine will cache the old record for long time.
-    - <img src="./images/dns-ttl.png" alt="dns-ttl" width="800" height="500">
+    - ![dns-ttl](./images/dns-ttl.png)
 
     
 
@@ -5880,7 +5959,7 @@ Once the Lambda is running, it will assume the role and then it has its executio
 even if your code isn't reaching out to any AWS services at all. You still probably want the basic
 execution rule, so we can post logs and metrics for monitoring and debugging.
 
-Lambda functions need basic execution permissions as well in order to do things like posting logs to Cloud watsh
+Lambda functions need basic execution permissions as well in order to do things like posting logs to Cloudwatch
 logs or sending tracing data to AWS X-Ray. AWS has a managed policy used for this called AWSLambdaBasicExecutionRole.
 
 A trigger is generally another AWS service account or AWS entity that invokes your Lambda function under certain event conditions.
@@ -5959,3 +6038,99 @@ and configure additional rules that apply sampling based on properties of the se
   - Extract structure from unstructured data make you able to query your data in s3 using sql or sql like tool .
   - ![img_20.png](img_20.png)
   - 
+
+### BOOK
+
+- ch 01:
+  - IAM group, It cannot be used to access AWS services directly. Its main purpose—other than grouping related users together—is to assign the same permissions to all the users in the group.
+  - IAM supports multiple types of policies: identity-based policies, resource-based policies, permissions boundaries, organizations’ service control policies (SCPs), access control lists (ACLs), and session policies. You will explore these in the following sections.
+    - Identity-Based Policies
+      - 1. Managed policies(by aws or you)
+      - 2. Inline policies: attached to a single IAM identity. Their life cycle is the same as that identity’s life cycle.
+    - Resource-Based Policies
+      - attached to a resource, such as an S3 bucket or an SQS queue. These policies define who has access to the resource and what actions they can perform.
+    - Permissions boundaries allow us to define the maximum permissions that identity-based policies can give to IAM entities (user or role).
+    - Session policies are policies passed as a parameter when programmatically creating a temporary session for a role or a federated user.
+      - To create a temporary session for a role, you use either the AssumeRole, the AssumeRoleWithSAML, or the AssumeRoleWithWebIdentity application programming interface (API) operation from the AWS Security Token Service (STS). For federated users, temporary sessions are created using the GetFederationToken API operation from AWS STS.
+  - RBAC vs ABAC
+    - RBAC:  lack of flexibility and management overhead is often the main drawback of a traditional RBAC approach.
+    - ABAC:  ABAC is a more flexible approach to access control. It allows you to define access control policies based on attributes of the principal.
+  - Access delegation is essentially used for the following reasons:
+    - Providing an entity temporary access to resources that they do not have access to ::
+      - A user that needs temporarily elevated privileges to perform a specific task
+      - An application or AWS service that requires specific privileges
+    - Providing an entity access to resources located in another AWS account.
+  - RAM (resource access manager)
+    - AWS RAM does not send them an invitation in this case. However, when you share resources in a standalone AWS account or in an organization without resource sharing enabled, AWS RAM would send the principals an invitation that they must accept to gain access to the shared resources.
+    - https://docs.aws.amazon.com/ram/latest/userguide/shareable.html
+  - Federation
+    - Federation is a mechanism that allows you to establish trust between your corporate directory and AWS. This trust enables your users to access AWS resources without having to create a new IAM user for each user in your organization.
+
+- ch 03:
+  - Accounts Structure 
+    1. **Separation of Production and Non-Production Resources**: It is a best practice to keep production and non-production resources in separate AWS accounts to limit the impact of incidents.
+
+    2. **Account Structure**: The choice of account structure should align with organizational requirements, security policies, and industry regulations (e.g., HIPAA, PCI-DSS). This may involve isolating regulated workloads or mirroring the organizational structure (e.g., by BU, department, or team).
+
+    3. **AWS Account Isolation**: AWS accounts provide the highest level of resource isolation, limiting the "blast radius" of security incidents to the affected account.
+
+    4. **Subnets and VPCs**: Subnets, as subdivisions of a VPC within a single Availability Zone, add another layer of isolation for AWS resources.
+
+    5. **Balancing Isolation Needs**: The level of isolation required depends on factors like workload segregation needs, team trust levels, and organizational structure.
+  - Bill option for large companies:
+    - Separate Organizations: Create distinct AWS organizations for each legal entity(multinational company), resulting in multiple payer accounts and automatically consolidated bills per entity.
+    - Single Organization with Split Bills: Maintain one AWS organization but filter the centralized bill(using AWS Cost Allocation Tags or Account IDs) to generate separate bills for each legal entity based on account usage.
+  
+  - AWS Organizations Management Policies
+    - **Management Policies** in AWS Organizations include:
+      - **AI Services Opt-Out Policies**
+      - **Backup Policies**
+      - **Tag Policies**
+    - Policies are inherited from the **root** of the organization down to **accounts**.
+    - **Effective Policy**: The result of merging policies from the root to the account level using **inheritance operators**.
+  - Inheritance Operators:
+    1. **@@assign**: Overwrites inherited policy settings.
+    2. **@@append**: Adds to inherited settings.
+    3. **@@remove**: Removes specified settings from inherited policies.
+    - **Child Control Operators**: Restrict certain behaviors in child policies (e.g., prevent use of `@@remove`).
+  - AI Services Opt-Out Policies:
+    - **Purpose**: Control whether AWS AI services (e.g., Amazon Lex, Polly, Rekognition) can collect and store data.
+    - **Use Case**: Compliance with regulations (e.g., healthcare, finance).
+    - **Implementation**:
+      - Set at **OU** or **organization level**.
+      - Applies to all accounts in the OU and child OUs across all AWS Regions.
+  - Backup Policies:
+    - **Purpose**: Centrally manage and enforce backup plans across the organization.
+    - **Components**:
+      - **Backup Plans**: Define backup vaults, schedules, lifecycle rules, and regions.
+      - **Policy Documents**: Written in JSON, attached to accounts, OUs, or the entire organization.
+    - **Best Practices**:
+      - Define **complete backup policies** at every level to avoid failures.
+      - Limit to **one backup plan per policy** for easier management and troubleshooting.
+      - Use **copy_actions** to store backups in separate accounts/regions for added protection.
+      - Use the `$account` variable to simplify ARN compilation for backup vaults.
+  - Tag Policies:
+    - **Purpose**: Standardize and enforce tagging across AWS resources.
+    - **Components**:
+      - **Tag Key**: Define capitalization and structure (e.g., `CostCenter`).
+      - **Tag Values**: Optional validation.
+      - **Enforcement**: Prevent non-compliant tagging or report on compliance.
+    - **Best Practices**:
+      - Use naming conventions (e.g., `<company>:<team>:<key>`).
+      - Avoid using the `aws:` prefix (reserved for AWS tags).
+      - Limit tag key length to 128 UTF-8 characters.
+      - Check AWS documentation for supported resources (e.g., S3 buckets support tag enforcement, but S3 objects do not).
+  - General Best Practices:
+     1. **Start Simple**: Begin with basic policies, test thoroughly, and gradually add complexity.
+     2. **Check Effective Policies**:
+        - Use the CLI command:
+          ```bash
+          aws organizations describe-effective-policy --policy-type <POLICY-TYPE>
+          ```
+        - Replace `<POLICY-TYPE>` with `BACKUP_POLICY`, `TAG_POLICY`, or `AISERVICES_OPT_OUT_POLICY`.
+     3. **Limit Scope**: Make small, incremental changes to policies for easier testing and troubleshooting.
+  - Key Takeaways:
+    - Use **management policies** to enforce governance, compliance, and standardization across AWS resources.
+    - Leverage **inheritance operators** and **child control operators** for flexible policy management.
+    - Follow **best practices** for backup and tag policies to ensure reliability and compliance.
+    - Regularly test and validate policies to avoid unintended consequences.
