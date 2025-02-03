@@ -2917,19 +2917,31 @@ S3 Glacier Deep Archive
   - Network Transit hub to connect VPCs and on-premises networks.
   - significantly reduce the number of connections required to connect many VPCs and on-premises networks.
   - single network object - HA and scalable.
-  - <b> Attachments </b> - VPCs, VPN, Direct Connect, Peering.
-     - how TGW connect to other network objects within aws and hybrid network.
+  - <b> Attachments(how tgw connect with other network object) </b> - VPCs, VPN(it can be aws site termination point for vpn), Direct Connect, Peering.
+      - in vpc attachment, like vpc interface endpoint we need to specify a subnet in each AZ inside the vpc you want to use the TGW with. tgw act as highly available inter-vpc router.
+      - how TGW connect to other network objects within aws and hybrid network.
   - hybrid network architecture without transit gateway
     - ![transit-gateway](images/vpc/hybrid-network-architechture-without-transit-gateway.png)
   - hybrid network architecture with Transit Gateway.
     - ![transit-gateway](images/vpc/hybrid-network-architechture-with-transit-gateway.png)
     - it comes with default route table which allow all traffic between attachments. you can create complex routing topology by using multiple route tables.
   - it supports transitive routing.
-  - it can be used to create global network
+  - it can be used to create global network when connecting(peering attachment) with cross-region same/cross-account tgw
   - you can share it between accounts using AWS RAM(resource access manager: it's a service allow you to share resources between accounts)
   - Peer with different regions .. same or cross account.
   - make you avoid full mesh connectivity.
-
+  - ![img_226.png](tgw-attachments.png)
+    - A TGW by default has one RT, all attachments use this route table for routing decisions.
+      - all attachments propagate routes (add) to it, exception: peering attachments it need static route setup like vpc peering.
+        - ![img_226.png](tgw-default-configurations.png)
+      - all attachments can route to each other.
+  - ![img_226.png](tgw-peering-tgw.png)
+    - ![img_226.png](tgw-peering-notes.png)
+  - tgw with more isolated configurations
+    - ![img_226.png](tgw-attachments-rt.png)
+    - associated rt is used when the data is leaving the attachment.
+    - propagation is the configuration which control which route table will be populated with routes known by the attachment.
+    - ![all-attachments-can-reach-each-other-except-vpc1-and-vpc2-cannot-connect](tgw-isolated-routing.png)
 - Reachability Analyzer
   - ![img_22.png](reachability-analyzer.png)
   - 0.1$ per reachability analysis.
@@ -4937,18 +4949,20 @@ S3 Glacier Deep Archive
 # DynamoDB DBaaS
 
 - nosql, wide column, key/value & Document.
+- intended to be used in the web-scale traditional app.
 - No Self-managed servers or infrastructure
-- {taking full control of scalability}Manual / Automatic scalabality{set & forget} 
+- {taking full control of scalability}Manual / Automatic scalability{set & forget} 
   - provisioned performance IN/OUT or On-Demand
-
-- Highly Resilient .. across AZs and Optionally global
-  - data is replicated across multiple storage nodes by default.
-- Really fast .. single-digit milliseconds (SSD based)
+- Highly Resilient..across AZs and Optionally global
+  - data is replicated across multiple storage nodes by default.(no need to explicitly do like rds)
+- Really fast..single-digit milliseconds (SSD based)
 - Backups, Point-in-time recovery, and encryption at rest.
 - support Event-Driven Integrations configure action based on data change.
 - datatypes:
-  - Scalar Types - String, Number, Binary, Boolean, Null
-  - Document Types - List, Map
+  - Scalar Types 
+      - String, Number, Binary, Boolean, Null
+  - Document Types 
+      - List, Map
   - Set Types - String Set, Number Set, Binary Set
 - [HASH|RANGE] - [Partition Key|Sort Key]
   - HASH - Partition Key - must be unique
@@ -4957,14 +4971,15 @@ S3 Glacier Deep Archive
   - RANGE - Sort Key - optional
 
 ## DynamoDB Tables
-
 - the base entity inside dynamodb.
   - dynamoDB shouldn't be designed as DBaaS it's more like Database Table as a service.
   - a group of items which share the same primary key.
   - no limit on #items in the table
 - when u create a table u need to pick a primary key.
   - (simple) partition key
+    - unique value for each item
   - (Composite) partition key + sort key
+    - the combination of the 2 must be unique.
 - u can configure a table with a provisioned capacity or on-demand capacity.
   - capacity{speed} is measured in read/write capacity units.
     - on-demand capacity is measured in request/operation units. 2.5x more expensive.
@@ -4985,7 +5000,9 @@ S3 Glacier Deep Archive
 ### DynamoDB On-Demand Backups
 
 - similar to have a manual snapshot of rds.
-- u are responsible for performing the backup or removing them.
+- full backup of the table retains until you manually delete it.
+- restoring the backup can be cross region or same, with or without indexes, u can adjust encryption settings.
+- You are responsible for performing the backup or removing them.
 - ![dynamodb-ondemand-backup](images/dynamodb/dynamodb-ondemand-backup.png)
 
 ### Point-in-time Recovery(PITR)
@@ -5006,13 +5023,18 @@ S3 Glacier Deep Archive
 
 - u can switch between capacity modes even if u add data to the table but with some restrictions. 
   - once within 24 hours.
+- DynamoDB auto scaling uses the AWS Application Auto Scaling service to dynamically adjust provisioned 
+  throughput capacity on your behalf, in response to actual traffic patterns. This enables a table or 
+  a global secondary index to increase its provisioned read and write capacity to handle sudden 
+  increases in traffic, without throttling. When the workload decreases, Application Auto Scaling 
+  decreases the throughput so that you don’t pay for unused provisioned capacity.
 - with On-Demand u don't have admin overhead of managing capacity. but, u pay more which can be 5x more expensive.
+  - tradeoff: reducing admin overhead and you will cope with unknown and unpredictable workload.
 - with provisioned u set rcu and wcu per table basis.
-- Every Opertation consumes at least 1 RCU/WCU(\*)
+- Every Operation consumes at least 1 RCU/WCU(\*)
 - 1 RCU is 1 _ 4 KB read operation per second(_)
 - 1 WCU is 1 \* 1 KB write operation per second
 - Every table has a RCU and WCU burst pool(300 seconds)
-
   - when u set rcu and wcu u set for sustained average but try to dip in burst pool as infrequently as possible. because other table modification task can use this pool as well.
   - DynamoDB provides burst capacity for read and write operations to handle short-term increases in demand. While you provision RCU and WCU based on sustained average usage, the burst pool is available for occasional bursts in activity, but it's advisable to use it judiciously due to its shared nature among tables.
 
@@ -5024,7 +5046,7 @@ S3 Glacier Deep Archive
   - get single item size and calc its RCU and multiply by the number of items u want to read per second.
 
 
-- for strongly consistenct read:
+- for strongly consistent read:
   - Set 'ConsistentRead' to true. in API call.(GetItem, Query, Scan, BatchGetItem)
 - ![wcu-rcu-partition](images/dynamodb/wcu-rcu-partition.png)
 - ![dynamodb-throttling](images/dynamodb/dynamodb-throttling.png)
@@ -5034,21 +5056,26 @@ S3 Glacier Deep Archive
 - Query is used to retrieve items from a table using the partition key.
   - you have to specify single value for the primary key and optionally a SK or range.
   - reading and writing the entire item{row}.
-  - if u have to perform a query which operate on single item as a minimum u're going to consume the capacity that whole item uses.
+  - if u have to perform a query which operate on single item as a minimum you're going to consume the capacity that whole item uses.
   - u charge for whole item even if u read a single attribute.
-    - if you return subset of attributes u'll be charged for the whole item.
+    - if you return subset of attributes you'll be charged for the whole item.
   - ![dynamodb-query](images/dynamodb/query.png)
+  - it's more efficient to return more than one item for a single operation. 2 item both combined is 4kb u'll be charged for 1 RCU. but if u do 2 separate operation u'll be charged for 2 RCU.
+  - architect your item to be small as possible if you rely on single item operations.
 
 ### scan
 
 - least efficient way to read data from dynamodb but more flexible.
 - consume the whole table .
+- you can filter on any attribute.
 - ![dynamodb-scan](images/dynamodb/scan.png)
 
 ### Consistency Model
 
-- Eventual Consistency is easier to implement from infrastructure prespective and it scale better.
-- Strong Consistency is more expensive and it's harder to implement.
+- Eventual Consistency is easier to implement from infrastructure perspective and it scales better.
+- Strong Consistency is more expensive, and it's harder to implement.
+- every piece of data is replicated multiple times in separate AZs. each one is called a storage node . one elected as a leader.
+- 
 - Eventual Consistent Read is half the price of Strong Consistent Read.
 - ![dynamodb-consistency](images/dynamodb/consistency-model.png)
   - strong read vs eventual read
@@ -5057,8 +5084,8 @@ S3 Glacier Deep Archive
 - calculate of wcu / rcu
   - calculate for one item -> x
   - x \* number of items per second - > y
-  - wcu = y / 1kb
-  - rcu = y / 4kb
+  - wcu = y / 1kb rounded up
+  - rcu = y / 4kb rounded up
   - eventual rcu = y / 4 / 2
 ## DynamoDB Indexes
 
@@ -5075,11 +5102,12 @@ S3 Glacier Deep Archive
 - LSI an alternative views for a table
 - LSI must be created with the table creation, u can create up to 5 LSI's per base table.
 - Alternative SK [sort key with the same partition key]
-  - allow for alternative sort key but sam partition key.
+  - allow for alternative sort key but same partition key.
 - Shares the RCU and WCU with the table.
   - in case of using provisioned capacity mode.
 - Attributes in the index - ALL, KEYS_ONLY & INCLUDE[u specify which to include]
-- Indexes are sparse, only row which have a value in the index alternative sprt key are added to the index. u can take the advantage and use scan op because u know the table only have the row u interested in.
+- Indexes are sparse, only row which have a value in the index are added to the index. 
+  u can take the advantage and use scan op because u know the table only have the row u interested in.
 
 ---
 
@@ -5097,7 +5125,7 @@ S3 Glacier Deep Archive
 - careful with projection (KEY_ONLY, INCLUDE, ALL)
   - Queries on attributes not in the index are slow.
 - Use GSIs as default, LSI only when strong consistency is required.
-- Use index for alternative access patterns.
+- Use index for alternative access patterns, different teams looking for different attributes.
 
 ### DynamoDB Streams
 
@@ -5119,24 +5147,40 @@ S3 Glacier Deep Archive
   - NEW_AND_OLD_IMAGES
     - both the new and the old images of the item are written to the stream.
 - ![dynamodb-trigger](images/dynamodb/dynamodb-trigger.png)
+  - last line ex: in case of chat app on new message you can push it/notification to the recipient.
+  - ![img_226.png](dynamodb-trigger-architecture.png)
 
 ## DAX - DynamoDB Accelerator
-
 - in memory cache for dynamodb.
+- single sdk to access the dax and dynamodb.
 - ![dynamodb-dax](images/dynamodb/dax-vs-regular-cache.png)
 - dax is not ideal in application which require strong consistency.
 - dax is not ideal for write heavy application .
+- dax operate from within a VPC, designed to be deployed to multiple AZs.
+- (ITEM Cache + Query Cache)
+  - item cache is used to cache the result of (Batch)GetItem operation, you need to specify the item pk and sk if present.
+  - query cache store collection of item from query/scan operation and the parameters that used in the query.
 - ![dax-consideartion](images/dynamodb/dax-consideration.png)
 - ![dax-architecture](images/dynamodb/dax-architecture.png)
 - elastic cache is good for caching data produced from a complex logic in
+- 
 
 ## DynamoDB Global Tables
 
-- Multi-Region, Multi-Master
+- Global tables provides multi-master cross-region replication.
+  - no single table viewed as replica all table are the same .
+- Tables are created in multiple regions configure links between all tables, create global tables, set dynamodb to cinfigure replication between all the tables replica.
+- Last write wins is used for conflict resolution. 
+- Read and write occur to any region.
+- Generally sub-second replication between regions 
+- Strongly consistent reads only in the same region as write.
+- replication is asynchronous.
+  - ![global-table-dynamodb-architecture](global-table-dynamodb-architecture.png)
 
 ## DynamoDB TTL
-
-- u can create a stream dedicated to TTL deletions.
+- define per item timestamp which is used to delete the item after a certain period of time.
+- u can create a stream dedicated to TTL deletions separately from the main crud stream. it's for ttl deletion only.
+  - you can use the stream to trigger some housekeeping tasks like audit logs, or other tasks. or even undelete the record.
 - ![dynamodb-ttl](images/dynamodb/ttl.png)
 
 ---
@@ -5152,11 +5196,11 @@ S3 Glacier Deep Archive
 - you should assume every time lambda function is invoked it's running in new environment.
 - 512MB storage available as /tmp Up to 10240MB 
 - timeout 900s (15Min)
-
+- Deployment package 50 MB zipped, 250mb unzipped
 - Common use cases
-  - Serverless Applciations(S3, API Gateway, Lambda)
+  - Serverless Applications(S3, API Gateway, Lambda)
   - Database Triggers (DynamoDB, Streams, Lambda)
-  - File Porcessing(S3, S3 Events(Notification), Lambda)
+  - File Processing(S3, S3 Events(Notification), Lambda)
   - Serverless CRON (EventBridge/CloudWatch Events, Lambda)
   - Realtime Stream Data Processing (Kinesis, Lambda)
 ### Lambda Networking
@@ -5167,7 +5211,7 @@ S3 Glacier Deep Archive
     - treat it as any resource within the VPC.
     - You will need to give it the EC2 network permissions
       - because it will need to create ENI to connect to the VPC.
-    - old way each lambda invokation inside a VPC will create a new ENI. (cannot scale well)
+    - old way each lambda invocation inside a VPC will create a new ENI. (cannot scale well)
       - new way, aws create on ENI for all lambda function within the same subnet and same security group rules. one ENI for each unique combination of subnet and security group.
         - any update in SG or subnet will result in 90s initial setup.
     - ![lambda-networking-VPC](images/lambda/lambda-networking-vpc.png)
@@ -5175,46 +5219,59 @@ S3 Glacier Deep Archive
     - ![lambda-networking-public](images/lambda/lambda-networking-public.png)
 
 ### Invocation
-- Synchronous
+#### Synchronous
   - Result (success or failure) is returned during the request.
-  - Errors an Retries have to be handled within the client.
+  - Errors a Retries have to be handled within the client.
   - API Gateway
   - Application Load Balancer
   - CloudFront
   - AWS SDK
   
-- Asynchronous
+#### Asynchronous
   - Typically used when aws services invoke lambda in your behalf.
-  - lambda is responsible for retrying/reprocessing . it will be configured tor etry between 0 and 2 times. lambda handle retry logic.
+  - lambda is responsible for retrying/reprocessing . it will be configured tor retry between 0 and 2 times. lambda handle retry logic.
     - the lambda code need to be idempotent.
     - failed events can be sent to DLQ after repeated failed processing. for diagnostic and reprocessing.
       - you can configure Destination for failed events. (SQS, SNS, EBridge). separate destinations can be configured for success and failure.
   - S3
   - SNS
-- Event Source Mapping
+#### Event Source Mapping
   - used on stream or queues which cannot produce events.
-  - use batch size carefully because lambda timeout is 15 min.
-  - in async innvocation data is delivered to lambda and lambda don't require permission to read from the source unless it need to read more data from it. but it need it because event source mapping will use the lambda execution role to read from the source. 
+  - choose batch size carefully because lambda timeout is 15 min.
+  - in async invocation data is delivered to lambda and lambda don't require permission to read from the source unless it need to read more data from it. but it need it because event source mapping will use the lambda execution role to read from the source. 
   - failed batches can be sent to DLQ.
   - Kinesis Data Streams
   - SQS
   - DynamoDB Streams
 
+---
+
 ### Lambda Version
 - immutable copy of the lambda function code + configuration.
-- version has its own ARN.
-- $LATEST is mutable and point to the latest version.
-- Aliases are pointers to a specific version. and can be changed to point to a different version.
+- version has its own ARN. (qualified ARN) point to a specific version.
+- $LATEST is mutable and point to the latest version. (unqualified ARN) <- point at latest 
+- Aliases are pointers to a specific version. and can be changed to point to a different version. 
+
+
+### Alias
+-
 
 ### Startup time
-- An execution context is the environment a lambda function runs in. A cold start is a full creation and configuration including function code download.
-  - warm start , the same execution context is reused.
-- concurrent invocation of the same function will result in multiple execution context. you can use <b> provisioned concurrency </b> to avoid cold start, aws will create and keep context warm and ready to use...improving start speeds.
-
+- An execution context is the environment a lambda function runs in. A cold start is a full creation and configuration including function code download. ~100ms.
+  - warm start , the same execution context is reused. ~1-2ms
+- one function run per-context, so if twenty invocation happening at the same time 20 context with cold start will be created.
+  - concurrent invocation of the same function will result in multiple execution context. you can use <b> provisioned concurrency </b> to avoid cold start, aws will create and keep context warm and ready to use...improving start speeds.
+- any code defined outside the handler like db connection setup will be available to use for any invocation in existing context.
+- don't expect any data from previous invocation, you may design your code to take the advantage from them but don't rely on them.
+- Excution Phase:
+  - INIT -> coldstart
+  - INVOKE
+    - NEXT INVOKE in warm start if it happens within short duration
+  - Shutdown 
 ### Lambda Security
 - Lambda has a resource policy like s3.
   - control who can invoke the lambda function. (other services, other accounts, public)
-- LambdaExecutionRole 
+- LambdaExecutionRole : Iam roles attached to lambda functions which control the Permission the lambda receives
   - CloudWatch Logs
   - CloudWatch Metrics
   - ...
@@ -5226,11 +5283,11 @@ S3 Glacier Deep Archive
 ### Lambda Environment Variables
 
 - every lambda func can have 0 or more env var.
-- envs associtated with a version (immutable // fixed)
+- envs associated with a version (immutable // fixed)
 - can be accessed within the execution env
 - can be encrypted with KMS
 - Allow code execution to be adjusted based on var.
-- under configurations/encironment variables
+- under configurations/environment variables
   - u interact with them depending on the runtime.
 
 ### Lambda Monitoring, Logging and Tracing.
@@ -5238,8 +5295,8 @@ S3 Glacier Deep Archive
 ## Monitoring
 
 - focus on metrics, Telemetry data, all data is injected into CW.
-  - or directly via monitioring tab on a specific function.
-- Dimensions - Function Name, Resource(Aloas/Version), Executed Version(combination alias and version) -> to compare error rate between two versions., and All function
+  - or directly via monitoring tab on a specific function.
+- Dimensions - Function Name, Resource(Alias/Version), Executed Version(combination alias and version) -> to compare error rate between two versions., and All function
 - Metrics : Invocations, Errors, Duration, Concurrent Executions,
   - Error related: DeadLetterErrors, DestinationDeliverFailures.
 
@@ -5248,9 +5305,9 @@ S3 Glacier Deep Archive
 - execution logs go to CW Logs
 - stdout or stderr will be captured by CW Logs.
 - log group is created for every function
-  - Log Group = /aws/lambda/functionname
+  - Log Group = /aws/lambda/function-name
     - within it u will be able to observe multiple logging streams.
-    - Log Stream = YYYY/MM/DD/[$LATESRT||version]..random
+    - Log Stream = YYYY/MM/DD/[$LATEST||version]..random
 - Permissions to logs are provided by Lambda Execution Role.
   - default role gives full logging permissions.
 
@@ -5761,64 +5818,64 @@ calls an API in the same region or when an API is intended to serve a small numb
 original API endpoint reduces connection overhead. - private API endpoints are a great way to provide a client secure access to resources inside of an Amazon virtual private cloud.
 Private APIs are isolated from the public Internet, and they're only accessed using VPC endpoints for API Gateway that have
 been granted access
-```bash
-    1- an HTTP API. This is designed to offer REST-based HTTP APIs at low latency and low cost. HTTP APIs
-        are used to proxy back-end resources and are supposed to be simple and fast. This is great for when
-        you want API gateway to simply taken in request, authorize it and pass it on to the back-end resource,
-         like a lambda function or an HTTP end-point.
+```
+  1- an HTTP API. This is designed to offer REST-based HTTP APIs at low latency and low cost. HTTP APIs
+      are used to proxy back-end resources and are supposed to be simple and fast. This is great for when
+      you want API gateway to simply taken in request, authorize it and pass it on to the back-end resource,
+       like a lambda function or an HTTP end-point.
 
-    2- WebSockets, unlike HTTP, is a stateful communications' protocol. WebSocket APIs allow for support for
-       applications that need real-time data or real-time communication.
+  2- WebSockets, unlike HTTP, is a stateful communications' protocol. WebSocket APIs allow for support for
+     applications that need real-time data or real-time communication.
 
-    3- REST APIs with API Gateway uses HTTPS and is stateless. This is very similar to HTTP APIs, but it offers
-       some different functionality. REST APIs allow you to have full control over the response and requests between
-        your client and API gateway. You can apply what are called models and mappings to validate and transform
-        requests and responses.
+  3- REST APIs with API Gateway uses HTTPS and is stateless. This is very similar to HTTP APIs, but it offers
+     some different functionality. REST APIs allow you to have full control over the response and requests between
+      your client and API gateway. You can apply what are called models and mappings to validate and transform
+      requests and responses.
 
-    4- a Private REST API. This is the same thing as a normal REST API, but it allows to set up an API that can
-       only be accessed from a VPC, creating a private API. This is useful for internal APIs that you do not want
-       to expose to outside clients.
+  4- a Private REST API. This is the same thing as a normal REST API, but it allows to set up an API that can
+     only be accessed from a VPC, creating a private API. This is useful for internal APIs that you do not want
+     to expose to outside clients.
 
-    request hit:
-      [method request], which is the first step for API gateway to accept a request. This is where you can apply
-       authorization and data payload validation
-      Next, it is passed to the [integration request]. This is where you configure what back-end service you are
-       fronting with API gateway, as well as applying any data transformations that you may require.
-      [backend svc]
-      An [integration response] is an HTTP response encapsulating the back-end response. You can configure how
-       your back-end service responses map to HTTP responses and apply data transformations at this step as well.
-      Method responses are similar to method requests. They are responsible for validating and fitting responses to models.
-       The only real difference is that they're applying this data validation to the response not to the client.
+  request hit:
+    [method request], which is the first step for API gateway to accept a request. This is where you can apply
+     authorization and data payload validation
+    Next, it is passed to the [integration request]. This is where you configure what back-end service you are
+     fronting with API gateway, as well as applying any data transformations that you may require.
+    [backend svc]
+    An [integration response] is an HTTP response encapsulating the back-end response. You can configure how
+     your back-end service responses map to HTTP responses and apply data transformations at this step as well.
+    Method responses are similar to method requests. They are responsible for validating and fitting responses to models.
+     The only real difference is that they're applying this data validation to the response not to the client.
 
-    API Gateway REST APIs provide a way to validate incoming requests against models and data can be transformed
-     in shape by using API Gateway mappings. API gateway supports multiple types of APIs, like HTTP APIs and web sockets.
+  API Gateway REST APIs provide a way to validate incoming requests against models and data can be transformed
+   in shape by using API Gateway mappings. API gateway supports multiple types of APIs, like HTTP APIs and web sockets.
 
-    using API Gateway as just a proxy for your back-end, and you won't need to do any data validation or transformation at all.
-     You could easily use API Gateway, HTTP APIs for that use case.
+  using API Gateway as just a proxy for your back-end, and you won't need to do any data validation or transformation at all.
+   You could easily use API Gateway, HTTP APIs for that use case.
 
-    Models can be applied to both method requests and method responses. You have API Gateway checking the structure
-      of the data on the way in and on the way out. It's also important to note that each method for resource like,
-       get, post, etc, could have different models. So these get applied at the method level, not at the resource level.
+  Models can be applied to both method requests and method responses. You have API Gateway checking the structure
+    of the data on the way in and on the way out. It's also important to note that each method for resource like,
+     get, post, etc, could have different models. So these get applied at the method level, not at the resource level.
 
-    Mappings are applied to the integration request and integration response of your API. They're used for REST HTTP
-     integrations, not proxy integrations, which just take the data as is and passes it to the back-end service without
-     transformation. These mappings, like models, are also applied at the method level, and each method under a resource
-      can have its own mappings.
+  Mappings are applied to the integration request and integration response of your API. They're used for REST HTTP
+   integrations, not proxy integrations, which just take the data as is and passes it to the back-end service without
+   transformation. These mappings, like models, are also applied at the method level, and each method under a resource
+    can have its own mappings.
 
-      Mappings are written in Velocity Template Language or VTL.
+    Mappings are written in Velocity Template Language or VTL.
 
-      If you already have defined a model for the method, API Gateway can generate a VTL blueprint for the mapping,
-       which you can then modify. A mapping template assumes the data coming in as a JSON object by default.
+    If you already have defined a model for the method, API Gateway can generate a VTL blueprint for the mapping,
+     which you can then modify. A mapping template assumes the data coming in as a JSON object by default.
 
-      Mapping support conditional statements, can inject new parameters into the payload, can hard-code values, which
-       is needed for mocking, map data in complex structures, and can even reference data made available at run-time,
-       such as context and stage variables
+    Mapping support conditional statements, can inject new parameters into the payload, can hard-code values, which
+     is needed for mocking, map data in complex structures, and can even reference data made available at run-time,
+     such as context and stage variables
 
-     what is this dollar input? API gateway provides variables that start with a dollar sign that give you access to payload,
-     and context information in your mappings. In this case the dollar input variable is giving the mapping access to the
-     request payload and parameters. - similar to this dollar input, like dollar context, dollar util, and dollar stage variable.
+   what is this dollar input? API gateway provides variables that start with a dollar sign that give you access to payload,
+   and context information in your mappings. In this case the dollar input variable is giving the mapping access to the
+   request payload and parameters. - similar to this dollar input, like dollar context, dollar util, and dollar stage variable.
 
-     - API Gateway is validating the incoming request against the model.
+   - API Gateway is validating the incoming request against the model.
 ```
 ---
 - AWS DataSync 
