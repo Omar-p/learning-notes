@@ -121,6 +121,7 @@ Constants:
     constant [kind of [at least 256 bits], type of same as their type]
   - kind of implicitly converted when used in expression. literals are kind of constant
   - iota , constants initially start with zero and each time increment by 1.
+  - ![img_1.png](img_1.png)
 Garabage collector [non-generational, non-compacting, concurrent, sweep]
   memory on the heap is not moving, once allocation happened in the heap it's fixed 
     for the lifetime of the allocation. 
@@ -201,6 +202,10 @@ concurrency:
       - closing a closed channel will panic.
       - send/recieve to nil channel will block forever.
     - to check if the channel has a zero value or it actually closed. use comma ok idiom.
+    - time.Tick() is a standard library function that returns a channel that sends a value on a given interval.
+    - time.After() sends a value once after the duration has passed.
+    - time.Sleep() blocks the current goroutine for the specified duration of time.
+    - ![img.png](img.png)
 -----
 Web:
   http.ResponseWriter is interface not a pointer to struct as http.Request

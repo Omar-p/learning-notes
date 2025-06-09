@@ -4951,6 +4951,7 @@ S3 Glacier Deep Archive
 - nosql, wide column, key/value & Document.
 - intended to be used in the web-scale traditional app.
 - No Self-managed servers or infrastructure
+- store data in multi-az by default
 - {taking full control of scalability}Manual / Automatic scalability{set & forget} 
   - provisioned performance IN/OUT or On-Demand
 - Highly Resilient..across AZs and Optionally global
@@ -5381,8 +5382,12 @@ S3 Glacier Deep Archive
 - Default retention of messages: 4 days, maximum of 14 days
 - Low latency (<10 ms on publish and receive) . Limitation of 256KB per message
 - Can have duplicate messages (at least once delivery, occasionally)
-- Can have out of order messages (best effort ordering)
+- Can have out of order messages ( the best effort ordering)
 - consumer can poll up to 10 messages at a time.
+  - Received message are hidden (VisibilityTimeout) for a certain period of time.
+    - if the message is not deleted within that time it will be available for other consumers.
+- DLQ can be configured to store failed messages.
+- ASGs can scale based on the number of messages in the queue.
 
 ## codebuild
 
@@ -6095,6 +6100,49 @@ and configure additional rules that apply sampling based on properties of the se
   - Extract structure from unstructured data make you able to query your data in s3 using sql or sql like tool .
   - ![img_20.png](img_20.png)
   - 
+---
+### practice test notes:
+- AWS Compute Optimize helps analyze the usage patterns of AWS resources, such as EC2 instances and Auto Scaling groups, and makes recommendations on how to optimize them for performance and cost using machine learning algorithms.It then generates recommendations that can be used to adjust instance types, purchase options, and other parameters.It provides two types of recommendations:
+  Recommended instance types
+  - recommends instance types that are more cost effective and better suited to the workload requirements.
+    Recommended purchase options
+  - recommends purchasing options, such as Reserved Instances or Savings Plans, that can help customers save money on their compute resources.
+
+- Access Analyzer uses automated reasoning to analyze resource policies and detect issues such as overly permissive access or violations of organizational security policies. It works by examining the policies attached to AWS resources, such as S3 buckets, IAM roles, and KMS keys, and identifying any potential security risks or policy violations.
+
+- CodeGuru has two main components: CodeGuru Reviewer and CodeGuru Profiler.
+  - CodeGuru Reviewer is a code review service that uses machine learning to identify code quality issues and security vulnerabilities in your application's source code. It analyzes the code and provides recommendations for improvements based on best practices, industry standards, and AWS experience.
+  - CodeGuru Profiler is a profiling tool that uses machine learning to identify performance issues in your application code at runtime. It continuously analyzes the performance characteristics of your application code and provides recommendations for optimization.
+
+- When you use the APIs to create a service or run a task, you must set enableECSManagedTags to true for run-task and create-service.
+
+- RDS Failover typically takes 60-120 seconds, while Aurora failover completes within 30 seconds. 
+  - RDS Proxy with Aurora are the best combination for less than "20 sec" failover time...According to this article RDS Proxy can reduce the failover time of Aurora by 79% while it can reduce RDS failover time by only 32%:
+    - https://aws.amazon.com/blogs/database/improving-application-availability-with-amazon-rds-proxy/
+  - Using an RDS Proxy further reduces failover time and provides 'transparent' fail-overs as well (It manages DNS changes)
+
+- Q) A financial company is planning to migrate its web application from on premises to AWS. The company uses a third-party security tool to monitor the inbound traffic to the application. The company has used the security tool for the last 15 years, and the tool has no cloud solutions available from its vendor. The company's security team is concerned about how to integrate the security tool with AWS technology.  The company plans to deploy the application migration to AWS on Amazon EC2 instances. The EC2 instances will run in an Auto Scaling group in a dedicated VPC. The company needs to use the security tool to inspect all packets that come in and out of the VPC. This inspection must occur in real time and must not affect the application's performance. A solutions architect must design a target architecture on AWS that is highly available within an AWS Region. Which combination of steps should the solutions architect take to meet these requirements? 
+  - Deploy the security tool on EC2 instances m a new Auto Scaling group in the existing VPC & Provision a Gateway Load Balancer for each Availability Zone to redirect the traffic to the security tool
+
+- A company is migrating some of its applications to AWS. The company wants to migrate and modernize the applications quickly after it finalizes networking and security strategies. The company has set up an AWS Direct Connect connection in a central network account. The company expects to have hundreds of AWS accounts and VPCs in the near future. The corporate network must be able to access the resources on AWS seamlessly and also must be able to communicate with all the VPCs. The company also wants to route its cloud resources to the internet through its on-premises data center. Which combination of steps will meet these requirements? (Choose three.)
+  - Create a Direct Connect gateway and a transit gateway in the central network account. Attach the transit gateway to the Direct Connect gateway by using a transit VIF. 
+  - Share the transit gateway with other accounts. Attach VPCs to the transit gateway.
+  - Provision only private subnets. Open the necessary route on the transit gateway and customer gateway to allow outbound internet traffic from AWS to flow through NAT services that run in the data center
+  - https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html
+
+- Several premium tier customers in various Regions report that they receive error responses of 429 Too Many Requests from multiple API methods during peak usage hours. Logs indicate that the Lambda function is never invoked.
+  - C. The company reached its API Gateway account limit for calls per second. Most Voted
+- Migration from sql server to aws managed db:
+  - Use the AWS Schema Conversion Tool to translate the database schema to Amazon RDS for MySQL. Then use AWS Database Migration Service (AWS DMS) to migrate the data from on-premises databases to Amazon RDS.
+    - AWS Schema Conversion Tool (SCT) can automatically convert the database schema from Microsoft SQL Server to Amazon RDS for MySQL. This allows for a smooth transition of the database schema without any manual intervention. AWS DMS can then be used to migrate the data from the on-premises databases to the newly created Amazon RDS for MySQL instance. This service can perform a one-time migration of the data or can set up ongoing replication of data changes to keep the on-premises and AWS databases in sync.
+
+- allow cross account access to s3 for group of iam users:
+  - In the production account, create a new IAM policy that allows read and write access to the S3 bucket.
+  - In the production account, create a role Attach the new policy to the role. Define the development account as a trusted entity. 
+  - In the development account, create a group that contains all the IAM users of the design team Attach a different IAM policy to the group to allow the sts:AssumeRole action on the role In the production account. 
+
+- AWS App2Container (A2C) is a command line tool to help you lift and shift applications that run in your on-premises data centers or on virtual machines, so that they run in containers that are managed by Amazon ECS, Amazon EKS, or AWS App Runner.
+----
 
 ### BOOK
 
@@ -6191,3 +6239,43 @@ and configure additional rules that apply sampling based on properties of the se
     - Leverage **inheritance operators** and **child control operators** for flexible policy management.
     - Follow **best practices** for backup and tag policies to ensure reliability and compliance.
     - Regularly test and validate policies to avoid unintended consequences.
+
+---
+### Cognito
+- User Pools: manage anything related to user account management .
+  - Leading Practice:
+     - Secure password handling with SRP protocol
+     - Encrypt all data server-side
+     - Pasword policies, Token-based Authentication, MFA
+     - Support CAPTCHA
+  - featuures:
+    - user groups
+    - custom attributes
+    - Find user by username/email, etc.
+    - Admin methods to create users, etc.
+    - Hosted UI
+- Identity Pool:
+  - take authirization token issuedby identity provider and exchange it with temporary aws credentials.
+  - ![identity-pool-exchange-token](image-1.png)
+- sync: sync user data between multiple devices. (not used)
+- flow with api-gateway:
+  - ![alt text](cognito-user-pool-api-gateway.png)
+---
+### Secure API Gateway:
+- usage plans + api key
+  - designed for rate limiting, not authentication & authorization
+  - allow client to access selected APIs at agreed upon request rates and quotas
+  - request rate and quota apply to all APIs and stages covered by the usage plan
+    - ![secure-api-gateway-usage-plan](secure-api-gateway-usage-plan.png)
+- AWS IAM
+  - for internal api 
+- Custom authorizer function
+  - cognito user pool 
+  - third party
+  - the api gateway cache the result for future usage.
+
+- for private api you may add another layer of security by making it accessible fron inside a specific vpc(using resource policy) + creating a vpc endpoint for the api.
+  - ![alt text](resource-policy-allow-access-from-specific-vpc.png)
+
+- you have to offload the authentication to api gateway so failed request due to authentication don't hit your lambda and charge you. 
+- ![alt text](api-gateway-security-options.png)

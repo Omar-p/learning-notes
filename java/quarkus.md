@@ -1,0 +1,24 @@
+## Quarkus
+- supersonic, subatomic Java
+  - supersonic: fast boot time
+  - subatomic: low memory footprint
+- Time to 1st Response: REST + CRUD
+  - Traditional Java Frameworks: 9.5s
+  - Quarkus + HotSpot: 2.5s
+  - Quarkus + GraalVM: 0.055s
+- Memory Footprint:  REST + CRUD
+  - Traditional Java Frameworks: 218MB
+  - Quarkus + HotSpot: 130MB
+  - Quarkus + GraalVM: 35MB
+---
+- Arc is the dependency injection mechanism within Quarkus.
+---
+Developer Joy(Hot Reload)
+- `mvn quarkus:dev`
+  - 
+---
+- JAX-RS
+  - Java API for RESTful Web Services
+  - Specification for exposing REST Web Services.
+  - Consuming REST Web Services.
+  - Implemented by RestEasy

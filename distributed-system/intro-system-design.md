@@ -45,27 +45,9 @@
     - **Soft state**:
       - 
     - Eventually consistent: The system will become consistent over time, given that it is not updated during that time.
-### Consistency
-- A measure of how up-to-date the data is inside a system.
-- **Consistency Model**
-  - the rules for what operations can run in parallel, and how we merge the results of those operations.
-  - Informally: how much the system designer can make life harder for the programmer,in order to make the system faster.
-- Why is consistency important?
-  - Make the system easier to understand and reason about. Because of all updates are reflected in all the data in the sytem
-    - Make UX better, if user make a like and then refresh the page, the like should be there.
-- Strict Consistency
-  - All writes are instantly visible to all subsequent reads.(assuming all reads and writes are atomic)
-- Linearized Consistency
-  - Highest level of consistency. (a read is guaranteed to return the most recent write)
-  - pros:
-    - High Consistency, Easy to debug
-  - cons:
-    - slow, because it needs to wait for all the replicas to be updated.
-    - requests are processed in order and if one request is slow, the other requests will face a head-of-line blocking.
-    - High Latency, Low Availability
-  - Implementation
-    - Single Threaded
-    - Raft
-- Eventual Consistency
-  - A read is guaranteed to return the most recent write eventually.
- 
+
+---
+
+---
+
+

@@ -1,0 +1,201 @@
+### Prompt Engineering:
+- Improved Prompt techniques consists of:
+  - **Instructions**: a task for the modle to do.
+  - **Context**: external information to guie the model
+  - **Input Data** the input for which you want a response
+  - **Output Indicator** the output type or format.
+- Negative Prompting:
+  - ![ai-negative-prompting](ai-negative-prompting.png)
+- Prompt Performance Optimization:
+  - ![ai-prompt-optimization](ai-prompt-optimization.png)
+- Prompt Latency:
+  - it's impacted by a few parameters:
+    - The Model Size
+    - The Model type itself(architecture)
+    - the #tokens in the input(the bigger is slower)
+    - the #tokens in the output(the bigger is slower)
+  - Latency is not impacted by Top P, Top K, Temperature.
+- Prompt Engineering Techniques:
+  - Zero-Shot Prompting:
+    - No examples are provided in the prompt.
+    - You fully rely on the model's general knowledge.
+    - The larger and more capable the FM, the more likely you'll get good results.
+  - Few-Shots Prompting:
+    - Provide a few examples ("few shots") in the prompt.
+    - The model uses the examples to understand the task and generate a response.
+    - The more examples you provide, the better the model can understand the task.
+    - if you provide one example, it's called "one-shot, single-shot prompting".
+  - Chain of Thought Prompting:
+    - The model is asked to think step by step.
+    - It breaks down the task into smaller steps and provides a more detailed response.
+    - This technique is useful for complex tasks that require reasoning or multi-step processes.
+    - ![img.png](ai-chain-of-thoughts-prompting.png)
+  - RAG (it's not a prompting technique. But it's often compared to prompt techniques in the exam):
+    - RAG is a technique that combines retrieval and generation.
+    - It retrieves relevant information from a knowledge base and then generates a response based on that information.
+    - This technique is useful for tasks that require specific knowledge or data.
+- Prompt Engineering Template:
+  - ![ai-prompt-engineering-template](ai-prompt-engineering-template.png)
+  - Attacks:
+    - ![prompt-template-injection-attack](prompt-template-injection-attack.png)
+    - ![prompt-template-injection-attack-protection](prompt-template-injection-attack-protection.png)
+---
+## Amazon Q:
+### Amazon Q Business:
+- Description:
+  - ![img_226.png](ai-amazon-q-business-description.png)
+- Integration (connectors & plugins):
+  - ![img_226.png](ai-amazon-q-business-integration.png)
+- Identity
+  - ![img_226.png](ai-amazon-q-business-iam.png)
+- Admin Control:
+  - ![img_226.png](ai-amazon-q-business-admin-control.png)
+### Amazon Q App(part of Amazon Q Business):
+- create Gen AI-Powered apps without coding by using natural language.
+- Leverage your company's internal data.
+- possibility to leverage plugins.
+### Amazon Q Developer:
+- Answer questions about the AWS docs and AWS services selection
+- Answer questions about resources in your AWS account.
+- Suggest CLI commands to run to make changes to your account.
+- Help you do bills analysis, resolve errors and troubleshoot issues.
+- AI Code Comapnion(like copilot and copilot chat) & IDE Extensions.
+- Software Agent to implement feaures, generate docs, bootstrapping new project.
+### Amazon Q for AWS:
+- for EC2
+  - give suggestions for instance type based on your requirements in natural langauge.
+- for Glue
+  - ![img.png](ai-amazon-q-glue.png)
+- for QuickSight
+  - ![ai-amazon-q-quicksight](ai-amazon-q-quicksight.png)
+- for chatbot
+  - ![img.png](ai-amazon-q-chatbot.png)
+---
+- PartyRock:
+  - GenAI app-building playground (powered by Amazon Bedrock)
+  - Allow you experiment creating GenAI apps with various FMs (no coding or AWS account required)
+  - UI is similar to Amazon Q Apps (with less setup and no AWS account required)
+---
+# Concepts:
+- ![img.png](ai-ml-terms.png)
+- Binary Evaluation:
+  - Confusion Metric
+    - ![img_38.png](img_38.png)
+    - ![img_39.png](img_39.png)
+  - Regression Metric
+    - ![img_40.png](img_40.png)
+    - ![img_41.png](img_41.png)
+- Inferencing:
+  - ![img_42.png](img_42.png)  
+- ML project phases:
+  - ![img_43.png](img_43.png)
+- Hyperparameters:
+  - ![img_44.png](img_44.png)
+- overfitting
+  - ![img_45.png](img_45.png)  
+---
+### SageMaker:
+- Fully managed service for developers/ data scientists to build, train, and deploy ML models.
+  - Collect and prepare data
+  - Build and train models
+  - Deploy and monitor the performance of the predictions
+- SageMaker Model Deployment Comparison:
+  - ![img.png](ai-sagemaker-model-deployment.png)
+  - ![img.png](ai-sagemaker-async-batch.png)
+- SageMaker - Automatic Model Tuning:
+  - ![img.png](ai-automatic-model-tuning.png)
+- SageMaker Jumpstart
+  - ![img_18.png](img_18.png)
+  - ![img_17.png](img_17.png)
+- SageMaker Canvas:
+  - ![img_19.png](img_19.png)
+  - ![img_20.png](img_20.png)
+- MLFlow on Sagemaker
+  - ![img_21.png](img_21.png) 
+- Governance:
+  - ![img_12.png](img_12.png)
+  - Dashboard:
+    - ![img_13.png](img_13.png)
+  - Monitoring:
+    - ![img_14.png](img_14.png) 
+  - Model Registry
+    - ![img_15.png](img_15.png)
+  - Pipeline
+    - ![img_16.png](img_16.png)
+    - Supported Step Types:
+      - `Processing`, for data processing (e.g., data wrangling, feature engineering)
+      - `Training`, for training models
+      - `Tuning`, for hyperparameter tuning (e.g., Hyperparameter Optimization)
+      - `AutoML`, to automatically train models
+      - `Model`, to create or register models
+      - `ClarifyCheck`, perform drift checks against a baseline(e.g., data bias, model bias, model explainability)
+      - `QualityCheck`, perform data quality checks
+- Data Wrangler:
+  - Prepare tabular and image data for ML
+  - Data preparation, transformation, and feature engineering
+  - Single interface for data selection(import&preview data), cleaning, exploring, visualizing, and processing
+  - SQL support, Data quality tool
+  - Feature Store
+    - ![ai-sagemaker-data-wrangle-feature-store](ai-sagemaker-data-wrangle-feature-store.png)
+- SageMaker Clarify:
+  -  ![img.png](ai-sagemaker-clarify.png)
+  - Model Explainability
+    - ![img.png](img.png)
+  - Bias Detection
+    - ![img_1.png](img_1.png)
+- Ground Truth:
+  - ![img_2.png](img_2.png)
+- Summary
+  - ![img_22.png](img_22.png)  
+  - ![img_23.png](img_23.png)
+- Extra
+  -  ![img_24.png](img_24.png)
+---
+# Services:
+### Comprehend:
+- ![img_3.png](img_3.png)
+- ![img_4.png](img_4.png)
+- ![img_5.png](img_5.png)
+- ![img_6.png](img_6.png)
+### Transcribe:
+- ![img_9.png](img_9.png)
+- ![img_10.png](img_10.png)
+- ![img_11.png](img_11.png)
+
+
+
+---
+# Bedrock
+- ![img_28.png](img_28.png)
+- ![img_29.png](img_29.png)
+- Foundation Models
+  - ![img_25.png](img_25.png)
+- Fine Tuning
+  - ![img_30.png](img_30.png)
+  - Instruction based fine tuning
+    - ![img_31.png](img_31.png)
+  - Continued Pre-training
+    - ![img_32.png](img_32.png)
+  - Single-Turn messaging 
+    - ![img_33.png](img_33.png)
+  - Multi-Turn messaging
+    - ![img_34.png](img_34.png)
+- FM Evaluation
+  - human evaluation and Automatic evaluation
+  - ![img_35.png](img_35.png)
+  - Some benchmark datasets allow you to very quickly detect any kind of bias and potential discrimination against group of people. 
+  - Metrics:
+    - ![img_36.png](img_36.png)
+    - ![img_37.png](img_37.png)
+- LLM
+  - ![img_26.png](img_26.png)
+  - Non deterministic: 
+    - the generated text may be different for every user that uses the same prompt.
+- Image from a text (Diffusion Model, ex: Stable Diffusion)
+  - ![img_27.png](img_27.png)
+- Bedrock makes a copy of the FM, available only to you, which you can further fine-tune with your own data.
+
+
+### Audit Manager
+- ![img_8.png](img_8.png)
+- ![img_7.png](img_7.png)

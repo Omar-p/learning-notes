@@ -1,12 +1,12 @@
-  - Previously, our focus has been deploying applications to individual machines
+- Previously, our focus has been deploying applications to individual machines
     [limited workflow]
-    K8s allows us to abstract the way in the individual machines and treat the 
-    entire cluster as a single logical machine. the application becomes a first
-    class citizen which enables us to manage them using high level abstractions.
-    In k8s, we can describe a set of application and how they should interact with
-    each other and the let k8s figure out how to make that happen.
+    - K8s allows us to abstract the way in the individual machines and treat the 
+      entire cluster as a single logical machine. the application becomes a first
+      class citizen which enables us to manage them using high level abstractions.
+      In k8s, we can describe a set of application and how they should interact with
+      each other and the let k8s figure out how to make that happen.
 
-Versioning:
+- Versioning:
   k8s versions are expressed using semantic versioning
   a K8S version is expressed as MAJOR.MINOR.PATCH
   there is a new patch release whenever needed.
@@ -85,27 +85,27 @@ in a cloud native environment the application is not directly related to any ser
 master node is the brain of the cluster where all decisions are made.
   master node contains control plane[scheduler, api server, cluster store, contoller manager, cloud controller Manager: communicate with cloud provider via its api]
 
-	API SERVER:
-		frontend to k8s control plane.
-		all communications go through API server External and Internal
-		Exposes Restful Api on port 443.
-		Authentication & authorization check
-	Cluster Store:
-		Stores configuration and state of the entire cluster.
-		Distributed Key/Value data store 
-		Single source of truth[etcd]
-      - etcd is the backend for service discovery and stores cluster state and configuration.
-	Scheduler:
-		Watches for new workload/pods and assigns them to a node based on several scheduling factors[is node healty ?, has enough resources?, port available?, affinity and anti affinity rules, etc]
-	Controller Manager:
-		Daemon that manages the controller loop.
-			-Controller of controllers.
-				[node controller]whenever the current state don't match the desired 
-				state. it react to reach to the desired state.[#of running nodes for 				     example]
-		it has several controllers each one of them is responsible for managing/control part 	 of the system. [replica, endpoint, namepaces, node ...] controller.
-	Cloud controller manager:
-		interact with underlying cloud provider.
-			congigure[load balancer, storage, instance]
+API SERVER:
+  frontend to k8s control plane.
+  all communications go through API server External and Internal
+  Exposes Restful Api on port 443.
+  Authentication & authorization check
+Cluster Store:
+  Stores configuration and state of the entire cluster.
+  Distributed Key/Value data store 
+  Single source of truth[etcd]
+    - etcd is the backend for service discovery and stores cluster state and configuration.
+Scheduler:
+  Watches for new workload/pods and assigns them to a node based on several scheduling factors[is node healty ?, has enough resources?, port available?, affinity and anti affinity rules, etc]
+Controller Manager:
+  Daemon that manages the controller loop.
+    -Controller of controllers.
+      [node controller]whenever the current state don't match the desired 
+      state. it react to reach to the desired state.[#of running nodes for 				     example]
+  it has several controllers each one of them is responsible for managing/control part 	 of the system. [replica, endpoint, namepaces, node ...] controller.
+Cloud controller manager:
+  interact with underlying cloud provider.
+    congigure[load balancer, storage, instance]
 
   Master runs all cluster's control plane services..
 ------------------------------------------------------------------
@@ -132,50 +132,10 @@ Kube-proxy:
   Responsible for :
     Local cluster networking [make sure each node has a unique ip address]
     Routing network traffic to load balanced services.
-_-----------------------------------
-Pod[abstraction of a server]  is a smallest deployable unit.
-  Pod contain Main-Container, may or may not has Init-container[executed before main-container], side-containers[0 to *][support main-container may be as a proxy to main-container], Volumes[share data between container].
-  Pod has unique IP address.
-  Pod: 
-    -Group of 1 or more container
-    -Represent running process
-    -Share network and volumes
-    -Never Create Pods on its own. Use Controller instead.
-    -Ephemeral and Disposable[not long-lived]. so if u create it on its own and it down k8s will not know about it and won't create a new one.
-    - Pods on its own don't self heal.
-    - Never deploy pods using kind:Pod
-  kubectl get pods -o yaml --> get yaml behind the pod.
-  any thing written after -- will be run on the pod not part of kubectl options.
-Creating pod Declarative vs Imperative Configuraion
-  -Imperative:
-    kubectl run [pod-name] --image=[name] ..
-    kubectl delete po podName
-    restartPolicy on pod for the running container inside the pod not for the pod
-    - [Learning, Troubleshooting, Expermienting]
-  -Declarative:
-    Using configuration file
-    -[Reproducible in any env] Best-Practice.
-    - Generating yaml file:
-      - kubectl run podName --image= --dry-run=client -o yaml > yamlFile
-
-to access pod for testing purpose:
- kubectl port-forward pod/[name] [host-port]:[pod-port ]
- 
- kubectl get pods --> return pods in the current namespace.
- 
- -Use the
-    kubectl edit pod <pod-name> command to edit pod properties.
-    - kubectl get pod <pod-name> -o yaml > pod-definition.yaml
 
 
- get namespaces:
-   kubectl get namespaces || kubectl get ns
- specify namespace to apply on
- 	kubectl get pod -n [namespace]
- - each namespace has its own DNS zone.
-   - so we can run different copies from our app in diff ns
-   to change ns
-   - kubens [name]<-- doesn't come by default
+
+
    - kubectl config set-context --current --namespace=[name]   <- edit .kube/config
    
    u can access svc in specific namespace curl svc.ns
@@ -323,22 +283,19 @@ Node Affinity:
 ===========
 Services
   - a stable endpoint to connect to a pod or a group of pods.
-  - expose a logical set of pods
+  - expose a logical set of pods.
   - applying round-robin load balancing to forward traffic to specific pods.
   - set of pods is targeted by a selector
   - stable IP address
   - Stable DNS Name
   - stable Port
   Types:
-    - ClusterIP(default) [access internally "headless"]
-      - Only Internal access. No External [service-name:port]
-    - NodePort
-      - allocate specific node port on the node that forward to the svc cluster ip add
-    - ExternalName
-      - work on DNS names; redirection is happening  at a DNS level, useful in migration
-    - LoadBalancer
- kube-controller-manager will continuously scan for pods that match the selector and include
- these in the service
+    - ![img_4.png](img_4.png)
+  - ![img_5.png](img_5.png)
+  - ![img_6.png](img_6.png)
+  - ![img_7.png](img_7.png)
+  - ![img_8.png](img_8.png)
+  -  kube-controller-manager will continuously scan for pods that match the selector and include these in the service
  
  Decoupling:
    - service exist independently from the [deployment]app they provide access to.
@@ -347,8 +304,19 @@ Services
    - that mean that one service can provide access to pods in multiple deploy,
      and while doing so, k8s will automatically load balance between these pods
       [used in canary deploy].  
-======
-[service] NodePort:
+---
+- ClusterIP:
+  - Exposes the Service on a cluster-internal IP. Reachable only from within the cluster. Kubernetes uses a round-robin
+    algorithm to distribute traffic evenly among the targeted Pods.
+- The `kubelet` makes the cluster IP address and port for every active Service available as environment variables. 
+  The naming convention for Service-related environments variable are `<SERVICE_NAME>_SERVICE_HOST` and `<SERVICE_NAME>_SERVICE_PORT`.
+  - `kubectl exec -it podName -- env`
+    `PODNAME_SERVICE_HOST=10.96.254.0`
+    `PODNAME_SERVICE_PORT=8080`
+  - You need to make sure that the Service has been created before starting a Pod if you want those environment variables populated.
+- service: NodePort:
+  - Exposes the Service on each node’s IP address at a static port. Accessible from outside the cluster. 
+    The Service type does not provide any load balancing across multiple nodes.
   - Allow you open a port on all nodes
   - Allowed Port Range: [30000-32767]
   - if client choose to send the req to Node with no healthy pods, Node responsible to send
@@ -363,8 +331,17 @@ Services
   DisAdvantages:
    - One service per port.
    - If Node IP address change then we have a problem.
+   - ![img_9.png](img_9.png)
+   - for exam:
+     - creating pod and service:
+        - `kubectl run echoserver --image=k8s.gcr.io/echoserver:1.10 --restart=Never \
+  --port=8080 --expose`
+   - Kubernetes represents endpoints by a dedicated primitive:
+     - `kubectl get endpoints serviceName`
+
 =====
 LoadBalancer
+   - Exposes the Service externally using a cloud provider’s load balancer.
   - An external load balancer is allocated for the service (typically cloud load balancer, AWS..
   - this is available only when the underlying infrastructure provides some kind of "load 
     balancer as aservice:
@@ -665,16 +642,18 @@ Resources Limitations
     don't do this: kubectl delete all --all -A --force --grace-period=-1
 ----
 Networking in K8S
-
-  there is an [internal network]pod-network connect all pods. each pod given an ip address.
-  there is an [internal] cluster network exposed to another network (external [node network])
-  we have services that allow cluster network to access pod:
-    - clusterIp: service available on the cluster net[used to expose internal compnents of the 
-      app to the other compnents; for example DB]
-    - nodePort: service on the cluster net; expose high port on nodes.
-       - those node ports are redirecting to the node-port service side. 
-    * now, user can access node on that port, but we don't user to be aware of the node ip so
-      there is another service called Ingress the expose our app to the outside world   
+  - nodes are connected to each other via a [external network]node network
+    - k8s create a software defined network that connects all nodes and pods.
+        - there is an [internal network]pod-network connect all pods. each pod given an ip address.
+        - there is an [internal] cluster network exposed to another network (external [node network]) used for administration.
+    we have services that allow cluster network to access pod:
+      - clusterIp: service available on the cluster net[used to expose internal compnents of the 
+        app to the other components; for example DB]
+      - nodePort: service on the cluster net; expose high port on nodes.
+         - those node ports are redirecting to the node-port service side. 
+      * now, user can access node on that port, but we don't user to be aware of the node ip so
+        there is another service called Ingress the expose our app to the outside world  
+      * ![img_3.png](img_3.png)
 -------------
 Ingress
   - Controller [contains LoadBalancer implementation] + API resource
@@ -1060,3 +1039,170 @@ https://home.robusta.dev/blog/kubernetes-memory-limit
   it is evident that capacity planning for a multipurpose environment is not straightforward.
   Keep in mind that in the different environments, there are different numbers of containers, and you may even need
    to leave some room for autoscaling, build jobs, infrastructure containers, and more. 
+---
+- if you are looking for an easy way to create a statefulSet, you'll use the helm package manager.
+  - because package manager make it easy to run applications in all required dependencies.
+  - 
+---
+### Pod
+- Pods add kubernetes properties to containers:
+  - `nodeSelector` allow selection of the node that runs the pods.
+  - `priority` allows for adding priority labels.
+  - `restartPolicy` tells the cluster what to do if the pod fails.
+  - you can run one or more containers in a pod.
+  - pods can also include volume, which make it easy to provide storage containerized applications.
+  - standalone pods are commonly used for testing and troubleshooting
+  - standalone pod downsides:
+    - no scaling
+    - not rescheduled in case of failure
+    - rolling updates are not possible, you can only bring pod down and bring it up again with the new settings.
+  - `kubectl run podname --image=imageName`, `k describe pod podname`, `k logs podname`, `k exec -it podname -- /bin/bash`
+- pod.spec.containers components:
+  - `name`: name of the container
+  - `image`: container image to run
+  - `env`: environment variables to set
+  - `volumeMounts`: volumes to mount
+  - `command`: command to run
+- multi-pod containers:
+  - Sidecar container: a container that enhances the primary application, for instance for logging.
+    - A sidecar container is providing additional functionality to the main container, where it makes no sense running this functionality in a separate Pod.
+      - Think of logging, monitoring, and syncing.
+      - The essence is that the main container and the sidecar container have access to shared resources to exchange information.
+      - Istio service mesh is a common addition to Kubernetes that injects sidecar containers in Pods for traffic management.
+      - Often, shared volumes are used for this purpose.
+    - new definition in k8s docs:
+      - A sidecar container is an initContainer that has the restartPolicy field set to Always.
+      - It doesn't occur as a specific attribute, to create a sidecar you need to create an initContainer with the restartPolicy set to Always.
+      - The sidecar container will be started before the main Pod is started and is typically used to repeatedly run a command.
+      - Like a regular initContainer, the sidecar container must complete once before the main Pod is started.
+  - Ambassador container: a container that represents the primary container to the outside world, such as a proxy.
+  - Adapter Container: used to adopt the traffic or data pattern to match the traffic or data pattern
+    to match the traffic or data patterns in other applications in the cluster.
+- Init Container
+  - An init container is a special case of a multi-container Pod, where the init container runs to completion before the main container is started.
+  - Starting the main container depends on the success of the init container, if the init container fails the main container will never start
+- Port forwarding:
+  - A very simple way is by using port forwarding to expose a Pod port on the kubectl host that forwards to the Pod.
+  - `kubectl port-forward fwnginx 8080:80`. Port forwarding is useful for testing Pod accessibility on a specific cluster node, not to expose it to external users.
+  - Regular user access to applications is provided through Services and Ingress.
+- RestartPolicy
+  - The Pod restartPolicy determines what happens if a container that is managed by a Pod crashes.
+  - If set to the default value restartPolicy=always, the container will be restarted after a crash.
+  - restartPolicy=always does not affect the state of the entire Pod.
+    - If the Pod is stopped or killed, restartPolicy=always won't restart it.
+---
+#### Jobs
+- A Job starts a Pod with the restartPolicy set to never.
+- To create a Pod that runs to completion, use Jobs instead.
+- Jobs are useful for one-shot tasks, like backup, calculation, batch processing, and more.
+- Use spec.ttlSecondsAfterFinished to clean up completed Jobs automatically.
+- 3 different Job types can be started, which is specified by the completions and parallelism parameters:
+  - Non-parallel Jobs: one Pod is started, unless the Pod fails
+    - completions=1
+    - parallelism=1
+  - Parallel Jobs with a fixed completion count: the Job is complete after successfully running as many times as specified in jobs.spec.completions
+    - completions=n
+    - parallelism=m
+  - Parallel Jobs with a work queue: multiple Jobs are started, when one completes successfully, the Job is complete.
+    - completions=1
+    - parallelism=n
+---
+### declarative way:
+- All YAML manifest ingredients are defined as resource properties in the API. 
+  - `apiVersion`: specifies which version of the API to use for the object.
+  - `kind`: indicate the type of object (Deployment, Pod, etc.)
+  - `metadata`: contains administrative information about the object.
+  - `spec`: contains the specifics to define exactly how the resource is used.
+  - `status`: added by the cluster for running resources
+#### Namespaces
+- Kubernetes Namespace resources leverage Linux kernel namespaces to provide resource isolation.
+- Different Namespaces can be used to strictly separate between customer resources and thus enable multi-tenancy.
+- Namespaces are used to apply different security-related settings,
+  - Role-Based Access Control (RBAC)
+  - Quota
+- By installing complex Kubernetes applications in their own Namespace, managing them is easier.
+---
+- apply vs create:
+  - `kubectl apply -f file.yaml` will create or update the resource.
+  - `kubectl create -f file.yaml` will create the resource, fails if the resource already exists.
+---
+- commands:
+- generating yaml file:
+  - adds `--dry-run=client -o yaml > my.yaml` as an argument to the `k run` and `k create` comands.
+    - `k run mynginx --image=nginx --dry-run=client -o yaml > my.yaml`
+- show all resources in all ns, `k get all -A`
+  - `k get all -n specific-ns`
+
+---
+Pods can be accessed in multiple ways.
+---
+CKAD NOTES:
+- Remember, you CANNOT edit specifications of an existing POD other than the below.
+  - spec.containers[*].image
+  - spec.initContainers[*].image
+  - spec.activeDeadlineSeconds
+  - spec.tolerations
+- if you asked to edit another fields you can use edit command to create a temp copy of the pod template, or extract pod definition as yaml and edit it, delete the old pod and create a new pod using the new definition.
+- ![img.png](img.png)
+- ![img_1.png](img_1.png)
+- ![img_2.png](img_2.png)
+- test svc :
+  - `kubectl run tmp --image=busybox:1.36.1 --restart=Never -it --rm -- wget svcIPorSVCname:svcPort`
+  - calling svc in another ns: `kubectl run tmp --image=busybox:1.36.1 --restart=Never -it --rm -- wget svcName.svcNamespace:svcPort`
+  - full hostname: `svcName.NamespaceName.svc.cluster.local`
+---
+# Ardanlabs
+- it's important to handle signal properly in the container.
+  - in k8s the container has a 30 sec to shutdown after receiving a SIGTERM signal.
+  - imagine rolling update a deployment with 100 containers and assume new container start at 3 seconds:
+    - 3 * 100 = 300 seconds to start the new containers and if you didn't handle the signal properly each old one will take 30 seconds to shutdown.
+      - 30 * 100 + 300 = 55 minutes to complete the rolling update.
+      - SO we have to handle the signal properly to reduce the time and decrease the duration of the feedback loop.
+
+
+# Debugging Kubernetes (Linkedin Learning)
+
+### Pods and Deployment
+#### Pod Stuck in a pending state:
+  - no nodes with enough free capacity
+  - the pod has a `toleration` that no nodes are `tainted` with
+    - `taints` are props applied onto nodes that pods must tolerate in order to be admitted into them.
+    - `Effects` tell k8s what to do with pods on nodes that are missing tolerations for its taints. 
+  - the pod is waiting on some other resource, like a persistent volume claim.
+    - before entering a rabbit hole and checking the StorageClass. First, we need to make sure the problem
+      is from the pvc, you can do that by deleting the pvc definition and see if the pod status changes from the PENDING.
+  - `kubectl get events` list all events in the namespace.
+
+
+# Book
+- a cluster IP: a new type of virtual IP, a special IP address the system will load balance across all of the Pods that are identified by the selector.
+  - Because the cluster IP is virtual, it is stable, and it is appropriate to give it a DNS
+    address. All of the issues around clients caching DNS results no longer apply. Within
+    a namespace, it is as easy as just using the service name to connect to one of the Pods
+    identified by a service.
+  - Cluster IPs are stable virtual IPs that load balance traffic across all of the endpoints
+    in a service. This magic is performed by a component running on every node in the
+    cluster called the kube-proxy
+  - the kube-proxy watches for new services in the cluster via the API
+    server. It then programs a set of iptables rules in the kernel of that host to rewrite
+    the destinations of packets so they are directed at one of the endpoints for that
+    service. If the set of endpoints for a service changes (due to Pods coming and going
+    or due to a failed readiness check), the set of iptables rules is rewritten.
+  - The cluster IP itself is usually assigned by the API server as the service is created.
+    However, when creating the service, the user can specify a specific cluster IP. Once
+    set, the cluster IP cannot be modified without deleting and re-creating the Service
+    object.
+- Ingress is a Kubernetes-native way to implement the “virtual hosting” pattern:
+  - ” This is a mechanism to host many HTTP sites on a single IP
+    address. Typically, the user uses a load balancer or reverse proxy to accept incoming
+    connections on HTTP (80) and HTTPS (443) ports. That program then parses the
+    HTTP connection and, based on the Host header and the URL path that is requested,
+    proxies the HTTP call to some other program. In this way, that load balancer or
+    reverse proxy directs traffic for decoding and directing incoming connections to the
+    right “upstream” server.
+  - The Ingress controller is a software system made up of two parts. The
+    first is the Ingress proxy, which is exposed outside the cluster using a service of
+    type: LoadBalancer. This proxy sends requests to “upstream” servers. The other
+    component is the Ingress reconciler, or operator. The Ingress operator is responsible
+    for reading and monitoring Ingress objects in the Kubernetes API and reconfiguring
+    the Ingress proxy to route traffic as specified in the Ingress resource.
