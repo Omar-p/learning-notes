@@ -236,13 +236,13 @@ RUN apt-get update
 when to send a string and when to send a list RUN ["apt-get", "install", "figlet"]
 	if u don't have a shell in the container use the list.
 
-ENTRYPOINT the first program run in ur container but it can overrwritten when we run the container using --entrypoint [the command we want to run].
+ENTRYPOINT the first program run in ur container but it can overwritten when we run the container using --entrypoint [the command we want to run].
 
 CMD run after run the image if we won't pass another command
 
 in case of we use both ENTRYPOINT and CMD. CMD work as a default parameter for the ENTRYPOINT.
 
-docker labels are useful in filtering the containers but in prodocution if we usingg k8s we don't use the docker labels and be relaying on k8s features.
+docker labels are useful in filtering the containers but in production if we using k8s we don't use the docker labels and be relaying on k8s features.
 
 ----------------------------------Troubleshooting-------------------------------------
 strace : to see system call stack for a process

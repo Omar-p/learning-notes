@@ -5,7 +5,9 @@
 - Broad Network Access
   - Capabilities are available over the network and accessed through standard mechanisms...[http, https,ssh,vpn..]. no need to visit datacenter.
   - if u need to go to datacenter to provision a new server, then it's not cloud computing.
-- Resource Pooling
+- Resource PoolingTLS ...asymmetric and then symmetric.
+  TLS ...asymmetric and then symmetric.
+
   - There is a sense of "location independence" ... no "control" or "knowledge: over the exact "location" of the resources
   - Resources are "pooled" to serve multiple consumers using a "multi-tenant model"
   - Moved from thinking of hardware as value (instead of thinking about hw and servers, it thinks about it as the host) to thinking of applications and services as things of value that a business offers.
@@ -1825,7 +1827,7 @@ Key points[identity, resource policy]:
 
 ---
 
-MFA delete
+## MFA delete
 
 - enabled in [versioing configuration]
 - MFA is required to change bucket [versioning state].
@@ -1835,7 +1837,8 @@ MFA delete
   is concating with any api call.
 
 # S3 Performance Optimization{it's often about performance and reliability}:
-
+- ![baseline performance](image-3.png)
+- ![s3 byte-range fetches](image-4.png)
 - Single PUT Upload[default]:
 
   - Single data stream to S3 , if stream fails - upload fails, require full restart.
@@ -1861,6 +1864,9 @@ MFA delete
         of the AWS global network, in this case, the S3 bucket.
     - public internet is not designed for speed, it is designed for flexiaility and resiliance.
 
+---
+- s3 batch operation:
+  - ![alt text](image-5.png)
 ---
 
 # presigned url
@@ -1981,6 +1987,7 @@ Key Polices and security
 - Server-Side Encryption - 3 types:
 
   - Server-Side Encryption with Customer-Provided Keys(SSE-C)
+    - ![alt text](image-13.png)
     - customer is responsible for encryption key.
     - s3 manage the encryption and decryption process.
     - s3 store the encrypted object and the hash of the key.
@@ -1989,12 +1996,15 @@ Key Polices and security
     - s3 store the encrypted object and the hash of the key. and discard the key.
     - u offloading the encryption and decryption process to s3.
   - Server-Side Encryption with Amazon S3-Managed Keys(SSE-S3 AES256)
+    - ![alt text](image-10.png)
     - aws s3 and the operation and the key management.
     - u send data, s3 generate from the root Key another ley for each object to use. it's invisible to u.
     - s3 generate key for every single object. and then encrypt the object with that key.
       - then s3 encrypt the key with the root key and store it with the object. and the key is discarded.
     - not suitable option for role separation. when u need some to manage the infrastructure and some to manage/access the data.
   - Server-Side Encryption with KMS keys stored in AWS KMS (SSE-KMS)
+    - ![alt text](image-11.png)
+    - ![alt text](image-12.png)
 
     - generating key by KMS, DEK
     - default master key KMS key
@@ -2007,6 +2017,8 @@ Key Polices and security
 
 - summary:
   - <img src="./images/s3-encryption-summary.png" width="850" height="500">
+  - ![alt text](image-14.png)
+  - ![alt text](image-15.png)
   # Bucket default encryption:
   - data ---PUT---> S3
   - u specify header [ x-amz-server-side-encryption ] if u don't specify this header this object will not  be encrypted.
@@ -2135,11 +2147,15 @@ same as [flexible] but:
 - u can create Lifecycle rule on s3 bucket which can automatically
   expire object in the bucket. great way to optimize the cost of S3.
 - set of rules, consist of [actions] do x if y is true.
+- it can be applied for a certain prefix or certain object tags
 - can be applied on a Bucket or groups of objects. (ex: objects under specified prefix)
   - Transition Actions: change object class [S3 standard -> S3-IA]
   - Expiration Actions: Delete object or a specific version.
     - actions on version is more complex.
+    - can be used to delete incomplete Multi-part uploads.
     - you cannot transition based on access frequency <= this is a feature of s3 intelligent tiring if you want it. but u can transition based on age.
+    - to recover deleted data in 48hrs you can enable versioning, then move non-current versions, ones with deleted marker, to standard-IA then transition them to glacier deep archive.
+  - ![alt text](image-2.png)
 
 S3 Standard
 S3 Standard-IA
@@ -2212,6 +2228,8 @@ S3 Glacier Deep Archive
 ---
 
 # cors
+- origin = scheme + host + port
+- ![alt text](image-17.png)
 
 - <img src="./images/s3/s3-cors-for-exam.png" width="850" height="500">
 
@@ -2224,6 +2242,8 @@ S3 Glacier Deep Archive
   - <img src="./images/s3/s3-event-types.png" width="850" height="500">
   - example
     - <img src="./images/s3/s3-event-flow.png" width="850" height="500">
+  - u can send it to event bridge and take advantage of the event bus to
+    route the event to (+18 supported services)different targets.
 
 ---
 
@@ -2275,6 +2295,12 @@ S3 Glacier Deep Archive
   - <img src="./images/s3/s3-legal-hold.png" width="850" height="500">
 - <img src="./images/s3/s3-object-lock.png" width="850" height="500">
 - it can be used in conjunction with each other legal hold and retention period.
+- ![alt text](image-18.png)
+#### S3 Glacier Vault Lock
+- Adopt a WORM model (write Once Read Many) for objects stored in S3 Glacier.
+- Create a Vault Lock policy to enforce compliance controls.
+- Lock the policy to prevent further changes.
+- helpful for compilance and data retention
 ---
 - S3 Access point:
   - ![img_220.png](img_220.png)
@@ -2283,6 +2309,22 @@ S3 Glacier Deep Archive
   
 - Multi - Region Access Point:
   - ![img_222.png](img_222.png)
+---
+- s3 storage lens:
+  - ![s3 storage lens](image-6.png)
+  - summary metrics:
+    - general insights, storagebytes, object count
+    - use cases : identify fastest-growing or not used bucket and prefixes.
+  - cost optimization metrics:
+    - provide insight to manage and optimize your storage costs
+    - noncurrentVersionStorageBytes, incompleteMultipartUploadStorageBytes..
+    - Use cases: identify buckets with incomplete multipart upload older than 7 days, identify which objects could be transitioned to lower cost storage class.
+  - ![alt text](image-7.png)
+  - ![alt text](image-8.png)
+  - ![alt text](image-9.png)
+---
+- s3 object lambda 
+  - ![alt text](image-16.png)
 ---
 
 # STS
@@ -3258,6 +3300,8 @@ S3 Glacier Deep Archive
   - u pay for a host itself which is designed for a particular family of instances.
   - reason to use :
     - u may have a swf which is licensing based on Sockets/Cores.
+      - Run the instance on a dedicated host with Host Affinity set to Host. (software licensing require same physical hw)
+    - 
   - ![ec2-reserved-option](images/ec2/ec2-dedicated-option.png)
   - ![img_114.png](img_114.png)
 - Dedicated Instances
@@ -6279,3 +6323,171 @@ and configure additional rules that apply sampling based on properties of the se
 
 - you have to offload the authentication to api gateway so failed request due to authentication don't hit your lambda and charge you. 
 - ![alt text](api-gateway-security-options.png)
+
+
+A media company has a 30-TB repository of digital news videos These videos are stored on tape in an on-premises tape library and referenced by a Media Asset Management (MAM) system The company wants to enrich the metadata for these videos in an automated fashion and put them into a searchable catalog by using a MAM feature The company must be able to search based on information in the video such as objects scenery items or people's faces A catalog is available that contains faces of people who have appeared in the videos that include an image of each person The company would like to migrate these videos to AWS The company has a high-speed AWS Direct Connect connection with AWS and would like to move the MAM solution video content directly from its current file system How can these requirements be met by using the LEAST amount of ongoing management overhead and causing MINIMAL disruption to the existing system
+-  C.Set up an AWS Storage Gateway file gateway appliance on-premises. Use the MAM solution to extract the videos from the current archive and push them into the file gateway Use the catalog of faces to build a collection in Amazon Rekognition Build an AWS Lambda function that invokes the Rekognition Javascript SDK to have Rekognition pull the video from the Amazon S3 files backing the file gateway, retrieve the required metadata and push the metadata into the MAM solution
+
+- A medical company is running a REST API on a set of Amazon EC2 instances. The EC2 instances run in an Auto Scaling group behind an Application Load Balancer (ALB). The ALB runs in three public subnets, and the EC2 instances run in three private subnets. The company has deployed an Amazon CloudFront distribution that has the AL8 as the only origin.
+  Which solution should a solutions architect recommend to enhance the origin security?
+  -  A.Store a random string in AWS Secrets Manager. Create an AWS Lambda (unction for automatic secret rotation. Configure CloudFront to inject the random string as a custom HTTP header for the origin request. Create an AWS WAF web ACL rule with a string match rule for the custom header. Associate the web ACL with the ALB.
+
+- A company recently completed the migration from an on-premises data center to the AWS Cloud by using a replatforming strategy. One of the migrated servers is running a legacy Simple Mail Transfer Protocol (SMTP) service that a critical application relies upon. The application sends outbound email messages to the company's customers. The legacy SMTP server does not support TLS encryption and uses TCP port 25. The application can use SMTP only.
+  The company decides to use Amazon Simple Email Service (Amazon SES) and to decommission the legacy SMTP server. The company has created and validated the SES domain. The company has lifted the SES limits.
+  What should the company do to modify the application to send email messages from Amazon SES?
+  -  B.Configure the application to connect to Amazon SES by using STARTTLS. Obtain Amazon SES SMTP credentials. Use the credentials to authenticate with Amazon SES.
+    - STARTTLS Support: Amazon SES supports STARTTLS, a protocol command used to upgrade an existing insecure connection to a secure connection using TLS (Transport Layer Security). This is crucial since the legacy SMTP server does not support TLS, and STARTTLS can be used to initiate a secure connection.
+      SMTP Credentials: Amazon SES requires authentication to send emails through its SMTP interface. This is achieved by using SMTP credentials, which are different from AWS access keys. SMTP credentials can be obtained from the Amazon SES console and are used to authenticate with the Amazon SES SMTP endpoint.
+
+- An ecommerce website running on AWS uses an Amazon RDS for MySQL DB instance with General Purpose SSD storage. The developers chose an appropriate instance type based on demand, and configured 100 GB of storage with a sufficient amount of free space.
+  The website was running smoothly for a few weeks until a marketing campaign launched. On the second day of the campaign, users reported long wait times and time outs. Amazon CloudWatch metrics indicated that both reads and writes to the DB instance were experiencing long response times. The CloudWatch metrics show 40% to 50% CPU and memory utilization, and sufficient free storage space is still available. The application server logs show no evidence of database connectivity issues.
+  What could be the root cause of the issue with the marketing campaign?
+  - C.It exhausted the I/O credit balance due to provisioning low disk storage during the setup phase.
+    - "When using General Purpose SSD storage, your DB instance receives an initial I/O credit balance of 5.4 million I/O credits. This initial credit balance is enough to sustain a burst performance of 3,000 IOPS for 30 minutes."
+- A company is planning to migrate its on-premises data analysis application to AWS. The application is hosted across a fleet of servers and requires consistent system time.
+  The company has established an AWS Direct Connect connection from its on-premises data center to AWS.
+  The company has a high-precision stratum-0 atomic dock network appliance that acts as an NTP source for all on-premises servers.
+  After the migration to AWS is complete, the clock on all Amazon EC2 instances that host the application must be synchronized with the on-premises atomic clock network appliance.
+  Which solution will meet these requirements with the LEAST administrative overhead?
+  A.Configure a DHCP options set with the on-premises NTP server address Assign the options set to the VPC. Ensure that NTP traffic is allowed between AWS and the on-premises networks.
+  B.Deploy a third-party time server from the AWS Marketplace. Configure the time server to synchronize with the on-premises atomic clock network appliance. Ensure that NTP traffic is allowed inbound in the network ACLs for the VPC that contains the third-party server.
+  D Create an IPsec VPN tunnel from the on-premises atomic clock network appliance to the VPC to encrypt the traffic over the Direct Connect connection. Configure the VPC route tables to direct NTP traffic over the tunnel.
+  C.Create a custom AMI to use the Amazon Time Sync Service at 169.254.169.123 Use this AMI for the application Use AWS Config to audit the NTP configuration.
+  - Based on the requirements and the goal of least administrative overhead, here is the correct solution.
+
+### **Correct Answer: A**
+**Configure a DHCP options set with the on-premises NTP server address. Assign the options set to the VPC. Ensure that NTP traffic is allowed between AWS and the on-premises networks.**
+
+---
+
+### **Why this is the best solution**
+
+* **Centralized Management (Least Overhead):** AWS VPC DHCP Options Sets allow you to define network configurations (like DNS and NTP servers) at the VPC level. Once assigned, all EC2 instances in that VPC will automatically receive the on-premises atomic clock's IP address as their NTP source when they renew their DHCP lease or reboot.
+* **Automation:** You do not need to configure the NTP settings manually on every EC2 instance or maintain a custom AMI specifically for this configuration.
+* **Leverages Existing Infrastructure:** It utilizes the existing Direct Connect connection for private connectivity to the on-premises data center without requiring additional infrastructure like VPN tunnels or proxy servers.
+
+### **Why the other options are incorrect**
+
+* **Option B (Third-party server):** This introduces high overhead. You would have to deploy, secure, patch, and manage an intermediary EC2 instance just to forward time requests.
+* **Option D (VPN Tunnel):** Creating an IPsec VPN over an existing Direct Connect specifically for NTP is unnecessary administrative overhead. Direct Connect already provides private connectivity; encryption can be handled at the application/protocol level if strictly necessary, but the prompt prioritizes "least overhead."
+* **Option C (Amazon Time Sync):** This violates the specific business requirement. The prompt explicitly states the instances must synchronize with the **on-premises atomic clock network appliance**, not the Amazon Time Sync Service.
+
+### **Next Step**
+Would you like me to explain how to verify if your current EC2 instances are correctly picking up the custom NTP configuration from the DHCP options set?
+
+- The acquiring company has decided to migrate and rehost the Windows-based desktop application lo AWS.
+  All employees must be authenticated before they use the application. The acquiring company uses Active Directory on premises but wants a simplified way to manage access to the application on AWS (or all the employees.
+  Which solution will rehost the application on AWS with the LEAST development effort? Use an Amazon AppStream 2.0 image builder to create an image that includes the application and the required configurations. 
+
+
+
+A company runs an IoT application in the AWS Cloud. The company has millions of sensors that collect data from houses in the United States. The sensors use the MQTT protocol to connect and send data to a custom MQTT broker. The MQTT broker stores the data on a single Amazon EC2 instance. The sensors connect to the broker through the domain named iot.example.com. The company uses Amazon Route 53 as its DNS service. The company stores the data in Amazon DynamoDB.
+
+On several occasions, the amount of data has overloaded the MQTT broker and has resulted in lost sensor data. The company must improve the reliability of the solution.
+
+Which solution will meet these requirements?v
+
+Reliability & scale: AWS IoT Core is a managed MQTT broker built for millions of devices; no server bottleneck.
+Minimal changes: Use custom domain to keep iot.example.com, point to Data-ATS; define an IoT Rule to DynamoDB.
+Why not A/C/D:
+A: ALB isn’t for raw MQTT; complex, stateful scaling problem.
+C: Still a single EC2 broker → still fails under load.
+D: Greengrass ≠ cloud MQTT ingress service. IoT Greengrass is designed for edge (on-premises/field) scenarios; it is not a replacement for a centralized, cloud-hosted MQTT broker.
+
+
+- A company is running multiple workloads in the AWS Cloud. The company has separate units for software development The company uses AWS Organizations and federation with SAML to give permissions to developers to manage resources in their AWS accounts The development units each deploy their production workloads into a common production account Recently, an incident occurred in the production account in which members of a development unit terminated an EC2 instance that belonged to a different development unit. A solutions architect must create a solution that prevents a similar incident from happening in the future. The solution also must a low developers the possibilityy to manage the instances used for their workloads.
+  Which strategy will meet these requirements?
+  - Pass an attribute for DevelopmentUnit as an AWS Security Token Service (AWS STS) session tag during SAML federation Update the IAM policy for the developers' assumed IAM role with a deny action and a StringNotEquals condition for the DevelopmentUnit resource tag and aws PrincipalTag/DevelopmentUnit
+
+- A company is planning to migrate 1,000 on-premises servers to AWS. The servers run on several VMware clusters in the company's data center. As part of the migration plan, the company wants to gather server metrics such as CPU details, RAM usage, operating system information, and running processes. The company then wants to query and analyze the data.
+  - Deploy the AWS Application Discovery Agent to each on-premises server. Configure Data Exploration in AWS Migration Hub. Use Amazon Athena to run predefined queries against the data in Amazon S3.
+
+- A company has 10 accounts that are part of an organization in AWS Organizations AWS Config is configured in each account All accounts belong to either the Prod OU or the NonProd OU The company has set up an Amazon EventBridge rule in each AWS account to notify an Amazon Simple Notification Service (Amazon SNS) topic when an Amazon EC2 security group inbound rule is created with
+  0.0.0.0/0 as the source The company's security team is subscribed to the SNS topic For all accounts in the NonProd OU the security team needs to remove the ability to create a security group inbound rule that includes 0.0.0.0/0 as the source Which solution will meet this requirement with the LEAST operational overhead?
+  -   D. Configure an SCP to deny the ec2:AuthorizeSecurityGroupIngress action when the value of the aws:SourceIp condition key is 0.0.0.0/0. Apply the SCP to the NonProd OU.
+
+
+- The problem in A is that "reader endpoint" is for Aurora, not RDS!
+- AWS App2Container to migrate the application to Amazon ECS
+- When RTO/RPO requirements are minutes or less, think real-time replication (Aurora Global Database, DynamoDB Global Tables). Backup/restore or manual recovery is too slow.
+
+- A large company recently experienced an unexpected increase in Amazon RDS and Amazon DynamoDB costs. The company needs to increase visibility into details of AWS Billing and Cost Management. There are various accounts associated with AWS Organizations, including many development and production accounts. There is no consistent tagging strategy across the organization, but there are guidelines in place that require all infrastructure to be deployed using AWS CloudFormation with consistent tagging. Management requires cost center numbers and project ID numbers for all existing and future DynamoDB tables and RDS instances.
+  - C. Use Tag Editor to tag existing resources. Create cost allocation tags to define the cost center and project ID. Use SCPs to restrict resource creation that do not have the cost center and project ID on the resource.
+
+- Aurora is must for RTO of 1 min. here RTO is 5 mins. you can easily promote a RDS read replica in 5 mins. RPO of 1 min is met by both. Why not A ?
+  - remember, RDS read replica is asynchronus, RPO requirement of 1 min cannot be guaranteed in read replica
+
+- A company is serving files to Its customers through an SFTP server that is accessible over the internet The SFTP server is running on a single Amazon EC2 instance with an Elastic IP address attached Customers connect to the SFTP server through its Elastic IP address and use SSH (or authentication. The EC2 instance also has an attached security group that allows access from all customer IP addresses.
+  A solutions architect must implement a solution to improve availability, minimize the complexity of infrastructure management, and minimize the disruption to customers who access files The solution must not change the way customers connect.
+  Which solution will meet these requirements?
+  - Disassociate the Elastic IP address from the EC2 instance. Create an Amazon S3 bucket to be used for SFTP file hosting. Create an AWS Transfer Family server. Configure the Transfer Family server with a VPC-hosted. internet-facing endpoint. Associate the SFTP Elastic IP address with the new endpoint.
+    Attach the security group with customer IP addresses to the new endpoint. Point the Transfer Family server to the S3 bucket Sync all files from the SFTP server to the S3 bucket.
+
+
+
+A software as a service (SaaS) company provides a media software solution to customers The solution is hosted on 50 VPCs across various AWS Regions and AWS accounts One of the VPCs is designated as a management VPC The compute resources in the VPCs work independently The company has developed a new feature that requires all 50 VPCs to be able to communicate with each other. The new feature also requires one-way access from each customer's VPC to the company's management VPC The management VPC hosts a compute resource that validates licenses for the media software solution The number of VPCs that the company will use to host the solution will continue to increase as the solution grows Which combination of steps will provide the required VPC connectivity with the LEAST operational overhead'' (Select TWO.)
+
+A.
+Create a transit gateway Attach all the company's VPCs and relevant subnets to the transit gateway
+
+B.
+Create VPC peering connections between all the company's VPCs
+
+C.
+Create a Network Load Balancer (NLB) that points to the compute resource for license validation. Create an AWS PrivateLink endpoint service that is available to each customer's VPC Associate the endpoint service with the NLB
+
+D.
+Create a VPN appliance in each customer's VPC Connect the company's management VPC to each customer's VPC by using AWS Site-to-Site VPN
+
+E.
+Create a VPC peering connection between the company's management VPC and each customer's VPC
+A. Transit Gateway as the hub — attach all tenant/customer VPCs and the company’s VPCs to a single Transit Gateway. This gives transitive, managed routing between all VPCs so you don’t need an N² mesh of peering connections as you scale. It centralizes route management and scales to many VPCs with minimal per-VPC effort.
+
+C, PrivateLink (NLB → endpoint service) from management VPC — publish the license-validation service in the management VPC behind a Network Load Balancer and create an AWS PrivateLink endpoint service. Each customer’s VPC creates an interface endpoint to that service; traffic flows from the customer VPC → local interface endpoint → AWS backbone → NLB in the management VPC. This gives exactly the required one-way, service-only access (consumers cannot initiate general VPC-to-VPC traffic) and it’s cross-account friendly.
+
+- A company is using Amazon API Gateway to deploy a private REST API that will provide access to sensitive data. The API must be accessible only from an application that is deployed in a VPC. The company deploys the API successfully. However, the API is not accessible from an Amazon EC2 instance that is deployed in the VPC. 
+Which solution will provide connectivity between the EC2 instance and the API?
+  - B. Create an interface VPC endpoint for API Gateway. Attach an endpoint policy that allows the execute-api:lnvoke action. Enable private DNS naming for the VPC endpoint. Configure an API resource policy that allows access from the VPC endpoint. Use the API endpoint's DNS names to access the API.
+
+
+
+A company wants to migrate to AWS. The company is running thousands of VMs in a VMware ESXi environment. The company has no configuration management database and has little Knowledge about the utilization of the VMware portfolio.
+A solutions architect must provide the company with an accurate inventory so that the company can plan for a cost-effective migration.
+Which solution will meet these requirements with the LEAST operational overhead?
+
+A.
+Use AWS Systems Manager Patch Manager to deploy Migration Evaluator to each VM. Review the collected data in Amazon QuickSight. Identify servers that have high utilization. Remove the servers that have high utilization from the migration list. Import the data to AWS Migration Hub.
+
+B.
+Export the VMware portfolio to a csv file. Check the disk utilization for each server. Remove servers that have high utilization. Export the data to AWS Application Migration Service. Use AWS Server Migration Service (AWS SMS) to migrate the remaining servers.
+
+C.
+Deploy the Migration Evaluator agentless collector to the ESXi hypervisor. Review the collected data in Migration Evaluator. Identify inactive servers. Remove the inactive servers from the migration list.
+Import the data to AWS Migration Hub.
+
+  The best solution is C (Migration Evaluator agentless collector) because it provides automated inventory and utilization data directly from ESXi without installing agents on every VM. Options A and D require per-VM agents, which adds major overhead, and B is too manual. Since the question emphasizes “least operational overhead,” the agentless collector is the right fit.
+
+
+- A company is migrating its infrastructure to the AWS Cloud. The company must comply with a variety of regulatory standards for different projects. The company needs a multi-account environment.
+
+A solutions architect needs to prepare the baseline infrastructure. The solution must provide a consistent baseline of management and security, but it must allow flexibility for different compliance requirements within various AWS accounts. The solution also needs to integrate with the existing on-premises Active Directory Federation Services (AD FS) server.
+
+Which solution meets these requirements with the LEAST amount of operational overhead?
+
+A. Create an organization in AWS Organizations. Create a single SCP for least privilege access across all accounts. Create a single OU for all accounts. Configure an IAM identity provider for federation with the on-premises AD FS server. Configure a central logging account with a defined process for log generating services to send log events to the central account. Enable AWS Config in the central account with conformance packs for all accounts.
+B. Create an organization in AWS Organizations. Enable AWS Control Tower on the organization. Review included controls (guardrails) for SCPs. Check AWS Config for areas that require additions. Add OUs as necessary. Connect AWS IAM Identity Center (AWS Single Sign-On) to the on-premises AD FS server. M
+
+
+(1) “Least amount of operational overhead”requirement is met with Control Tower. Control Tower automates the creation of a well-architected, multi-account environment using best-practice blueprints, and
+
+(2) IAM Identity Center is the recommended approach for workforce authentication and authorization
+
+
+- A company runs an loT application in the AWS Cloud. The company has millions of sensors that collect data from houses in the United States. The sensors use the MOTT protocol to connect and send data to a custom MQTT broker. The MQTT broker stores the data on a single Amazon EC2 instance. The sensors connect to the broker through the domain named iot.example.com. The company uses Amazon Route 53 as its DNS service. The company stores the data in Amazon DynamoDB.
+  On several occasions, the amount of data has overloaded the MOTT broker and has resulted in lost sensor data. The company must improve the reliability of the solution.
+  Which solution will meet these requirements?
+  - B. Set up AWS IoT Core to receive the sensor data. Create and configure a custom domain to connect to AWS IoT Core. Update the DNS record in Route 53 to point to the AWS IoT Core Data-ATS endpoint. Configure an AWS IoT rule to store the data.
+  - Greengrass is typically used for edge computing scenarios and may not be the most suitable solution for addressing MQTT broker reliability and scalability.
+  - Reliability & scale: AWS IoT Core is a managed MQTT broker built for millions of devices; no server bottleneck.
+  - Minimal changes: Use custom domain to keep iot.example.com, point to Data-ATS; define an IoT Rule to DynamoDB.
+

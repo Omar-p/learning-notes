@@ -1,0 +1,4 @@
+- Convention over configuration means that Rails has sensible defaults for just about every aspect of knitting together your application.
+- `gem list --local rails`
+- Rails applications are spread across many files; for example, a newly created Rails application enters the world containing seventy-seven files spread across forty-five directories. That’s before you’ve written a thing.
+- In the Introduction, we talked about using the gem server command to run a local web server containing the Rails documentation. This is convenient, but it unfortunately splits the Rails documentation across a number of separate documentation trees. If you’re online, you can see a consolidated view of all the Rails documentation in one place

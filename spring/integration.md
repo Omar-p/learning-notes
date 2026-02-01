@@ -3,23 +3,23 @@ pluralsight
 Spring Integration: Getting Started.
 1
 
-- how to connect ur internally compnents in ur spring app with
+- how to connect ur internally components in ur spring app with
   external systems using asynchronous messaging. without needing
   of writing plumbing code [downloading file from FTP server:
-  - u will need to establish connection.
+  - u will need to establish a connection.
   - authenticate
   - navigating files...
     ]sping-integration[
   - configure FTP inbound Channel Adapter that downloads file on
     regular schedule and put a message on a channel
-    whenever the file is downloaded , then.
+    whenever the file is downloaded, then.
   - configure Service Activator that call our business logic
     when it recieves a message on the channel.
     ].
 - separate integration code from business logic.
 - basis of other spring projects [cloud stream
   for building highly scalably event-driven microservice]
-- integrate different system have challenges such as :
+- integrating a different system has challenges such as :
   - 1- each system may produce different data format.
   - asynchronous adv. 
     - 1- . More responsive system because sender does not have to wait. 
@@ -42,7 +42,7 @@ Spring Integration: Getting Started.
   ### subscribable channel:
   - implement event-driven consumer pattern, push msgs to rec, Non-buffering
     - Implementation:
-      - Unicasting dispatcher[DirectChannel, ExectuorChannel] (pattern: p2p)
+      - Unicasting dispatcher[DirectChannel, ExecutorChannel] (pattern: p2p)
       - broadcasting dispatcher[PublishSubscribeChannel] (pattern (pub-sub))
       - DirectChannel: 
         - call one of its subscriber when the msg is sent on the same thread.
