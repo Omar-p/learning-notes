@@ -13,10 +13,17 @@
 
 ## 🚀 AWS Lambda Deep Dive
 
+### FinDev
+- you can accurately predict the cost of a single request/transaction
+  - this will make us define the critical 3% to optimize. (knuth quote about premature optimization is the root of all evil) 
+- Unless you are an infrastructure company, infrastructure is basically overhead.
+
+
 ### Scaling Characteristics
 - **Current Scaling**: Each function can scale by **1,000 concurrent executions every 10 seconds**
 - **Independent Scaling**: Functions scale independently of each other
 - **Improved Performance**: Lambda now scales **12x faster** for high-volume requests
+  - https://aws.amazon.com/blogs/aws/new-accelerate-your-lambda-functions-with-lambda-snapstart/
 - **Account Limits**: Account-level concurrency limits still apply
 
 ### Architecture & Security
@@ -61,6 +68,11 @@
    - Hitting serverless limits
    - Throughput grows where containers are more cost-effective
 3. **Benefit**: Modular serverless code makes container migration easier
+4. https://www.wudsn.com/productions/www/site/news/2023/2023-05-08-microservices-01.pdf
+5. https://martinfowler.com/articles/evo-arch-forward.html
+6. https://aws.amazon.com/blogs/enterprise-strategy/switching-costs-and-lock-in/
+7. https://aws.amazon.com/ar/video/watch/4ba04e84b32/
+8. https://www.lastweekinaws.com/blog/multi-cloud-is-the-worst-practice/
 
 ### Vendor Lock-in Strategy
 **Philosophy**: Productivity before portability
@@ -168,6 +180,8 @@
   - ![alt text](images/how-lambda-can-now-scale-for-burst-traffic.png)
 - **Traffic patterns**: Design for expected load patterns
 - ![https://aws.amazon.com/blogs/aws/aws-lambda-functions-now-scale-12-times-faster-when-handling-high-volume-requests/](AWS Lambda functions now scale 12 times faster when handling high-volume requests)
+  - Every function can scale by 1000 concurrent executions every 10 seconds. independently of each other.
+  - if 1 concurrent execution takes 100ms, in one second, it can handle 10 requests. so it can scale by 10000 TPS every seconds.
 
 ## internals:
 - AWS Lambda functions run inside Firecracker, an open-source virtualization technology developed by AWS.
@@ -175,7 +189,10 @@
 It uses lightweight microVMs (micro virtual machines) to provide strong isolation, fast startup times, and minimal overhead.
 - Each Lambda invocation can be executed in a separate microVM, improving security and resource efficiency.
 - Firecracker is designed to optimize for serverless workloads, enabling rapid cold starts and efficient resource utilization.
-
+- https://docs.aws.amazon.com/lambda/latest/api/API_Invoke.html
+- https://www.youtube.com/watch?v=AECR8WMHjv0
+- https://www.youtube.com/watch?v=Rjq7SKudjpo
+- https://www.youtube.com/watch?v=0_jfH6qijVY
 ## 🎯 Interview Preparation Questions
 
 ### Fundamental Concepts
@@ -186,6 +203,7 @@ It uses lightweight microVMs (micro virtual machines) to provide strong isolatio
 ### Scaling & Performance
 1. How does Lambda handle sudden traffic spikes?
 2. What is provisioned concurrency and when should you use it?
+  - https://docs.aws.amazon.com/lambda/latest/dg/lambda-concurrency.html
 3. How do you optimize for cold starts?
 
 ### Architecture & Design
